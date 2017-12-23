@@ -65,6 +65,6 @@ CLASS lcl_appl IMPLEMENTATION.
 
   METHOD handle_button_click.
     mo_btn->set_ucomm( mo_btn->mc_com-exit ).
-    mo_screen->add( NEW zcl_dynscreen_parameter( iv_type = 'FLAG') ).
+    MESSAGE 'Button pressed!' TYPE 'I'.
   ENDMETHOD.
 ENDCLASS.
