@@ -1,4 +1,7 @@
 REPORT zwd_dynscreen_creat_gentargets.
+
+" THIS IS BROKEN, DO NOT RUN
+RETURN.
 *Z_DYNSCREEN_GENERATION_T000 Dynscreen Generation Target
 *Z_DYNSCREEN000 DYNSCREEN GENERATION TARGET
 DATA lv_poolname TYPE tlibg-area.
