@@ -47,13 +47,6 @@
      <LENGTH>9</LENGTH>
      <SPLIT>D</SPLIT>
     </item>
-    <item>
-     <ID>S</ID>
-     <KEY>V_0007</KEY>
-     <ENTRY>.</ENTRY>
-     <LENGTH>9</LENGTH>
-     <SPLIT>D</SPLIT>
-    </item>
    </TPOOL>
   </asx:values>
  </asx:abap>
