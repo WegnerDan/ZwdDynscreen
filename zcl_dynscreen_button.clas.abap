@@ -1,24 +1,20 @@
-CLASS zcl_dynscreen_button DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_io_element
-  FINAL
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_button DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC.
   PUBLIC SECTION.
-    METHODS constructor IMPORTING iv_text TYPE textpooltx OPTIONAL.
-    METHODS raise_event REDEFINITION .
-    EVENTS button_click EXPORTING VALUE(ev_ucomm) TYPE sy-ucomm OPTIONAL.
+    METHODS:
+      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
+      raise_event REDEFINITION.
+    EVENTS:
+     button_click EXPORTING VALUE(ev_ucomm) TYPE sy-ucomm OPTIONAL.
   PROTECTED SECTION.
-    METHODS generate_open REDEFINITION .
-    METHODS generate_close REDEFINITION .
-
-
+    METHODS:
+      generate_open REDEFINITION,
+      generate_close REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_BUTTON IMPLEMENTATION.
+CLASS zcl_dynscreen_button IMPLEMENTATION.
 
 
   METHOD constructor.

@@ -1,46 +1,34 @@
-CLASS zcl_dynscreen_screen_base DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_base
-  CREATE PROTECTED .
-
+CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base CREATE PROTECTED.
   PUBLIC SECTION.
-
     TYPES:
       BEGIN OF mty_position,
         x TYPE n LENGTH 3,
         y TYPE n LENGTH 3,
       END OF mty_position .
-
-    METHODS constructor
-      IMPORTING
-        !iv_text TYPE textpooltx OPTIONAL .
-    METHODS display
-      RETURNING
-        VALUE(rv_subrc) TYPE sy-subrc .
+    METHODS:
+      constructor IMPORTING !iv_text TYPE textpooltx OPTIONAL,
+      display RETURNING VALUE(rv_subrc) TYPE sy-subrc,
+      set_pretty_print IMPORTING iv_pretty_print TYPE abap_bool DEFAULT abap_true,
+      get_pretty_print RETURNING VALUE(rv_pretty_print) TYPE abap_bool.
   PROTECTED SECTION.
-
     CONSTANTS:
       BEGIN OF mc_default_starting_pos,
         x TYPE n LENGTH 3 VALUE 50,
         y TYPE n LENGTH 3 VALUE 10,
       END OF mc_default_starting_pos.
-    DATA mv_is_subscreen TYPE abap_bool .
-    DATA mv_is_window TYPE abap_bool .
-    DATA ms_starting_position TYPE mty_position VALUE mc_default_starting_pos.
-    DATA ms_ending_position TYPE mty_position .
-
-    METHODS set_subscreen
-      IMPORTING
-        !iv_is_subscreen TYPE abap_bool DEFAULT abap_true .
-    METHODS set_window
-      IMPORTING
-        !iv_is_window TYPE abap_bool DEFAULT abap_true .
-
-    METHODS generate_close
-         REDEFINITION .
-    METHODS generate_open
-         REDEFINITION .
+    DATA:
+      mv_is_subscreen      TYPE abap_bool,
+      mv_is_window         TYPE abap_bool,
+      ms_starting_position TYPE mty_position VALUE mc_default_starting_pos,
+      ms_ending_position   TYPE mty_position.
+    METHODS:
+      set_subscreen IMPORTING !iv_is_subscreen TYPE abap_bool DEFAULT abap_true,
+      set_window IMPORTING !iv_is_window TYPE abap_bool DEFAULT abap_true,
+      generate_close REDEFINITION,
+      generate_open REDEFINITION.
   PRIVATE SECTION.
+    DATA:
+      mv_pretty_print TYPE abap_bool.
 ENDCLASS.
 
 
@@ -111,8 +99,10 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     APPEND LINES OF generate_value_transport( ) TO lt_func_module_src.
 
 * ---------------------------------------------------------------------
-    pretty_print( CHANGING ct_source = lt_func_module_src ).
-    pretty_print( CHANGING ct_source = lt_top_incl_src ).
+    IF mv_pretty_print = abap_true.
+      pretty_print( CHANGING ct_source = lt_func_module_src ).
+      pretty_print( CHANGING ct_source = lt_top_incl_src ).
+    ENDIF.
 
 * ---------------------------------------------------------------------
     INSERT REPORT mc_gentarget_incnames-func_inc FROM lt_func_module_src.
@@ -202,4 +192,21 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD set_pretty_print.
+* ---------------------------------------------------------------------
+    mv_pretty_print = iv_pretty_print.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_pretty_print.
+* ---------------------------------------------------------------------
+    rv_pretty_print = mv_pretty_print.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

@@ -1,47 +1,33 @@
-CLASS zcl_dynscreen_transport DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PRIVATE .
-
+CLASS zcl_dynscreen_transport DEFINITION PUBLIC FINAL CREATE PRIVATE.
   PUBLIC SECTION.
-
-    INTERFACES if_serializable_object .
-
+    INTERFACES:
+      if_serializable_object.
     TYPES:
       BEGIN OF mty_transport,
         fname TYPE fieldname,
         value TYPE string,
-      END OF mty_transport .
-    TYPES:
-      mty_transport_tt TYPE SORTED TABLE OF mty_transport WITH UNIQUE KEY fname .
-
-    METHODS add_value
-      IMPORTING
-        !iv_fname TYPE fieldname
-        !iv_value TYPE any .
-    METHODS set_values
-      IMPORTING
-        !it_variables TYPE zcl_dynscreen_base=>mty_variables_tt .
-    CLASS-METHODS get_inst
-      RETURNING
-        VALUE(ro_inst) TYPE REF TO zcl_dynscreen_transport .
-    METHODS set_subrc
-      IMPORTING
-        !iv_subrc TYPE sy-subrc .
-    METHODS get_subrc
-      RETURNING
-        VALUE(rv_subrc) TYPE sy-subrc .
+      END OF mty_transport,
+      mty_transport_tt TYPE SORTED TABLE OF mty_transport WITH UNIQUE KEY fname.
+    CLASS-METHODS:
+      get_inst RETURNING VALUE(ro_inst) TYPE REF TO zcl_dynscreen_transport.
+    METHODS:
+      add_value IMPORTING !iv_fname TYPE fieldname
+                          !iv_value TYPE any,
+      set_values IMPORTING !it_variables TYPE zcl_dynscreen_base=>mty_variables_tt,
+      set_subrc IMPORTING !iv_subrc TYPE sy-subrc,
+      get_subrc RETURNING VALUE(rv_subrc) TYPE sy-subrc.
   PROTECTED SECTION.
   PRIVATE SECTION.
-
-    DATA mv_subrc TYPE sy-subrc .
-    DATA mt_values TYPE mty_transport_tt .
-    CLASS-DATA mo_me TYPE REF TO zcl_dynscreen_transport .
+    DATA:
+      mv_subrc  TYPE sy-subrc,
+      mt_values TYPE mty_transport_tt.
+    CLASS-DATA:
+      mo_me TYPE REF TO zcl_dynscreen_transport .
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_TRANSPORT IMPLEMENTATION.
+CLASS zcl_dynscreen_transport IMPLEMENTATION.
 
 
   METHOD add_value.
