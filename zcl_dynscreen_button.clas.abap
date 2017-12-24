@@ -36,7 +36,11 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
                         iv_text         = iv_text                                   ).
     mv_is_variable = abap_false.
     set_position( iv_pos ).
-    set_length( iv_length ).
+    IF iv_length IS NOT SUPPLIED.
+      set_length( 8 ).
+    ELSE.
+      set_length( iv_length ).
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

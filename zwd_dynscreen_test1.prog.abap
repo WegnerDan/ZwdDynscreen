@@ -47,7 +47,7 @@ CLASS lcl_appl IMPLEMENTATION.
     mo_screen->add( lo_pa_ebeln ).
 
 
-    IF mo_screen->display( ) = zwd_dynscreen_basis=>mc_selection_ok.
+    IF mo_screen->display( ) = zcl_dynscreen_base=>mc_selection_ok.
 
       DATA lv_matnr1 TYPE mara-matnr.
       lo_pa_matnr1->get_value( IMPORTING ev_value = lv_matnr1 ).
