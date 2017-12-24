@@ -34,7 +34,7 @@ CLASS lcl_appl IMPLEMENTATION.
 
     mo_screen->add( lo_pa_matnr1 ).
     mo_screen->add( lo_pa_matnr2 ).
-    mo_btn = NEW #( iv_text = 'Testbutton' ).
+    mo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
     SET HANDLER handle_button_click FOR mo_btn.
 
     mo_screen->add( mo_btn ).
