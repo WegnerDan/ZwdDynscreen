@@ -27,11 +27,15 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       generate_close REDEFINITION,
       generate_open REDEFINITION.
   PRIVATE SECTION.
+    TYPES:
+      mty_funcgroup_id TYPE n LENGTH 3.
     DATA:
       mv_pretty_print TYPE abap_bool,
-      mt_gen_notice   LIKE mt_source.
+      mt_gen_notice   LIKE mt_source,
+      mv_funcgroup_id TYPE mty_funcgroup_id.
     METHODS:
-      get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source.
+      get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source,
+      get_generation_target RETURNING VALUE(rs_incnames) TYPE mty_s_gentarget_incnames.
 ENDCLASS.
 
 
@@ -101,17 +105,20 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    INSERT REPORT mc_gentarget_incnames-func_inc FROM lt_func_module_src.
-    INSERT REPORT mc_gentarget_incnames-top_inc  FROM lt_top_incl_src.
+    DATA(ls_gentarget_incnames) = get_generation_target( ).
 
 * ---------------------------------------------------------------------
-    READ TEXTPOOL mc_gentarget_incnames-func_pool INTO lt_old_texts.
+    INSERT REPORT ls_gentarget_incnames-func_inc FROM lt_func_module_src.
+    INSERT REPORT ls_gentarget_incnames-top_inc  FROM lt_top_incl_src.
+
+* ---------------------------------------------------------------------
+    READ TEXTPOOL ls_gentarget_incnames-func_pool INTO lt_old_texts.
     IF lt_old_texts <> mt_textpool.
-      INSERT TEXTPOOL mc_gentarget_incnames-func_pool FROM mt_textpool.
+      INSERT TEXTPOOL ls_gentarget_incnames-func_pool FROM mt_textpool.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = mc_gentarget_incnames-func_pool ).
+    DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = ls_gentarget_incnames-func_pool ).
     IF lo_syncheck->subrc <> 0.
       rv_subrc = mc_selection_canceled.
       MESSAGE `syntax error: ` && lo_syncheck->message TYPE 'I' DISPLAY LIKE 'E'.
@@ -119,7 +126,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    CALL FUNCTION mc_gentarget_incnames-func_module
+    CALL FUNCTION ls_gentarget_incnames-func_module
       EXPORTING
         io_value_transport = zcl_dynscreen_transport=>get_inst( )
         io_events          = zcl_dynscreen_events=>get_inst( ).
@@ -218,6 +225,30 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     rt_src = mt_gen_notice.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+  METHOD get_generation_target.
+* ---------------------------------------------------------------------
+    CONSTANTS lc_repl TYPE c LENGTH 3 VALUE '%%%'.
+
+* ---------------------------------------------------------------------
+    rs_incnames-func_pool   = mc_gentarget_incnames-func_pool.
+    rs_incnames-func_group  = mc_gentarget_incnames-func_group.
+    rs_incnames-func_module = mc_gentarget_incnames-func_module.
+    rs_incnames-top_inc     = mc_gentarget_incnames-top_inc.
+    rs_incnames-func_inc    = mc_gentarget_incnames-func_inc.
+
+* ---------------------------------------------------------------------
+    REPLACE FIRST OCCURRENCE OF lc_repl IN rs_incnames-func_pool   WITH mv_funcgroup_id.
+    REPLACE FIRST OCCURRENCE OF lc_repl IN rs_incnames-func_group  WITH mv_funcgroup_id.
+    REPLACE FIRST OCCURRENCE OF lc_repl IN rs_incnames-func_module WITH mv_funcgroup_id.
+    REPLACE FIRST OCCURRENCE OF lc_repl IN rs_incnames-top_inc     WITH mv_funcgroup_id.
+    REPLACE FIRST OCCURRENCE OF lc_repl IN rs_incnames-func_inc    WITH mv_funcgroup_id.
+
+* ---------------------------------------------------------------------
+    mv_funcgroup_id = mv_funcgroup_id + 1.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

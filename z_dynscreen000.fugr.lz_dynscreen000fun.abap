@@ -1,7 +1,7 @@
 * ---------------------------------------------------------------------
 * THIS IS A GENERATED PROGRAM!
 *     changes are futile
-*     last generation: 20171225 225520
+*     last generation: 20171225 232646
 * ---------------------------------------------------------------------
 go_events = io_events.
 CALL SELECTION-SCREEN 0001.

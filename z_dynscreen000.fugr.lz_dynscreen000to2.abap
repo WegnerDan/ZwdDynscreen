@@ -1,7 +1,7 @@
 * ---------------------------------------------------------------------
 * THIS IS A GENERATED PROGRAM!
 *     changes are futile
-*     last generation: 20171225 225520
+*     last generation: 20171225 232646
 * ---------------------------------------------------------------------
 DATA go_events TYPE REF TO zcl_dynscreen_events.
 DATA gv_subrc TYPE sy-subrc.
