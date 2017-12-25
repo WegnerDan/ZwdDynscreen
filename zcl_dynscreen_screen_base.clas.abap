@@ -28,7 +28,10 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       generate_open REDEFINITION.
   PRIVATE SECTION.
     DATA:
-      mv_pretty_print TYPE abap_bool.
+      mv_pretty_print TYPE abap_bool,
+      mt_gen_notice   LIKE mt_source.
+    METHODS:
+      get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source.
 ENDCLASS.
 
 
@@ -70,22 +73,15 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     generate_texts( ).
 
 * ---------------------------------------------------------------------
-*    APPEND `FUNCTION-POOL ` && mc_gentarget_incnames-func_pool && '.' TO lt_top_incl_src.
+    APPEND LINES OF get_generation_notice( ) TO lt_top_incl_src.
     APPEND mc_syn-data && ` go_events TYPE REF TO zcl_dynscreen_events.` TO lt_top_incl_src.
     APPEND mc_syn-data && ` gv_subrc ` && mc_syn-type && ` sy-subrc.` TO lt_top_incl_src.
-*    APPEND `INCLUDE ` && mc_gentarget_incnames-scr_inc && '.' TO lt_top_incl_src.
     APPEND LINES OF mt_source TO lt_top_incl_src.
-
-* ---------------------------------------------------------------------
     APPEND LINES OF generate_events( ) TO lt_top_incl_src.
 
 * ---------------------------------------------------------------------
-    APPEND mc_syn-cline TO lt_func_module_src.
-    APPEND '* THIS IS A GENERATED PROGRAM!' TO lt_func_module_src.
-    APPEND '*     changes are futile' TO lt_func_module_src.
-    GET TIME.
-    APPEND `*     last generation: ` && sy-datum && ` ` && sy-uzeit TO lt_func_module_src.
-    APPEND mc_syn-cline TO lt_func_module_src.
+    APPEND LINES OF get_generation_notice( ) TO lt_func_module_src.
+
     IF mv_is_window IS NOT INITIAL.
       lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
       IF ms_ending_position IS NOT INITIAL.
@@ -205,6 +201,23 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
   METHOD get_pretty_print.
 * ---------------------------------------------------------------------
     rv_pretty_print = mv_pretty_print.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+  METHOD get_generation_notice.
+* ---------------------------------------------------------------------
+    IF mt_gen_notice IS INITIAL.
+      APPEND mc_syn-cline TO mt_gen_notice.
+      APPEND '* THIS IS A GENERATED PROGRAM!' TO mt_gen_notice.
+      APPEND '*     changes are futile' TO mt_gen_notice.
+      GET TIME.
+      APPEND `*     last generation: ` && sy-datum && ` ` && sy-uzeit TO mt_gen_notice.
+      APPEND mc_syn-cline TO mt_gen_notice.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+    rt_src = mt_gen_notice.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

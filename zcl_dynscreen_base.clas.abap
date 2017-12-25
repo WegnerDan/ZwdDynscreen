@@ -132,12 +132,12 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
       generate_open ABSTRACT,
       generate_close ABSTRACT,
       pretty_print FINAL CHANGING ct_source TYPE mty_source_tt.
-private section.
+  PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
+CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 
   METHOD add.
@@ -228,10 +228,8 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    IF ms_source_eve-t_selscreen IS NOT INITIAL.
-      APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
-      APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
-    ENDIF.
+    APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
+    APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
     APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source.
     APPEND 'LEAVE TO SCREEN 0.' TO rt_events_source.
     APPEND 'ENDIF.' TO rt_events_source.

@@ -3,11 +3,11 @@ CLASS zcl_dynscreen_transport DEFINITION PUBLIC FINAL CREATE PRIVATE.
     INTERFACES:
       if_serializable_object.
     TYPES:
-      BEGIN OF mty_transport,
+      BEGIN OF mty_s_transport,
         fname TYPE fieldname,
         value TYPE string,
-      END OF mty_transport,
-      mty_transport_tt TYPE SORTED TABLE OF mty_transport WITH UNIQUE KEY fname.
+      END OF mty_s_transport,
+      mty_t_transport TYPE SORTED TABLE OF mty_s_transport WITH UNIQUE KEY fname.
     CLASS-METHODS:
       get_inst RETURNING VALUE(ro_inst) TYPE REF TO zcl_dynscreen_transport.
     METHODS:
@@ -20,7 +20,7 @@ CLASS zcl_dynscreen_transport DEFINITION PUBLIC FINAL CREATE PRIVATE.
   PRIVATE SECTION.
     DATA:
       mv_subrc  TYPE sy-subrc,
-      mt_values TYPE mty_transport_tt.
+      mt_values TYPE mty_t_transport.
     CLASS-DATA:
       mo_me TYPE REF TO zcl_dynscreen_transport .
 ENDCLASS.
@@ -32,14 +32,11 @@ CLASS zcl_dynscreen_transport IMPLEMENTATION.
 
   METHOD add_value.
 * ---------------------------------------------------------------------
-    DATA:
-      ls_value LIKE LINE OF mt_values.
-
-* ---------------------------------------------------------------------
-    FREE ls_value.
-    ls_value-fname = iv_fname.
-    CALL TRANSFORMATION id SOURCE value = iv_value RESULT XML ls_value-value.
-    INSERT ls_value INTO TABLE mt_values.
+    READ TABLE mt_values ASSIGNING FIELD-SYMBOL(<ls_value>) WITH KEY fname = iv_fname.
+    IF sy-subrc <> 0.
+      INSERT VALUE #( fname = iv_fname ) INTO TABLE mt_values ASSIGNING <ls_value>.
+    ENDIF.
+    CALL TRANSFORMATION id SOURCE value = iv_value RESULT XML <ls_value>-value.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

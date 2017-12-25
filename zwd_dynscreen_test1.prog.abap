@@ -4,8 +4,6 @@ CLASS lcl_appl DEFINITION CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS process.
   PRIVATE SECTION.
-    DATA mo_screen TYPE REF TO zcl_dynscreen_screen.
-    DATA mo_btn TYPE REF TO zcl_dynscreen_button.
     METHODS handle_button_click FOR EVENT button_click OF zcl_dynscreen_button.
 ENDCLASS.
 
@@ -17,14 +15,17 @@ CLASS lcl_appl IMPLEMENTATION.
   METHOD process.
 * ---------------------------------------------------------------------
     DATA:
+      lo_screen    TYPE REF TO zcl_dynscreen_screen,
+      lo_btn       TYPE REF TO zcl_dynscreen_button,
       lo_pa_matnr1 TYPE REF TO zcl_dynscreen_parameter,
       lo_pa_matnr2 TYPE REF TO zcl_dynscreen_parameter,
       lo_so_vbeln  TYPE REF TO zcl_dynscreen_selectoption,
       lo_pa_ebeln  TYPE REF TO zcl_dynscreen_parameter.
 
 * ---------------------------------------------------------------------
-    mo_screen = NEW #( ).
-    mo_screen->set_text( 'Selection Screen Generation Test' ).
+    lo_screen = NEW #( ).
+    lo_screen->set_pretty_print( ).
+    lo_screen->set_text( 'Selection Screen Generation Test' ).
 
     lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
     lo_pa_matnr1->set_value( 'DEFAULT' ).
@@ -32,22 +33,22 @@ CLASS lcl_appl IMPLEMENTATION.
     lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
     lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
 
-    mo_screen->add( lo_pa_matnr1 ).
-    mo_screen->add( lo_pa_matnr2 ).
-    mo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
-    SET HANDLER handle_button_click FOR mo_btn.
+    lo_screen->add( lo_pa_matnr1 ).
+    lo_screen->add( lo_pa_matnr2 ).
+    lo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
+    SET HANDLER handle_button_click FOR lo_btn.
 
-    mo_screen->add( mo_btn ).
+    lo_screen->add( lo_btn ).
 
     lo_so_vbeln = NEW #( iv_type = 'VBAK-VBELN' ).
-    mo_screen->add( lo_so_vbeln ).
+    lo_screen->add( lo_so_vbeln ).
 
 
     lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
-    mo_screen->add( lo_pa_ebeln ).
+    lo_screen->add( lo_pa_ebeln ).
 
 
-    IF mo_screen->display( ) = zcl_dynscreen_base=>mc_selection_ok.
+    IF lo_screen->display( ) = zcl_dynscreen_base=>mc_selection_ok.
 
 * ---------------------------------------------------------------------
       " ev_value is "type any"
