@@ -1,13 +1,6 @@
-CLASS zcl_dynscreen_io_element DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_base
-  ABSTRACT
-  CREATE PUBLIC
-
+CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC
   GLOBAL FRIENDS zcl_dynscreen_base .
-
   PUBLIC SECTION.
-
     TYPES:
       BEGIN OF mty_generic_type_info ,
         datatype  TYPE dd01l-datatype,
@@ -15,62 +8,62 @@ CLASS zcl_dynscreen_io_element DEFINITION
         decimals  TYPE dd01l-decimals,
         lowercase TYPE abap_bool,
       END OF mty_generic_type_info .
-
-    CONSTANTS mc_conv_write      TYPE c VALUE 'W' ##NO_TEXT.
-    CONSTANTS mc_conv_xml        TYPE c VALUE 'X' ##NO_TEXT.
-    CONSTANTS mc_conv_cast       TYPE c VALUE 'C' ##NO_TEXT.
-    CONSTANTS mc_type_c          TYPE dd01l-datatype VALUE 'CHAR' ##NO_TEXT.
-    CONSTANTS mc_type_string     TYPE dd01l-datatype VALUE 'STRG' ##NO_TEXT.
-    CONSTANTS mc_type_x          TYPE dd01l-datatype VALUE 'RAW' ##NO_TEXT.
-    CONSTANTS mc_type_n          TYPE dd01l-datatype VALUE 'NUMC' ##NO_TEXT.
-    CONSTANTS mc_type_i          TYPE dd01l-datatype VALUE 'INT4' ##NO_TEXT.
-    CONSTANTS mc_type_d          TYPE dd01l-datatype VALUE 'DATS' ##NO_TEXT.
-    CONSTANTS mc_type_t          TYPE dd01l-datatype VALUE 'TIMS' ##NO_TEXT.
-    CONSTANTS mc_type_p          TYPE dd01l-datatype VALUE 'DEC' ##NO_TEXT.
-    CONSTANTS mc_type_decfloat16 TYPE dd01l-datatype VALUE 'D16S' ##NO_TEXT.
-    CONSTANTS mc_type_decfloat34 TYPE dd01l-datatype VALUE 'D34S' ##NO_TEXT.
-
-    METHODS get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx .
-    METHODS set_ddic_text IMPORTING !iv_ddic_text TYPE textpooltx .
-    METHODS set_generic_type IMPORTING !is_type_info TYPE mty_generic_type_info .
-    METHODS constructor IMPORTING !iv_type         TYPE typename OPTIONAL
-                                  !is_generic_type TYPE mty_generic_type_info OPTIONAL
-                                  !iv_text         TYPE textpooltx OPTIONAL .
-    METHODS get_type RETURNING VALUE(rv_type) TYPE typename .
-    METHODS get_value IMPORTING !iv_conversion  TYPE c DEFAULT mc_conv_cast
-                      EXPORTING !ev_value       TYPE any
-                      RETURNING VALUE(rv_value) TYPE string .
-    METHODS set_type IMPORTING !iv_type TYPE typename .
-    METHODS set_value IMPORTING !iv_conversion TYPE c DEFAULT mc_conv_cast
-                                !iv_value      TYPE any OPTIONAL
-                                !iv_value_str  TYPE string OPTIONAL
-            PREFERRED PARAMETER iv_value .
-    METHODS get_value_ref RETURNING VALUE(rd_value) TYPE REF TO data .
-    METHODS raise_event ABSTRACT.
-    METHODS set_ucomm IMPORTING iv_ucomm TYPE sy-ucomm.
-    METHODS get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm.
+    CONSTANTS:
+      mc_conv_write      TYPE c VALUE 'W' ##NO_TEXT,
+      mc_conv_xml        TYPE c VALUE 'X' ##NO_TEXT,
+      mc_conv_cast       TYPE c VALUE 'C' ##NO_TEXT,
+      mc_type_c          TYPE dd01l-datatype VALUE 'CHAR' ##NO_TEXT,
+      mc_type_string     TYPE dd01l-datatype VALUE 'STRG' ##NO_TEXT,
+      mc_type_x          TYPE dd01l-datatype VALUE 'RAW' ##NO_TEXT,
+      mc_type_n          TYPE dd01l-datatype VALUE 'NUMC' ##NO_TEXT,
+      mc_type_i          TYPE dd01l-datatype VALUE 'INT4' ##NO_TEXT,
+      mc_type_d          TYPE dd01l-datatype VALUE 'DATS' ##NO_TEXT,
+      mc_type_t          TYPE dd01l-datatype VALUE 'TIMS' ##NO_TEXT,
+      mc_type_p          TYPE dd01l-datatype VALUE 'DEC' ##NO_TEXT,
+      mc_type_decfloat16 TYPE dd01l-datatype VALUE 'D16S' ##NO_TEXT,
+      mc_type_decfloat34 TYPE dd01l-datatype VALUE 'D34S' ##NO_TEXT.
+    METHODS:
+      get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx,
+      set_ddic_text IMPORTING !iv_ddic_text TYPE textpooltx,
+      set_generic_type IMPORTING !is_type_info TYPE mty_generic_type_info,
+      constructor IMPORTING !iv_type         TYPE typename OPTIONAL
+                            !is_generic_type TYPE mty_generic_type_info OPTIONAL
+                            !iv_text         TYPE textpooltx OPTIONAL,
+      get_type RETURNING VALUE(rv_type) TYPE typename,
+      get_value IMPORTING !iv_conversion  TYPE c DEFAULT mc_conv_cast
+                EXPORTING !ev_value       TYPE any
+                RETURNING VALUE(rv_value) TYPE string,
+      set_type IMPORTING !iv_type TYPE typename,
+      set_value IMPORTING !iv_conversion TYPE c DEFAULT mc_conv_cast
+                          !iv_value      TYPE any OPTIONAL
+                          !iv_value_str  TYPE string OPTIONAL
+                            PREFERRED PARAMETER iv_value,
+      get_value_ref RETURNING VALUE(rd_value) TYPE REF TO data,
+      raise_event ABSTRACT,
+      set_ucomm IMPORTING iv_ucomm TYPE sy-ucomm,
+      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm.
   PROTECTED SECTION.
-
-    CONSTANTS mc_type_generic TYPE typename VALUE '_%_%_GENERIC_%_%_'. "#EC NOTEXT
-    DATA mv_ucomm TYPE sy-ucomm.
-    DATA mo_elemdescr TYPE REF TO cl_abap_elemdescr .
-    DATA mv_ddic_text TYPE c LENGTH 40 .
-    DATA mv_type TYPE typename .
-    DATA ms_generic_type_info TYPE mty_generic_type_info .
-    DATA mv_generic_type_string TYPE string .
-    DATA mv_value TYPE string .
-    DATA md_value TYPE REF TO data .
-
-    METHODS get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname .
-    METHODS get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx .
-    METHODS get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx .
+    CONSTANTS:
+      mc_type_generic TYPE typename VALUE '_%_%_GENERIC_%_%_'. "#EC NOTEXT
+    DATA:
+      mv_ucomm               TYPE sy-ucomm,
+      mo_elemdescr           TYPE REF TO cl_abap_elemdescr,
+      mv_ddic_text           TYPE c LENGTH 40,
+      mv_type                TYPE typename,
+      ms_generic_type_info   TYPE mty_generic_type_info,
+      mv_generic_type_string TYPE string,
+      mv_value               TYPE string,
+      md_value               TYPE REF TO data.
+    METHODS:
+      get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
+      get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
+      get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
 CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
-
 
   METHOD constructor.
 * ---------------------------------------------------------------------

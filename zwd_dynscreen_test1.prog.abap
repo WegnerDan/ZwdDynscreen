@@ -49,21 +49,32 @@ CLASS lcl_appl IMPLEMENTATION.
 
     IF mo_screen->display( ) = zcl_dynscreen_base=>mc_selection_ok.
 
+* ---------------------------------------------------------------------
+      " ev_value is "type any"
       DATA lv_matnr1 TYPE mara-matnr.
       lo_pa_matnr1->get_value( IMPORTING ev_value = lv_matnr1 ).
 
-
+* ---------------------------------------------------------------------
+      " all io elements have a generated variable reference held internally
+      " which can be accessed with method GET_VALUE_REF
       FIELD-SYMBOLS <lv_matnr2> TYPE mara-matnr.
       DATA(lv_matnr2_ref) = lo_pa_matnr2->get_value_ref( ).
       ASSIGN lv_matnr2_ref->* TO <lv_matnr2>.
 
+* ---------------------------------------------------------------------
       DATA lr_vbeln TYPE RANGE OF vbak-vbeln.
       lo_so_vbeln->get_value( IMPORTING ev_value = lr_vbeln ).
 
+* ---------------------------------------------------------------------
+      " method GET_VALUE also has a returning parameter of type string
+      " if the io element is not of type string, using this will cause two type conversions
+      " in this case:
+      " internal value of type EKKO-EBELN cast to string -> string cast to LV_EBELN of type EKKO_EBELN
       DATA lv_ebeln TYPE ekko-ebeln.
       lv_ebeln = lo_pa_ebeln->get_value( ).
 
 
+* ---------------------------------------------------------------------
       WRITE: `lo_pa_matnr1: `, lv_matnr1, /.
 
       WRITE: `lo_pa_matnr2: `, <lv_matnr2>, /.
