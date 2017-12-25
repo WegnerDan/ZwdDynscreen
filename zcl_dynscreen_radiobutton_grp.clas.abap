@@ -1,49 +1,35 @@
-CLASS zcl_dynscreen_radiobutton_grp DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_io_element
-  FINAL
-  CREATE PUBLIC
-
-  GLOBAL FRIENDS zcl_dynscreen_radiobutton .
-
+CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_radiobutton.
   PUBLIC SECTION.
-
     TYPES:
       BEGIN OF mty_radiobutton,
         id   TYPE mty_id,
         text TYPE textpooltx,
-      END OF mty_radiobutton .
-    TYPES:
-      mty_radiobutton_tt TYPE SORTED TABLE OF mty_radiobutton WITH UNIQUE KEY id .
-
-    METHODS constructor
-      IMPORTING
-        !it_radiobuttons TYPE mty_radiobutton_tt OPTIONAL .
-
-    METHODS add
-         REDEFINITION .
+      END OF mty_radiobutton,
+      mty_radiobutton_tt TYPE SORTED TABLE OF mty_radiobutton WITH UNIQUE KEY id.
+    METHODS:
+      constructor IMPORTING !it_radiobuttons TYPE mty_radiobutton_tt OPTIONAL,
+      add REDEFINITION,
+      raise_event REDEFINITION.
   PROTECTED SECTION.
-
     TYPES:
       BEGIN OF mty_radiobutton_ref.
             INCLUDE TYPE mty_radiobutton.
     TYPES:
       refid TYPE mty_id,
       ref   TYPE REF TO zcl_dynscreen_radiobutton,
-      END OF mty_radiobutton_ref .
-    TYPES:
-      mty_radiobutton_ref_tt TYPE SORTED TABLE OF mty_radiobutton_ref WITH UNIQUE KEY id .
-
-    DATA mt_radiobuttons TYPE mty_radiobutton_ref_tt .
-
-    METHODS generate_close REDEFINITION.
-    METHODS generate_open REDEFINITION.
+      END OF mty_radiobutton_ref,
+      mty_radiobutton_ref_tt TYPE SORTED TABLE OF mty_radiobutton_ref WITH UNIQUE KEY id.
+    DATA:
+      mt_radiobuttons TYPE mty_radiobutton_ref_tt .
+    METHODS:
+      generate_close REDEFINITION,
+      generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
+CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
 
   METHOD add.
@@ -115,4 +101,12 @@ CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD raise_event.
+* ---------------------------------------------------------------------
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

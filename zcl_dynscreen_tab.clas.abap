@@ -1,34 +1,21 @@
-CLASS zcl_dynscreen_tab DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_base
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_tab DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base CREATE PUBLIC.
   PUBLIC SECTION.
-
-    METHODS constructor
-      IMPORTING
-        !iv_text TYPE textpooltx OPTIONAL .
-
-    METHODS add
-         REDEFINITION .
+    METHODS:
+      constructor IMPORTING !iv_text TYPE textpooltx OPTIONAL,
+      add REDEFINITION.
   PROTECTED SECTION.
-
-    DATA mo_screen TYPE REF TO zcl_dynscreen_subscreen .
-
-    METHODS generate
-         REDEFINITION .
-    METHODS generate_close
-         REDEFINITION .
-    METHODS generate_open
-         REDEFINITION .
+    DATA:
+      mo_screen TYPE REF TO zcl_dynscreen_subscreen .
+    METHODS:
+      generate REDEFINITION,
+      generate_close REDEFINITION,
+      generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_TAB IMPLEMENTATION.
-
-
+CLASS zcl_dynscreen_tab IMPLEMENTATION.
   METHOD add.
 * ---------------------------------------------------------------------
     IF mo_screen IS BOUND.

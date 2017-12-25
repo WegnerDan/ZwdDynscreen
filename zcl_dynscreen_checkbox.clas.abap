@@ -1,23 +1,12 @@
-CLASS zcl_dynscreen_checkbox DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_parameter
-  FINAL
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_parameter FINAL CREATE PUBLIC.
   PUBLIC SECTION.
-
-    METHODS constructor
-      IMPORTING
-        !iv_text TYPE textpooltx OPTIONAL .
-
-    METHODS set_type
-         REDEFINITION .
-    METHODS set_value
-         REDEFINITION .
+    METHODS:
+      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
+      set_type REDEFINITION,
+      set_value REDEFINITION.
   PROTECTED SECTION.
-
-    METHODS generate_open
-         REDEFINITION .
+    METHODS:
+      generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 

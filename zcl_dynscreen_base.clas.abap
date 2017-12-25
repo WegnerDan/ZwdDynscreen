@@ -1,28 +1,16 @@
-CLASS zcl_dynscreen_base DEFINITION
-  PUBLIC
-  ABSTRACT
-  CREATE PUBLIC
-
-  GLOBAL FRIENDS zcl_dynscreen_io_element .
-
+CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_io_element.
   PUBLIC SECTION.
-
     INTERFACES if_serializable_object .
-
     TYPES:
-      mty_id TYPE n LENGTH 4 .
-    TYPES:
-      mty_varname TYPE c LENGTH 30 .
-    TYPES:
+      mty_id      TYPE n LENGTH 4,
+      mty_varname TYPE c LENGTH 30,
       BEGIN OF mty_variable,
         id   TYPE mty_id,
         name TYPE mty_varname,
         ref  TYPE REF TO zcl_dynscreen_io_element,
-      END OF mty_variable .
-    TYPES:
+      END OF mty_variable,
       mty_variables_tt TYPE SORTED TABLE OF mty_variable WITH UNIQUE KEY id,
       mty_srcname      TYPE c LENGTH 40.
-
     CONSTANTS:
       BEGIN OF mc_gentarget_incnames,
         func_pool   TYPE mty_srcname VALUE 'SAPLZ_DYNSCREEN000' ##NO_TEXT,
@@ -30,35 +18,34 @@ CLASS zcl_dynscreen_base DEFINITION
         func_module TYPE mty_srcname VALUE 'Z_DYNSCREEN_GENERATION_T000' ##NO_TEXT,
         top_inc     TYPE mty_srcname VALUE 'LZ_DYNSCREEN000TO2' ##NO_TEXT,
         func_inc    TYPE mty_srcname VALUE 'LZ_DYNSCREEN000FUN' ##NO_TEXT,
-      END OF mc_gentarget_incnames.
-    CONSTANTS mc_selection_ok       TYPE sy-subrc VALUE 0 ##NO_TEXT.
-    CONSTANTS mc_selection_canceled TYPE sy-subrc VALUE 4 ##NO_TEXT.
-    CONSTANTS:
+      END OF mc_gentarget_incnames,
+      mc_selection_ok       TYPE sy-subrc VALUE 0 ##NO_TEXT,
+      mc_selection_canceled TYPE sy-subrc VALUE 4 ##NO_TEXT,
       BEGIN OF mc_com,
         exit TYPE sy-ucomm VALUE '_%_%_EXIT_%_%_',
       END OF mc_com.
-    CLASS-METHODS class_constructor .
-    METHODS get_variables RETURNING VALUE(rt_variables) TYPE mty_variables_tt .
-    METHODS get_text RETURNING VALUE(rv_text) TYPE textpooltx .
-    METHODS set_text IMPORTING !iv_text TYPE textpooltx .
-    METHODS constructor .
-    METHODS add IMPORTING !io_screen_element TYPE REF TO zcl_dynscreen_base .
-    METHODS set_id IMPORTING !iv_id TYPE i .
-    METHODS get_id RETURNING VALUE(rv_id) TYPE i .
-
+    CLASS-METHODS:
+      class_constructor.
+    METHODS:
+      constructor,
+      get_variables RETURNING VALUE(rt_variables) TYPE mty_variables_tt,
+      get_text RETURNING VALUE(rv_text) TYPE textpooltx,
+      set_text IMPORTING !iv_text TYPE textpooltx,
+      add IMPORTING !io_screen_element TYPE REF TO zcl_dynscreen_base,
+      set_id IMPORTING !iv_id TYPE i,
+      get_id RETURNING VALUE(rv_id) TYPE i.
   PROTECTED SECTION.
+    TYPE-POOLS:
+      abap.
     TYPES:
       BEGIN OF mty_screen_element,
         id  TYPE mty_id,
         ref TYPE REF TO zcl_dynscreen_base,
         var TYPE abap_bool,
-      END OF mty_screen_element.
-    TYPES:
-      mty_screen_elements_tt TYPE SORTED TABLE OF mty_screen_element WITH UNIQUE KEY id .
-    TYPES:
-      mty_source TYPE c LENGTH 254 .
-    TYPES:
-      mty_source_tt TYPE STANDARD TABLE OF mty_source WITH DEFAULT KEY,
+      END OF mty_screen_element,
+      mty_screen_elements_tt TYPE SORTED TABLE OF mty_screen_element WITH UNIQUE KEY id,
+      mty_source             TYPE c LENGTH 254,
+      mty_source_tt          TYPE STANDARD TABLE OF mty_source WITH DEFAULT KEY,
       BEGIN OF mty_generated,
         srcname TYPE mty_srcname,
       END OF mty_generated,
@@ -112,16 +99,15 @@ CLASS zcl_dynscreen_base DEFINITION
         eve_selscreen_ovr TYPE c LENGTH 40 VALUE 'AT SELECTION-SCREEN ON VALUE-REQUEST FOR',
         eve_selscreen_ohr TYPE c LENGTH 39 VALUE 'AT SELECTION-SCREEN ON HELP-REQUEST FOR',
       END OF mc_syn.
-
-    CLASS-DATA mv_last_id TYPE mty_id .
-    DATA mv_id TYPE mty_id .
-    TYPE-POOLS abap .
-    DATA mv_is_variable TYPE abap_bool .
-    DATA mv_text        TYPE textpooltx .
-    DATA mt_elements    TYPE mty_screen_elements_tt .
-    DATA mt_source      TYPE mty_source_tt .
-    DATA mt_source_ac   TYPE mty_source_tt .
+    CLASS-DATA:
+      mv_last_id TYPE mty_id.
     DATA:
+      mv_id          TYPE mty_id,
+      mv_is_variable TYPE abap_bool,
+      mv_text        TYPE textpooltx,
+      mt_elements    TYPE mty_screen_elements_tt,
+      mt_source      TYPE mty_source_tt,
+      mt_source_ac   TYPE mty_source_tt,
       BEGIN OF ms_source_eve,
         t_init          TYPE mty_source_tt,
         t_selscreen     TYPE mty_source_tt,
@@ -131,31 +117,27 @@ CLASS zcl_dynscreen_base DEFINITION
         t_selscreen_org TYPE mty_source_tt,
         t_selscreen_ovr TYPE mty_source_tt,
         t_selscreen_ohr TYPE mty_source_tt,
-      END OF ms_source_eve.
-    DATA mt_variables   TYPE mty_variables_tt .
-    DATA mt_textpool    TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key .
-
-    METHODS generate_value_transport RETURNING VALUE(rt_valtrans_source) TYPE mty_source_tt .
-    METHODS generate_events RETURNING VALUE(rt_events_source) TYPE mty_source_tt.
-    METHODS generate_texts .
-    METHODS is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool .
-    METHODS generate .
-    METHODS generate_open ABSTRACT .
-    METHODS generate_close ABSTRACT .
-    METHODS pretty_print FINAL CHANGING ct_source TYPE mty_source_tt .
-
-    CLASS-METHODS set_last_id
-      IMPORTING
-        !iv_last_id TYPE i .
-    CLASS-METHODS get_last_id
-      RETURNING
-        VALUE(rv_id) TYPE i .
-  PRIVATE SECTION.
+      END OF ms_source_eve,
+      mt_variables TYPE mty_variables_tt,
+      mt_textpool  TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key.
+    CLASS-METHODS:
+      set_last_id IMPORTING !iv_last_id TYPE i,
+      get_last_id RETURNING VALUE(rv_id) TYPE i.
+    METHODS:
+      generate_value_transport RETURNING VALUE(rt_valtrans_source) TYPE mty_source_tt,
+      generate_events RETURNING VALUE(rt_events_source) TYPE mty_source_tt,
+      generate_texts,
+      is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
+      generate,
+      generate_open ABSTRACT,
+      generate_close ABSTRACT,
+      pretty_print FINAL CHANGING ct_source TYPE mty_source_tt.
+private section.
 ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_base IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
 
 
   METHOD add.

@@ -1,33 +1,18 @@
-CLASS zcl_dynscreen_radiobutton DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_parameter
-  FINAL
-  CREATE PROTECTED
-
-  GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp .
-
+CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_parameter FINAL CREATE PROTECTED GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
   PUBLIC SECTION.
-
-    METHODS set_generic_type
-         REDEFINITION .
-    METHODS set_type
-         REDEFINITION .
-    METHODS set_value
-         REDEFINITION .
+    METHODS:
+      set_generic_type REDEFINITION,
+      set_type REDEFINITION,
+      set_value REDEFINITION.
   PROTECTED SECTION.
-
     TYPES:
       mty_radiobutton_grp TYPE c LENGTH 4 .
-
-    DATA mv_radiobutton_grp TYPE mty_radiobutton_grp .
-
-    METHODS constructor
-      IMPORTING
-        !iv_radiobutton_grp TYPE mty_radiobutton_grp
-        !iv_text            TYPE textpooltx OPTIONAL .
-
-    METHODS generate_open
-         REDEFINITION .
+    DATA:
+      mv_radiobutton_grp TYPE mty_radiobutton_grp .
+    METHODS:
+      constructor IMPORTING !iv_radiobutton_grp TYPE mty_radiobutton_grp
+                            !iv_text            TYPE textpooltx OPTIONAL,
+      generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 

@@ -1,35 +1,24 @@
-CLASS zcl_dynscreen_selectoption DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_io_element
-  FINAL
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC.
   PUBLIC SECTION.
-
-    METHODS constructor
-      IMPORTING
-        !iv_type TYPE typename
-        !iv_text TYPE textpooltx OPTIONAL .
-
-    METHODS get_value REDEFINITION .
-    METHODS set_type REDEFINITION .
-    METHODS raise_event REDEFINITION .
+    METHODS:
+      constructor IMPORTING !iv_type TYPE typename
+                            !iv_text TYPE textpooltx OPTIONAL,
+      get_value REDEFINITION,
+      set_type REDEFINITION,
+      raise_event REDEFINITION .
   PROTECTED SECTION.
-
-    DATA mo_tabledescr TYPE REF TO cl_abap_tabledescr .
-
-    METHODS generate_close
-         REDEFINITION .
-    METHODS generate_open
-         REDEFINITION .
-    METHODS get_var_name
-         REDEFINITION .
+    DATA:
+      mo_tabledescr TYPE REF TO cl_abap_tabledescr .
+    METHODS:
+      generate_close REDEFINITION,
+      generate_open REDEFINITION,
+      get_var_name REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_SELECTOPTION IMPLEMENTATION.
+CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
 
   METHOD constructor.

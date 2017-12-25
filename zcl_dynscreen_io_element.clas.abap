@@ -1,5 +1,4 @@
-CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC
-  GLOBAL FRIENDS zcl_dynscreen_base .
+CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_base.
   PUBLIC SECTION.
     TYPES:
       BEGIN OF mty_generic_type_info ,
@@ -63,7 +62,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
+CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------

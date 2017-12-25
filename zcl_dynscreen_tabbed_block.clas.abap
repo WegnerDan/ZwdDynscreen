@@ -1,36 +1,23 @@
-CLASS zcl_dynscreen_tabbed_block DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_base
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_tabbed_block DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base CREATE PUBLIC.
   PUBLIC SECTION.
-
     TYPES:
       mty_lines TYPE n LENGTH 3 .
-
-    METHODS constructor
-      IMPORTING
-        !iv_lines TYPE mty_lines OPTIONAL .
-    METHODS set_lines
-      IMPORTING
-        !iv_lines TYPE mty_lines .
-    METHODS get_lines
-      RETURNING
-        VALUE(rv_lines) TYPE mty_lines .
+    METHODS:
+      constructor IMPORTING !iv_lines TYPE mty_lines OPTIONAL,
+      set_lines IMPORTING !iv_lines TYPE mty_lines,
+      get_lines RETURNING VALUE(rv_lines) TYPE mty_lines.
   PROTECTED SECTION.
-
-    DATA mv_lines TYPE mty_lines.
-
-    METHODS generate_close
-         REDEFINITION .
-    METHODS generate_open
-         REDEFINITION .
+    DATA:
+      mv_lines TYPE mty_lines.
+    METHODS:
+      generate_close REDEFINITION,
+      generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_TABBED_BLOCK IMPLEMENTATION.
+CLASS zcl_dynscreen_tabbed_block IMPLEMENTATION.
 
 
   METHOD constructor.

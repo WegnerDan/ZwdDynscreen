@@ -1,33 +1,18 @@
-CLASS zcl_dynscreen_popup DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_screen_base
-  FINAL
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_popup DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_screen_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
-
-    METHODS get_ending_position
-      RETURNING
-        VALUE(rs_position) TYPE mty_position .
-    METHODS get_starting_position
-      RETURNING
-        VALUE(rs_position) TYPE mty_position .
-    METHODS set_ending_position
-      IMPORTING
-        !is_position TYPE mty_position .
-    METHODS set_starting_position
-      IMPORTING
-        !is_position TYPE mty_position .
-    METHODS constructor
-      IMPORTING
-        !iv_text TYPE textpooltx OPTIONAL .
+    METHODS:
+      constructor IMPORTING !iv_text TYPE textpooltx OPTIONAL,
+      get_ending_position RETURNING VALUE(rs_position) TYPE mty_position,
+      get_starting_position RETURNING VALUE(rs_position) TYPE mty_position,
+      set_ending_position IMPORTING !is_position TYPE mty_position,
+      set_starting_position IMPORTING !is_position TYPE mty_position.
   PROTECTED SECTION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_POPUP IMPLEMENTATION.
+CLASS zcl_dynscreen_popup IMPLEMENTATION.
 
 
   METHOD constructor.

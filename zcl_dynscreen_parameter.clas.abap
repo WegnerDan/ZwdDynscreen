@@ -1,20 +1,14 @@
-CLASS zcl_dynscreen_parameter DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_dynscreen_io_element
-  CREATE PUBLIC .
-
+CLASS zcl_dynscreen_parameter DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element CREATE PUBLIC.
   PUBLIC SECTION.
-
-    METHODS constructor
-      IMPORTING
-        !iv_type         TYPE typename OPTIONAL
-        !is_generic_type TYPE mty_generic_type_info OPTIONAL
-        !iv_text         TYPE textpooltx OPTIONAL .
-    METHODS raise_event REDEFINITION .
+    METHODS:
+      constructor IMPORTING !iv_type         TYPE typename OPTIONAL
+                            !is_generic_type TYPE mty_generic_type_info OPTIONAL
+                            !iv_text         TYPE textpooltx OPTIONAL,
+      raise_event REDEFINITION.
   PROTECTED SECTION.
-
-    METHODS generate_close REDEFINITION .
-    METHODS generate_open REDEFINITION .
+    METHODS:
+      generate_close REDEFINITION,
+      generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 

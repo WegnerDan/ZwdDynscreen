@@ -1,35 +1,36 @@
-CLASS zcl_dynscreen_events DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PRIVATE.
-
+CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE.
   PUBLIC SECTION.
     TYPES:
       BEGIN OF mty_event,
-        id TYPE zcl_dynscreen_base=>mty_id,
+        id  TYPE zcl_dynscreen_base=>mty_id,
         ref TYPE REF TO zcl_dynscreen_io_element,
       END OF mty_event,
       mty_events_tt TYPE SORTED TABLE OF mty_event WITH UNIQUE KEY id.
-    CLASS-METHODS init.
-    CLASS-METHODS get_inst RETURNING VALUE(ro_me) TYPE REF TO zcl_dynscreen_events.
-    METHODS add IMPORTING io_ref TYPE REF TO zcl_dynscreen_io_element.
-    METHODS raise IMPORTING iv_id TYPE zcl_dynscreen_base=>mty_id
-                            iv_ucomm TYPE sy-ucomm OPTIONAL
-                  RETURNING VALUE(rv_ucomm) TYPE sy-ucomm.
+    CLASS-METHODS:
+      init,
+      get_inst RETURNING VALUE(ro_me) TYPE REF TO zcl_dynscreen_events.
+    METHODS:
+      add IMPORTING io_ref TYPE REF TO zcl_dynscreen_io_element,
+      raise IMPORTING iv_id           TYPE zcl_dynscreen_base=>mty_id
+                      iv_ucomm        TYPE sy-ucomm OPTIONAL
+            RETURNING VALUE(rv_ucomm) TYPE sy-ucomm.
   PROTECTED SECTION.
   PRIVATE SECTION.
-    CLASS-DATA mo_me TYPE REF TO zcl_dynscreen_events.
-    DATA mt_events TYPE mty_events_tt.
+    CLASS-DATA:
+      mo_me TYPE REF TO zcl_dynscreen_events.
+    DATA:
+      mt_events TYPE mty_events_tt.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_EVENTS IMPLEMENTATION.
+CLASS zcl_dynscreen_events IMPLEMENTATION.
 
 
   METHOD add.
 * ---------------------------------------------------------------------
-    INSERT VALUE #( id = io_ref->get_id( ) ref = io_ref ) INTO TABLE mt_events.
+    INSERT VALUE #( id  = io_ref->get_id( )
+                    ref = io_ref            ) INTO TABLE mt_events.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
