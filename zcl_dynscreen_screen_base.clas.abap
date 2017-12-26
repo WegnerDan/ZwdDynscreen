@@ -32,8 +32,9 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
     CLASS-DATA:
       mv_funcgroup_id TYPE mty_funcgroup_id.
     DATA:
-      mv_pretty_print TYPE abap_bool,
-      mt_gen_notice   LIKE mt_source.
+      mv_internal_funcgroup_id TYPE c LENGTH 3,
+      mv_pretty_print          TYPE abap_bool,
+      mt_gen_notice            LIKE mt_source.
     METHODS:
       get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source,
       get_generation_target RETURNING VALUE(rs_incnames) TYPE mty_s_gentarget_incnames.
@@ -232,7 +233,8 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
   METHOD get_generation_target.
 * ---------------------------------------------------------------------
-    CONSTANTS lc_repl TYPE c LENGTH 3 VALUE '%%%'.
+    CONSTANTS:
+      lc_repl TYPE c LENGTH 3 VALUE '%%%'.
 
 * ---------------------------------------------------------------------
     rs_incnames-func_pool   = mc_gentarget_incnames-func_pool.
@@ -249,6 +251,10 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     REPLACE FIRST OCCURRENCE OF lc_repl IN rs_incnames-func_inc    WITH mv_funcgroup_id.
 
 * ---------------------------------------------------------------------
+    " MV_FUNCGROUP_ID is a static member var
+    " everytime the DISPLAY method is called, another function group will be used
+    " this is necessary to enable generating different screens in the same origin LUW
+    " a side effect of this is that even if the same screen is used twice, the generation target will differ
     mv_funcgroup_id = mv_funcgroup_id + 1.
 
 * ---------------------------------------------------------------------
