@@ -29,10 +29,11 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
   PRIVATE SECTION.
     TYPES:
       mty_funcgroup_id TYPE n LENGTH 3.
+    CLASS-DATA:
+      mv_funcgroup_id TYPE mty_funcgroup_id.
     DATA:
       mv_pretty_print TYPE abap_bool,
-      mt_gen_notice   LIKE mt_source,
-      mv_funcgroup_id TYPE mty_funcgroup_id.
+      mt_gen_notice   LIKE mt_source.
     METHODS:
       get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source,
       get_generation_target RETURNING VALUE(rs_incnames) TYPE mty_s_gentarget_incnames.

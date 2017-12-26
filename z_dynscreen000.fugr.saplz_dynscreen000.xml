@@ -18,31 +18,12 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>Selection Screen Generation Test</ENTRY>
-     <LENGTH>32</LENGTH>
+     <ENTRY>Dynscreen Data Browser Demo</ENTRY>
+     <LENGTH>27</LENGTH>
     </item>
     <item>
      <ID>S</ID>
      <KEY>V_0002</KEY>
-     <ENTRY>Material 1</ENTRY>
-     <LENGTH>18</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>V_0003</KEY>
-     <ENTRY>Material 2</ENTRY>
-     <LENGTH>18</LENGTH>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>V_0005</KEY>
-     <ENTRY>.</ENTRY>
-     <LENGTH>9</LENGTH>
-     <SPLIT>D</SPLIT>
-    </item>
-    <item>
-     <ID>S</ID>
-     <KEY>V_0006</KEY>
      <ENTRY>.</ENTRY>
      <LENGTH>9</LENGTH>
      <SPLIT>D</SPLIT>
