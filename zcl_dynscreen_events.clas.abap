@@ -1,4 +1,4 @@
-CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE.
+CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE GLOBAL FRIENDS zcl_dynscreen_base.
   PUBLIC SECTION.
     TYPES:
       BEGIN OF mty_event,
@@ -7,8 +7,8 @@ CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE.
       END OF mty_event,
       mty_events_tt TYPE SORTED TABLE OF mty_event WITH UNIQUE KEY id.
     CLASS-METHODS:
-      init,
-      get_inst RETURNING VALUE(ro_me) TYPE REF TO zcl_dynscreen_events.
+      get_inst IMPORTING iv_new_inst  TYPE abap_bool DEFAULT abap_false
+               RETURNING VALUE(ro_me) TYPE REF TO zcl_dynscreen_events.
     METHODS:
       add IMPORTING io_ref TYPE REF TO zcl_dynscreen_io_element,
       raise IMPORTING iv_id           TYPE zcl_dynscreen_base=>mty_id
@@ -24,7 +24,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_events IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_EVENTS IMPLEMENTATION.
 
 
   METHOD add.
@@ -38,20 +38,17 @@ CLASS zcl_dynscreen_events IMPLEMENTATION.
 
   METHOD get_inst.
 * ---------------------------------------------------------------------
+    IF iv_new_inst = abap_true.
+      FREE mo_me.
+    ENDIF.
+
+* ---------------------------------------------------------------------
     IF mo_me IS NOT BOUND.
       mo_me = NEW #( ).
     ENDIF.
 
 * ---------------------------------------------------------------------
     ro_me = mo_me.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD init.
-* ---------------------------------------------------------------------
-    FREE mo_me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

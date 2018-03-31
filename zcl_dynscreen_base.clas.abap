@@ -19,13 +19,14 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
         func_inc    TYPE mty_srcname,
       END OF mty_s_gentarget_incnames.
     CONSTANTS:
-      BEGIN OF mc_gentarget_incnames,
-        func_pool   TYPE mty_srcname VALUE 'SAPLZ_DYNSCREEN%%%' ##NO_TEXT,
-        func_group  TYPE mty_srcname VALUE 'Z_DYNSCREEN%%%' ##NO_TEXT,
-        func_module TYPE mty_srcname VALUE 'Z_DYNSCREEN_GENERATION_T%%%' ##NO_TEXT,
-        top_inc     TYPE mty_srcname VALUE 'LZ_DYNSCREEN%%%TO2' ##NO_TEXT,
-        func_inc    TYPE mty_srcname VALUE 'LZ_DYNSCREEN%%%FUN' ##NO_TEXT,
-      END OF mc_gentarget_incnames,
+      mc_gentarget_incname  TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
+*      BEGIN OF mc_gentarget_incnames,
+*        func_pool   TYPE mty_srcname VALUE 'SAPLZ_DYNSCREEN%%%' ##NO_TEXT,
+*        func_group  TYPE mty_srcname VALUE 'Z_DYNSCREEN%%%' ##NO_TEXT,
+*        func_module TYPE mty_srcname VALUE 'Z_DYNSCREEN_GENERATION_T%%%' ##NO_TEXT,
+*        top_inc     TYPE mty_srcname VALUE 'LZ_DYNSCREEN%%%TO2' ##NO_TEXT,
+*        func_inc    TYPE mty_srcname VALUE 'LZ_DYNSCREEN%%%FUN' ##NO_TEXT,
+*      END OF mc_gentarget_incnames,
       mc_selection_ok       TYPE sy-subrc VALUE 0 ##NO_TEXT,
       mc_selection_canceled TYPE sy-subrc VALUE 4 ##NO_TEXT,
       BEGIN OF mc_com,
@@ -51,7 +52,8 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
         var TYPE abap_bool,
       END OF mty_screen_element,
       mty_screen_elements_tt TYPE SORTED TABLE OF mty_screen_element WITH UNIQUE KEY id,
-      mty_source             TYPE c LENGTH 254,
+      "mty_source             TYPE c LENGTH 254,
+      mty_source             TYPE string,
       mty_source_tt          TYPE STANDARD TABLE OF mty_source WITH DEFAULT KEY,
       BEGIN OF mty_generated,
         srcname TYPE mty_srcname,
@@ -59,6 +61,7 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
       mty_generated_tt TYPE STANDARD TABLE OF mty_generated WITH DEFAULT KEY.
     CONSTANTS:
       BEGIN OF mc_syn,
+        funcpool          TYPE c LENGTH 13 VALUE 'FUNCTION-POOL',
         sq                TYPE c LENGTH 1  VALUE '''', " single quote
         dq                TYPE c LENGTH 1  VALUE '"',  " double quote
         dat_prefix        TYPE c LENGTH 1  VALUE 'D',
@@ -72,6 +75,7 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
         param             TYPE c LENGTH 10 VALUE 'PARAMETERS',
         selopt            TYPE c LENGTH 14 VALUE 'SELECT-OPTIONS',
         type              TYPE c LENGTH 4  VALUE 'TYPE',
+        type_ref          TYPE c LENGTH 11 VALUE 'TYPE REF TO',
         default           TYPE c LENGTH 7  VALUE 'DEFAULT',
         selscreen         TYPE c LENGTH 16 VALUE 'SELECTION-SCREEN',
         begin             TYPE c LENGTH 8  VALUE 'BEGIN OF',
@@ -316,17 +320,17 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     FREE rt_valtrans_source.
 
 * ---------------------------------------------------------------------
-    APPEND 'IF io_value_transport IS BOUND.' TO rt_valtrans_source.
+    APPEND 'IF io_values IS BOUND.' TO rt_valtrans_source.
 
 * ---------------------------------------------------------------------
     " remember subrc
-    APPEND 'io_value_transport->set_subrc( gv_subrc ).' TO rt_valtrans_source.
+    APPEND 'io_values->set_subrc( lv_subrc ).' TO rt_valtrans_source.
 
 * ---------------------------------------------------------------------
     " remember variable values
     LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
       APPEND
-      `io_value_transport->add_value( iv_fname = '` && <ls_var>-name && `' iv_value = ` && <ls_var>-name && ` ).`
+      `io_values->add( iv_fname = '` && <ls_var>-name && `' iv_value = ` && <ls_var>-name && ` ).`
       TO rt_valtrans_source.
     ENDLOOP.
 
