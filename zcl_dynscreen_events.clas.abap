@@ -1,4 +1,4 @@
-CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE GLOBAL FRIENDS zcl_dynscreen_base.
+CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE.
   PUBLIC SECTION.
     TYPES:
       BEGIN OF mty_event,

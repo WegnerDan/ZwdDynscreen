@@ -4,7 +4,7 @@ CLASS lcl_appl DEFINITION CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS process.
   PRIVATE SECTION.
-    METHODS handle_button_click FOR EVENT button_click OF zcl_dynscreen_button.
+    METHODS handle_button_click FOR EVENT button_click OF zcl_dynscreen_button IMPORTING sender.
 ENDCLASS.
 
 NEW lcl_appl( )->process( ).
@@ -94,5 +94,6 @@ CLASS lcl_appl IMPLEMENTATION.
 
   METHOD handle_button_click.
     MESSAGE 'Button pressed!' TYPE 'I'.
+    sender->set_ucomm( zcl_dynscreen_base=>mc_com-exit ).
   ENDMETHOD.
 ENDCLASS.

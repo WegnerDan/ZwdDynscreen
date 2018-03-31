@@ -10,7 +10,7 @@ CLASS zcl_dynscreen_button DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_el
       get_length RETURNING VALUE(rv_length) TYPE i,
       raise_event REDEFINITION.
     EVENTS:
-     button_click EXPORTING VALUE(ev_ucomm) TYPE sy-ucomm OPTIONAL.
+      button_click.
   PROTECTED SECTION.
     METHODS:
       generate_open REDEFINITION,
@@ -26,7 +26,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_button IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_BUTTON IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -47,10 +47,13 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
 
 
   METHOD generate_close.
+* ---------------------------------------------------------------------
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
 
   METHOD generate_open.
+* ---------------------------------------------------------------------
     APPEND mc_syn-selscreen && ` SKIP 1.` TO mt_source.
     APPEND mc_syn-selscreen && ` ` && mc_syn-button && ` ` && mv_position && `(` && mv_length && `) ` && mc_syn-btn_prefix && mv_id && ` `
                             && mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && mv_id && '.' TO mt_source.
@@ -65,13 +68,50 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
       APPEND mc_syn-btn_prefix && mv_id && ` = '` && mv_text && `'.` TO ms_source_eve-t_init.
     ENDIF.
 
+* ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD get_length.
+* ---------------------------------------------------------------------
+    rv_length = mv_length.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_position.
+* ---------------------------------------------------------------------
+    rv_pos = mv_position.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 
   METHOD raise_event.
+* ---------------------------------------------------------------------
     RAISE EVENT button_click.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
+
+  METHOD set_length.
+* ---------------------------------------------------------------------
+    IF iv_length < 1.
+      mv_length = 1.
+    ELSEIF iv_length > 83.
+      mv_length = 83.
+    ELSE.
+      mv_length = iv_length.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
   METHOD set_position.
+* ---------------------------------------------------------------------
     IF iv_pos < 1.
       mv_position = 1.
     ELSEIF iv_pos > 83.
@@ -80,24 +120,6 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
       mv_position = iv_pos.
     ENDIF.
 
+* ---------------------------------------------------------------------
   ENDMETHOD.
-
-  METHOD get_position.
-    rv_pos = mv_position.
-  ENDMETHOD.
-
-  METHOD set_length.
-    IF iv_length < 1.
-      mv_length = 1.
-    ELSEIF iv_length > 83.
-      mv_length = 83.
-    ELSE.
-      mv_length = iv_length.
-    ENDIF.
-  ENDMETHOD.
-
-  METHOD get_length.
-    rv_length = mv_length.
-  ENDMETHOD.
-
 ENDCLASS.

@@ -32,9 +32,8 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
     CLASS-DATA:
       mv_source_id TYPE mty_source_id.
     DATA:
-      mv_internal_funcgroup_id TYPE c LENGTH 3,
-      mv_pretty_print          TYPE abap_bool,
-      mt_gen_notice            LIKE mt_source.
+      mv_pretty_print TYPE abap_bool,
+      mt_gen_notice   LIKE mt_source.
     METHODS:
       get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source,
       get_generation_target RETURNING VALUE(rv_srcname) TYPE mty_srcname.
@@ -75,6 +74,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     DATA(lo_events) = zcl_dynscreen_events=>get_inst( iv_new_inst = abap_true ).
+    DATA(lo_values) = zcl_dynscreen_values=>get_inst( iv_new_inst = abap_true ).
     generate( ).
     generate_texts( ).
 
@@ -84,6 +84,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     APPEND mc_syn-funcpool && ` ` && lv_gentarget && '.' TO lt_source.
     APPEND LINES OF get_generation_notice( ) TO lt_source.
+    APPEND mc_syn-data && ` go_values ` && mc_syn-type_ref && ` zcl_dynscreen_values.` TO lt_source.
     APPEND mc_syn-data && ` go_events ` && mc_syn-type_ref && ` zcl_dynscreen_events.` TO lt_source.
     APPEND LINES OF mt_source TO lt_source.
     APPEND LINES OF generate_events( ) TO lt_source.
@@ -94,6 +95,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     APPEND 'io_events TYPE REF TO zcl_dynscreen_events' TO lt_source.
     APPEND 'io_values TYPE REF TO zcl_dynscreen_values.' TO lt_source.
     APPEND 'go_events = io_events.' TO lt_source.
+    APPEND 'go_values = io_values.' TO lt_source.
     APPEND mc_syn-data && ` lv_subrc ` && mc_syn-type && ` sy-subrc.` TO lt_source.
     IF mv_is_window IS NOT INITIAL.
       lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
@@ -129,9 +131,6 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       MESSAGE `syntax error: ` && lo_syncheck->message TYPE 'I' DISPLAY LIKE 'E'.
       RETURN.
     ENDIF.
-
-* ---------------------------------------------------------------------
-    DATA(lo_values) = NEW zcl_dynscreen_values( ).
 
 * ---------------------------------------------------------------------
     PERFORM (lv_formname) IN PROGRAM (lv_gentarget) USING lo_events lo_values.

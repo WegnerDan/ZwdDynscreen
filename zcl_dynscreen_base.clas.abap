@@ -10,23 +10,9 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
         ref  TYPE REF TO zcl_dynscreen_io_element,
       END OF mty_variable,
       mty_variables_tt TYPE SORTED TABLE OF mty_variable WITH UNIQUE KEY id,
-      mty_srcname      TYPE c LENGTH 40,
-      BEGIN OF mty_s_gentarget_incnames,
-        func_pool   TYPE mty_srcname,
-        func_group  TYPE mty_srcname,
-        func_module TYPE mty_srcname,
-        top_inc     TYPE mty_srcname,
-        func_inc    TYPE mty_srcname,
-      END OF mty_s_gentarget_incnames.
+      mty_srcname      TYPE c LENGTH 40.
     CONSTANTS:
       mc_gentarget_incname  TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
-*      BEGIN OF mc_gentarget_incnames,
-*        func_pool   TYPE mty_srcname VALUE 'SAPLZ_DYNSCREEN%%%' ##NO_TEXT,
-*        func_group  TYPE mty_srcname VALUE 'Z_DYNSCREEN%%%' ##NO_TEXT,
-*        func_module TYPE mty_srcname VALUE 'Z_DYNSCREEN_GENERATION_T%%%' ##NO_TEXT,
-*        top_inc     TYPE mty_srcname VALUE 'LZ_DYNSCREEN%%%TO2' ##NO_TEXT,
-*        func_inc    TYPE mty_srcname VALUE 'LZ_DYNSCREEN%%%FUN' ##NO_TEXT,
-*      END OF mc_gentarget_incnames,
       mc_selection_ok       TYPE sy-subrc VALUE 0 ##NO_TEXT,
       mc_selection_canceled TYPE sy-subrc VALUE 4 ##NO_TEXT,
       BEGIN OF mc_com,
@@ -215,7 +201,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
                         name = lo_io->get_var_name( )
                         ref  = lo_io                 ) INTO TABLE mt_variables.
       ENDIF.
-      APPEND LINES OF <ls_element>-ref->mt_source_ac TO mt_source_ac.
+      APPEND LINES OF <ls_element>-ref->mt_source_ac                  TO mt_source_ac.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_init          TO ms_source_eve-t_init.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_selscreen     TO ms_source_eve-t_selscreen.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_selscreen_out TO ms_source_eve-t_selscreen_out.
@@ -382,9 +368,13 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 
   METHOD pretty_print.
-    DATA: ls_settings  TYPE rseumod,
-          lt_source    TYPE rswsourcet,
-          lt_lineindex TYPE STANDARD TABLE OF edlineindx.
+* ---------------------------------------------------------------------
+    DATA:
+      ls_settings  TYPE rseumod,
+      lt_source    TYPE rswsourcet,
+      lt_lineindex TYPE STANDARD TABLE OF edlineindx.
+
+* ---------------------------------------------------------------------
     CALL FUNCTION 'RS_WORKBENCH_CUSTOMIZING'
       EXPORTING
         suppress_dialog = abap_true
@@ -397,6 +387,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
           value = '2'.
     ENDIF.
 
+* ---------------------------------------------------------------------
     CALL FUNCTION 'PRETTY_PRINTER'
       EXPORTING
         inctoo             = abap_false
@@ -420,12 +411,16 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
              lt_lineindex
       USING  'HIKEY'.
     MOVE-CORRESPONDING lt_source TO ct_source.
+
+* ---------------------------------------------------------------------
     IF ls_settings-indent <> '2'.
       CALL FUNCTION 'RS_WB_CUSTOMIZING_SET_VALUE'
         EXPORTING
           name  = 'INDENT'
           value = ls_settings-indent.
     ENDIF.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
 
