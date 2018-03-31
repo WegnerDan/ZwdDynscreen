@@ -1,5 +1,4 @@
 # ZwdDynscreen 
-## Currently broken
 
 Object Oriented Selection Screen Generation for SAP
 
