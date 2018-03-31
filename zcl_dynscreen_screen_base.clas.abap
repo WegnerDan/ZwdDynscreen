@@ -91,6 +91,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     DATA(lv_formname) = 'DISPLAY_' && mv_id.
+    APPEND mc_syn-cline TO lt_source.
     APPEND `FORM ` && lv_formname && ` USING` TO lt_source.
     APPEND 'io_events TYPE REF TO zcl_dynscreen_events' TO lt_source.
     APPEND 'io_values TYPE REF TO zcl_dynscreen_values.' TO lt_source.
@@ -241,7 +242,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
                           with = mv_source_id         ).
 
 * ---------------------------------------------------------------------
-    " MV_FUNCGROUP_ID is a static member var
+    " MV_SOURCE_ID is a static member var
     " everytime the DISPLAY method is called, another function group will be used
     " this is necessary to enable generating different screens in the same origin LUW
     " a side effect of this is that even if the same screen is used twice, the generation target will differ

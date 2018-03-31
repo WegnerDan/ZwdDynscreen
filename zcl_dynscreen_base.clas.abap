@@ -298,11 +298,6 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
   METHOD generate_value_transport.
 * ---------------------------------------------------------------------
-* because we generate a report and run it using the submit command
-* there is no official way to transport values provided to the generated report
-* as a solution, the class ZWD_DYNSCREEN_TRANSPORT is used to save the values to memory
-* the method ADD_VALUE is called once for every entry of the table MT_VARIABLES
-* ---------------------------------------------------------------------
     FREE rt_valtrans_source.
 
 * ---------------------------------------------------------------------
