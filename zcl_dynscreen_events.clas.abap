@@ -1,11 +1,11 @@
 CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE.
   PUBLIC SECTION.
     TYPES:
-      BEGIN OF mty_event,
+      BEGIN OF mty_s_event,
         id  TYPE zcl_dynscreen_base=>mty_id,
         ref TYPE REF TO zcl_dynscreen_io_element,
-      END OF mty_event,
-      mty_events_tt TYPE SORTED TABLE OF mty_event WITH UNIQUE KEY id.
+      END OF mty_s_event,
+      mty_t_events TYPE SORTED TABLE OF mty_s_event WITH UNIQUE KEY id.
     CLASS-METHODS:
       get_inst IMPORTING iv_new_inst  TYPE abap_bool DEFAULT abap_false
                RETURNING VALUE(ro_me) TYPE REF TO zcl_dynscreen_events.
@@ -19,12 +19,12 @@ CLASS zcl_dynscreen_events DEFINITION PUBLIC FINAL CREATE PRIVATE.
     CLASS-DATA:
       mo_me TYPE REF TO zcl_dynscreen_events.
     DATA:
-      mt_events TYPE mty_events_tt.
+      mt_events TYPE mty_t_events.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_EVENTS IMPLEMENTATION.
+CLASS zcl_dynscreen_events IMPLEMENTATION.
 
 
   METHOD add.

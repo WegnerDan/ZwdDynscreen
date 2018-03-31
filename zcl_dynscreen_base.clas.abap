@@ -4,13 +4,13 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
     TYPES:
       mty_id      TYPE n LENGTH 4,
       mty_varname TYPE c LENGTH 30,
-      BEGIN OF mty_variable,
+      mty_srcname TYPE c LENGTH 40,
+      BEGIN OF mty_s_variable,
         id   TYPE mty_id,
         name TYPE mty_varname,
         ref  TYPE REF TO zcl_dynscreen_io_element,
-      END OF mty_variable,
-      mty_variables_tt TYPE SORTED TABLE OF mty_variable WITH UNIQUE KEY id,
-      mty_srcname      TYPE c LENGTH 40.
+      END OF mty_s_variable,
+      mty_t_variables TYPE SORTED TABLE OF mty_s_variable WITH UNIQUE KEY id.
     CONSTANTS:
       mc_gentarget_incname  TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
       mc_selection_ok       TYPE sy-subrc VALUE 0 ##NO_TEXT,
@@ -22,7 +22,7 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
       class_constructor.
     METHODS:
       constructor,
-      get_variables RETURNING VALUE(rt_variables) TYPE mty_variables_tt,
+      get_variables RETURNING VALUE(rt_variables) TYPE mty_t_variables,
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING !iv_text TYPE textpooltx,
       add IMPORTING !io_screen_element TYPE REF TO zcl_dynscreen_base,
@@ -32,19 +32,19 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
     TYPE-POOLS:
       abap.
     TYPES:
-      BEGIN OF mty_screen_element,
+      BEGIN OF mty_s_screen_element,
         id  TYPE mty_id,
         ref TYPE REF TO zcl_dynscreen_base,
         var TYPE abap_bool,
-      END OF mty_screen_element,
-      mty_screen_elements_tt TYPE SORTED TABLE OF mty_screen_element WITH UNIQUE KEY id,
+      END OF mty_s_screen_element,
+      mty_t_screen_elements TYPE SORTED TABLE OF mty_s_screen_element WITH UNIQUE KEY id,
       "mty_source             TYPE c LENGTH 254,
-      mty_source             TYPE string,
-      mty_source_tt          TYPE STANDARD TABLE OF mty_source WITH DEFAULT KEY,
-      BEGIN OF mty_generated,
+      mty_source            TYPE string,
+      mty_t_source          TYPE STANDARD TABLE OF mty_source WITH DEFAULT KEY,
+      BEGIN OF mty_s_generated,
         srcname TYPE mty_srcname,
-      END OF mty_generated,
-      mty_generated_tt TYPE STANDARD TABLE OF mty_generated WITH DEFAULT KEY.
+      END OF mty_s_generated,
+      mty_t_generated TYPE STANDARD TABLE OF mty_s_generated WITH DEFAULT KEY.
     CONSTANTS:
       BEGIN OF mc_syn,
         funcpool          TYPE c LENGTH 13 VALUE 'FUNCTION-POOL',
@@ -102,33 +102,33 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
       mv_id          TYPE mty_id,
       mv_is_variable TYPE abap_bool,
       mv_text        TYPE textpooltx,
-      mt_elements    TYPE mty_screen_elements_tt,
-      mt_source      TYPE mty_source_tt,
-      mt_source_ac   TYPE mty_source_tt,
+      mt_elements    TYPE mty_t_screen_elements,
+      mt_source      TYPE mty_t_source,
+      mt_source_ac   TYPE mty_t_source,
       BEGIN OF ms_source_eve,
-        t_init          TYPE mty_source_tt,
-        t_selscreen     TYPE mty_source_tt,
-        t_selscreen_out TYPE mty_source_tt,
-        t_selscreen_on  TYPE mty_source_tt,
-        t_selscreen_obl TYPE mty_source_tt,
-        t_selscreen_org TYPE mty_source_tt,
-        t_selscreen_ovr TYPE mty_source_tt,
-        t_selscreen_ohr TYPE mty_source_tt,
+        t_init          TYPE mty_t_source,
+        t_selscreen     TYPE mty_t_source,
+        t_selscreen_out TYPE mty_t_source,
+        t_selscreen_on  TYPE mty_t_source,
+        t_selscreen_obl TYPE mty_t_source,
+        t_selscreen_org TYPE mty_t_source,
+        t_selscreen_ovr TYPE mty_t_source,
+        t_selscreen_ohr TYPE mty_t_source,
       END OF ms_source_eve,
-      mt_variables TYPE mty_variables_tt,
+      mt_variables TYPE mty_t_variables,
       mt_textpool  TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key.
     CLASS-METHODS:
       set_last_id IMPORTING !iv_last_id TYPE i,
       get_last_id RETURNING VALUE(rv_id) TYPE i.
     METHODS:
-      generate_value_transport RETURNING VALUE(rt_valtrans_source) TYPE mty_source_tt,
-      generate_events RETURNING VALUE(rt_events_source) TYPE mty_source_tt,
+      generate_value_transport RETURNING VALUE(rt_valtrans_source) TYPE mty_t_source,
+      generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
       is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
       generate,
       generate_open ABSTRACT,
       generate_close ABSTRACT,
-      pretty_print FINAL CHANGING ct_source TYPE mty_source_tt.
+      pretty_print FINAL CHANGING ct_source TYPE mty_t_source.
   PRIVATE SECTION.
 ENDCLASS.
 

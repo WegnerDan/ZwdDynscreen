@@ -1,26 +1,26 @@
 CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_radiobutton.
   PUBLIC SECTION.
     TYPES:
-      BEGIN OF mty_radiobutton,
+      BEGIN OF mty_s_radiobutton,
         id   TYPE mty_id,
         text TYPE textpooltx,
-      END OF mty_radiobutton,
-      mty_radiobutton_tt TYPE SORTED TABLE OF mty_radiobutton WITH UNIQUE KEY id.
+      END OF mty_s_radiobutton,
+      mty_t_radiobutton TYPE SORTED TABLE OF mty_s_radiobutton WITH UNIQUE KEY id.
     METHODS:
-      constructor IMPORTING !it_radiobuttons TYPE mty_radiobutton_tt OPTIONAL,
+      constructor IMPORTING !it_radiobuttons TYPE mty_t_radiobutton OPTIONAL,
       add REDEFINITION,
       raise_event REDEFINITION.
   PROTECTED SECTION.
     TYPES:
-      BEGIN OF mty_radiobutton_ref.
-            INCLUDE TYPE mty_radiobutton.
+      BEGIN OF mty_s_radiobutton_ref.
+            INCLUDE TYPE mty_s_radiobutton.
     TYPES:
       refid TYPE mty_id,
       ref   TYPE REF TO zcl_dynscreen_radiobutton,
-      END OF mty_radiobutton_ref,
-      mty_radiobutton_ref_tt TYPE SORTED TABLE OF mty_radiobutton_ref WITH UNIQUE KEY id.
+      END OF mty_s_radiobutton_ref,
+      mty_t_radiobutton_ref TYPE SORTED TABLE OF mty_s_radiobutton_ref WITH UNIQUE KEY id.
     DATA:
-      mt_radiobuttons TYPE mty_radiobutton_ref_tt .
+      mt_radiobuttons TYPE mty_t_radiobutton_ref.
     METHODS:
       generate_close REDEFINITION,
       generate_open REDEFINITION.

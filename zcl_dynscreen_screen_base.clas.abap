@@ -1,10 +1,10 @@
 CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base CREATE PROTECTED.
   PUBLIC SECTION.
     TYPES:
-      BEGIN OF mty_position,
+      BEGIN OF mty_s_position,
         x TYPE n LENGTH 3,
         y TYPE n LENGTH 3,
-      END OF mty_position .
+      END OF mty_s_position.
     METHODS:
       constructor IMPORTING !iv_text TYPE textpooltx OPTIONAL,
       display RETURNING VALUE(rv_subrc) TYPE sy-subrc,
@@ -19,8 +19,8 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
     DATA:
       mv_is_subscreen      TYPE abap_bool,
       mv_is_window         TYPE abap_bool,
-      ms_starting_position TYPE mty_position VALUE mc_default_starting_pos,
-      ms_ending_position   TYPE mty_position.
+      ms_starting_position TYPE mty_s_position VALUE mc_default_starting_pos,
+      ms_ending_position   TYPE mty_s_position.
     METHODS:
       set_subscreen IMPORTING !iv_is_subscreen TYPE abap_bool DEFAULT abap_true,
       set_window IMPORTING !iv_is_window TYPE abap_bool DEFAULT abap_true,

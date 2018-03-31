@@ -2,7 +2,7 @@ CLASS zcl_dynscreen_parameter DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io
   PUBLIC SECTION.
     METHODS:
       constructor IMPORTING !iv_type         TYPE typename OPTIONAL
-                            !is_generic_type TYPE mty_generic_type_info OPTIONAL
+                            !is_generic_type TYPE mty_s_generic_type_info OPTIONAL
                             !iv_text         TYPE textpooltx OPTIONAL,
       raise_event REDEFINITION.
   PROTECTED SECTION.
@@ -14,7 +14,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_PARAMETER IMPLEMENTATION.
+CLASS zcl_dynscreen_parameter IMPLEMENTATION.
 
 
   METHOD constructor.

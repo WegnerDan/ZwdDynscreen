@@ -9,7 +9,7 @@ CLASS zcl_dynscreen_values DEFINITION PUBLIC FINAL CREATE PRIVATE GLOBAL FRIENDS
     METHODS:
       add IMPORTING iv_fname TYPE fieldname
                     iv_value TYPE any,
-      set_values IMPORTING it_variables TYPE zcl_dynscreen_base=>mty_variables_tt,
+      set_values IMPORTING it_variables TYPE zcl_dynscreen_base=>mty_t_variables,
       set_subrc IMPORTING iv_subrc TYPE sy-subrc,
       get_subrc RETURNING VALUE(rv_subrc) TYPE sy-subrc.
     CLASS-METHODS:

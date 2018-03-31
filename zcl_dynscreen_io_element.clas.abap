@@ -1,12 +1,12 @@
 CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_base.
   PUBLIC SECTION.
     TYPES:
-      BEGIN OF mty_generic_type_info ,
+      BEGIN OF mty_s_generic_type_info,
         datatype  TYPE dd01l-datatype,
         length    TYPE dd01l-leng,
         decimals  TYPE dd01l-decimals,
         lowercase TYPE abap_bool,
-      END OF mty_generic_type_info .
+      END OF mty_s_generic_type_info.
     CONSTANTS:
       mc_conv_write      TYPE c VALUE 'W' ##NO_TEXT,
       mc_conv_xml        TYPE c VALUE 'X' ##NO_TEXT,
@@ -24,9 +24,9 @@ CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_b
     METHODS:
       get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx,
       set_ddic_text IMPORTING !iv_ddic_text TYPE textpooltx,
-      set_generic_type IMPORTING !is_type_info TYPE mty_generic_type_info,
+      set_generic_type IMPORTING !is_type_info TYPE mty_s_generic_type_info,
       constructor IMPORTING !iv_type         TYPE typename OPTIONAL
-                            !is_generic_type TYPE mty_generic_type_info OPTIONAL
+                            !is_generic_type TYPE mty_s_generic_type_info OPTIONAL
                             !iv_text         TYPE textpooltx OPTIONAL,
       get_type RETURNING VALUE(rv_type) TYPE typename,
       get_value IMPORTING !iv_conversion  TYPE c DEFAULT mc_conv_cast
@@ -49,7 +49,7 @@ CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_b
       mo_elemdescr           TYPE REF TO cl_abap_elemdescr,
       mv_ddic_text           TYPE c LENGTH 40,
       mv_type                TYPE typename,
-      ms_generic_type_info   TYPE mty_generic_type_info,
+      ms_generic_type_info   TYPE mty_s_generic_type_info,
       mv_generic_type_string TYPE string,
       mv_value               TYPE string,
       md_value               TYPE REF TO data.
