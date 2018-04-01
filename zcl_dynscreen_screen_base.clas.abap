@@ -73,10 +73,12 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       lv_wrd       TYPE string.  " /
 
 * ---------------------------------------------------------------------
-    DATA(lo_events) = zcl_dynscreen_events=>get_inst( iv_new_inst = abap_true ).
-    DATA(lo_values) = zcl_dynscreen_values=>get_inst( iv_new_inst = abap_true ).
     generate( ).
     generate_texts( ).
+
+* ---------------------------------------------------------------------
+    DATA(lo_callback) = zcl_dynscreen_callback=>get_inst( iv_new_inst = abap_true ).
+    lo_callback->set_caller( me ).
 
 * ---------------------------------------------------------------------
     DATA(lv_gentarget) = get_generation_target( ).
@@ -84,21 +86,17 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     APPEND mc_syn-funcpool && ` ` && lv_gentarget && '.' TO lt_source.
     APPEND LINES OF get_generation_notice( ) TO lt_source.
-    APPEND mc_syn-data && ` go_values ` && mc_syn-type_ref && ` zcl_dynscreen_values.` TO lt_source.
-    APPEND mc_syn-data && ` go_events ` && mc_syn-type_ref && ` zcl_dynscreen_events.` TO lt_source.
+    APPEND mc_syn-data && ` go_cb ` && mc_syn-type_ref && ` zcl_dynscreen_callback.` TO lt_source.
     APPEND LINES OF mt_source TO lt_source.
     APPEND LINES OF generate_events( ) TO lt_source.
 
 * ---------------------------------------------------------------------
     DATA(lv_formname) = 'DISPLAY_' && mv_id.
     APPEND mc_syn-cline TO lt_source.
-    APPEND `FORM ` && lv_formname && ` USING` TO lt_source.
-    APPEND 'io_events TYPE REF TO zcl_dynscreen_events' TO lt_source.
-    APPEND 'io_values TYPE REF TO zcl_dynscreen_values.' TO lt_source.
-    APPEND 'go_events = io_events.' TO lt_source.
-    APPEND 'go_values = io_values.' TO lt_source.
+    APPEND `FORM ` && lv_formname && ` USING io_cb TYPE REF TO zcl_dynscreen_callback.` TO lt_source.
+    APPEND 'go_cb = io_cb.' TO lt_source.
     APPEND mc_syn-data && ` lv_subrc ` && mc_syn-type && ` sy-subrc.` TO lt_source.
-    IF mv_is_window IS NOT INITIAL.
+    IF mv_is_window = abap_true.
       lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
       IF ms_ending_position IS NOT INITIAL.
         lv_position = lv_position && ` ENDING AT ` && ms_ending_position-x && ` ` && ms_ending_position-y.
@@ -134,12 +132,11 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    PERFORM (lv_formname) IN PROGRAM (lv_gentarget) USING lo_events lo_values.
+    PERFORM (lv_formname) IN PROGRAM (lv_gentarget) USING lo_callback.
 
 * ---------------------------------------------------------------------
-    IF lo_values->get_subrc( ) = 0.
+    IF lo_callback->get_subrc( ) = 0.
       rv_subrc = mc_selection_ok.
-      lo_values->set_values( mt_variables ).
     ELSE.
       rv_subrc = mc_selection_canceled.
     ENDIF.

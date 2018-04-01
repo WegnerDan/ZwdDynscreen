@@ -1,4 +1,5 @@
-CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_io_element.
+CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC
+GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
   PUBLIC SECTION.
     INTERFACES if_serializable_object .
     TYPES:
@@ -136,7 +137,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
+CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 
   METHOD add.
@@ -185,15 +186,13 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
 * ---------------------------------------------------------------------
     DATA:
       lo_io TYPE REF TO zcl_dynscreen_io_element.
-    FIELD-SYMBOLS:
-      <ls_element> LIKE LINE OF mt_elements.
 
 * ---------------------------------------------------------------------
     FREE: mt_source, mt_source_ac, ms_source_eve.
 
 * ---------------------------------------------------------------------
     generate_open( ).
-    LOOP AT mt_elements ASSIGNING <ls_element>.
+    LOOP AT mt_elements ASSIGNING FIELD-SYMBOL(<ls_element>).
       <ls_element>-ref->generate( ).
       APPEND LINES OF <ls_element>-ref->mt_source TO mt_source.
       INSERT LINES OF <ls_element>-ref->mt_variables INTO TABLE mt_variables.
@@ -231,7 +230,7 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
     APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
     APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source.
-    APPEND 'LEAVE TO SCREEN 0.' TO rt_events_source.
+    APPEND '  LEAVE TO SCREEN 0.' TO rt_events_source.
     APPEND 'ENDIF.' TO rt_events_source.
 
 * ---------------------------------------------------------------------
@@ -304,22 +303,16 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
     FREE rt_valtrans_source.
 
 * ---------------------------------------------------------------------
-    APPEND 'IF io_values IS BOUND.' TO rt_valtrans_source.
-
-* ---------------------------------------------------------------------
     " remember subrc
-    APPEND 'io_values->set_subrc( lv_subrc ).' TO rt_valtrans_source.
+    APPEND 'io_cb->set_subrc( lv_subrc ).' TO rt_valtrans_source.
 
 * ---------------------------------------------------------------------
     " remember variable values
     LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
       APPEND
-      `io_values->add( iv_fname = '` && <ls_var>-name && `' iv_value = ` && <ls_var>-name && ` ).`
+      `io_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).`
       TO rt_valtrans_source.
     ENDLOOP.
-
-* ---------------------------------------------------------------------
-    APPEND 'ENDIF.' TO rt_valtrans_source.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
