@@ -24,10 +24,11 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
       constructor,
       get_variables RETURNING VALUE(rt_variables) TYPE mty_t_variables,
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
-      set_text IMPORTING !iv_text TYPE textpooltx,
-      add IMPORTING !io_screen_element TYPE REF TO zcl_dynscreen_base,
-      set_id IMPORTING !iv_id TYPE i,
-      get_id RETURNING VALUE(rv_id) TYPE i.
+      set_text IMPORTING iv_text TYPE textpooltx,
+      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base,
+      set_id IMPORTING iv_id TYPE i,
+      get_id RETURNING VALUE(rv_id) TYPE i,
+      get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
     TYPE-POOLS:
       abap.
@@ -100,6 +101,7 @@ CLASS zcl_dynscreen_base DEFINITION PUBLIC ABSTRACT CREATE PUBLIC GLOBAL FRIENDS
       mv_last_id TYPE mty_id.
     DATA:
       mv_id          TYPE mty_id,
+      mo_parent      TYPE REF TO zcl_dynscreen_base,
       mv_is_variable TYPE abap_bool,
       mv_text        TYPE textpooltx,
       mt_elements    TYPE mty_t_screen_elements,
@@ -134,12 +136,13 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_base IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
 
 
   METHOD add.
 * ---------------------------------------------------------------------
     IF lines( mt_elements ) < 199.
+      io_screen_element->mo_parent = me.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
                       var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
@@ -333,6 +336,14 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
   METHOD get_last_id.
 * ---------------------------------------------------------------------
     rv_id = mv_last_id.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_parent.
+* ---------------------------------------------------------------------
+    ro_parent = mo_parent.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

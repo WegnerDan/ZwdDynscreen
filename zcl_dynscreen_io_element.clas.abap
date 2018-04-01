@@ -8,9 +8,9 @@ CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_b
         lowercase TYPE abap_bool,
       END OF mty_s_generic_type_info.
     CONSTANTS:
-      mc_conv_write      TYPE c VALUE 'W' ##NO_TEXT,
-      mc_conv_xml        TYPE c VALUE 'X' ##NO_TEXT,
-      mc_conv_cast       TYPE c VALUE 'C' ##NO_TEXT,
+      mc_conv_write      TYPE c LENGTH 1 VALUE 'W' ##NO_TEXT,
+      mc_conv_xml        TYPE c LENGTH 1 VALUE 'X' ##NO_TEXT,
+      mc_conv_cast       TYPE c LENGTH 1 VALUE 'C' ##NO_TEXT,
       mc_type_c          TYPE dd01l-datatype VALUE 'CHAR' ##NO_TEXT,
       mc_type_string     TYPE dd01l-datatype VALUE 'STRG' ##NO_TEXT,
       mc_type_x          TYPE dd01l-datatype VALUE 'RAW' ##NO_TEXT,
@@ -63,6 +63,7 @@ ENDCLASS.
 
 
 CLASS zcl_dynscreen_io_element IMPLEMENTATION.
+
 
   METHOD constructor.
 * ---------------------------------------------------------------------
@@ -350,8 +351,8 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
       <lv_value> TYPE any.
 
 * ---------------------------------------------------------------------
-    IF  iv_value IS INITIAL
-    AND iv_value_str IS INITIAL.
+    IF  iv_value     IS NOT SUPPLIED
+    AND iv_value_str IS NOT SUPPLIED.
       RETURN.
     ENDIF.
 
@@ -364,12 +365,14 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 * ---------------------------------------------------------------------
     CASE iv_conversion.
       WHEN mc_conv_cast.
-        IF iv_value IS NOT INITIAL.
+        IF iv_value IS SUPPLIED.
           <lv_value> = iv_value.
-        ELSEIF iv_value_str IS NOT INITIAL.
+        ELSEIF iv_value_str IS SUPPLIED.
           <lv_value> = iv_value_str.
         ENDIF.
-        IF <lv_value> IS NOT INITIAL.
+        IF <lv_value> IS INITIAL.
+          FREE mv_value.
+        ELSE.
           CALL TRANSFORMATION id SOURCE value = <lv_value> RESULT XML mv_value.
         ENDIF.
       WHEN mc_conv_xml.

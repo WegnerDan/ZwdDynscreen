@@ -6,7 +6,7 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
         y TYPE n LENGTH 3,
       END OF mty_s_position.
     METHODS:
-      constructor IMPORTING !iv_text TYPE textpooltx OPTIONAL,
+      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
       display RETURNING VALUE(rv_subrc) TYPE sy-subrc,
       set_pretty_print IMPORTING iv_pretty_print TYPE abap_bool DEFAULT abap_true,
       get_pretty_print RETURNING VALUE(rv_pretty_print) TYPE abap_bool.

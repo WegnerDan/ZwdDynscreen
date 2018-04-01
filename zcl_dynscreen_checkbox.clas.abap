@@ -45,9 +45,8 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen.
-    APPEND `    go_values->add( iv_fname = '` && mc_syn-var_prefix && mv_id &&
-           `' iv_value = ` && mc_syn-var_prefix && mv_id && ` ).` TO ms_source_eve-t_selscreen.
-    APPEND `    sy-ucomm = go_events->raise( iv_id = '` && mv_id && `' iv_ucomm = sy-ucomm ).` TO ms_source_eve-t_selscreen.
+    APPEND `    sy-ucomm = go_events->raise( iv_id = '` && mv_id && `' iv_ucomm = sy-ucomm ` &&
+           `iv_value = ` && mc_syn-var_prefix && mv_id && ` ).`  TO ms_source_eve-t_selscreen.
     APPEND `  ENDIF.` TO ms_source_eve-t_selscreen.
     zcl_dynscreen_events=>get_inst( )->add( me ).
 
@@ -96,11 +95,12 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
   METHOD raise_event.
 * ---------------------------------------------------------------------
-    zcl_dynscreen_values=>get_inst( )->set_values(
-                                        VALUE #( ( name = mc_syn-var_prefix && mv_id
-                                                   ref  = me                         )
-                                               ) ).
-    RAISE EVENT checkbox_clicked EXPORTING ev_value = get_value( ) && ''.
+    FIELD-SYMBOLS:
+      <lv_value> TYPE abap_bool.
+
+* ---------------------------------------------------------------------
+    ASSIGN md_value->* TO <lv_value>.
+    RAISE EVENT checkbox_clicked EXPORTING ev_value = <lv_value>.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
