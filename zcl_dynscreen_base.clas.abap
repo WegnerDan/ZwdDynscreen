@@ -126,7 +126,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       set_last_id IMPORTING !iv_last_id TYPE i,
       get_last_id RETURNING VALUE(rv_id) TYPE i.
     METHODS:
-      generate_value_transport RETURNING VALUE(rt_valtrans_source) TYPE mty_t_source,
       generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
       is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
@@ -234,6 +233,11 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
+    LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
+      APPEND
+      `go_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).`
+      TO rt_events_source.
+    ENDLOOP.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
     APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source.
     APPEND '  LEAVE TO SCREEN 0.' TO rt_events_source.
@@ -242,7 +246,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     APPEND mc_syn-eve_selscreen_out && '.' TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_out TO rt_events_source.
-    LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
+    LOOP AT mt_variables ASSIGNING <ls_var>.
       APPEND `go_cb->get_value( exporting iv_id = '` && <ls_var>-id &&
               `' importing ev_value = ` && <ls_var>-name && ` ).`       TO rt_events_source.
     ENDLOOP.
@@ -301,26 +305,6 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
                       key    = replace( val = <ls_var>-name sub = lc_tab_body with = '' )
                       entry  = lv_text
                       length = lv_txlen      ) TO mt_textpool.
-    ENDLOOP.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD generate_value_transport.
-* ---------------------------------------------------------------------
-    FREE rt_valtrans_source.
-
-* ---------------------------------------------------------------------
-    " remember subrc
-    APPEND 'io_cb->set_subrc( lv_subrc ).' TO rt_valtrans_source.
-
-* ---------------------------------------------------------------------
-    " remember variable values
-    LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
-      APPEND
-      `io_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).`
-      TO rt_valtrans_source.
     ENDLOOP.
 
 * ---------------------------------------------------------------------

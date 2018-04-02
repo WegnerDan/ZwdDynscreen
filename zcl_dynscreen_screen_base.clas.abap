@@ -105,7 +105,8 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     APPEND `CALL SELECTION-SCREEN ` && mv_id && lv_position && `.` TO lt_source.
     APPEND `lv_subrc = sy-subrc.` TO lt_source.
     APPEND LINES OF mt_source_ac TO lt_source.
-    APPEND LINES OF generate_value_transport( ) TO lt_source.
+    APPEND 'io_cb->set_subrc( lv_subrc ).' TO lt_source.
+*    APPEND LINES OF generate_value_transport( ) TO lt_source.
     APPEND 'ENDFORM.' TO lt_source.
 
 
