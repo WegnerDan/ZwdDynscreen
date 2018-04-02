@@ -470,6 +470,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     lv_base22 = iv_base22.
     CONDENSE lv_base22.
+    TRANSLATE lv_base22 TO UPPER CASE.
     lv_length = strlen( lv_base22 ).
     lv_last = lv_length - 1.
     WHILE lv_last >= 0.

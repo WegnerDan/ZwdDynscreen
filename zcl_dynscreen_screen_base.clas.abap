@@ -9,7 +9,11 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
       display RETURNING VALUE(rv_subrc) TYPE sy-subrc,
       set_pretty_print IMPORTING iv_pretty_print TYPE abap_bool DEFAULT abap_true,
-      get_pretty_print RETURNING VALUE(rv_pretty_print) TYPE abap_bool.
+      get_pretty_print RETURNING VALUE(rv_pretty_print) TYPE abap_bool,
+      serialize FINAL RETURNING VALUE(rv_xml) TYPE string.
+    CLASS-METHODS:
+      deserialize IMPORTING iv_xml        TYPE string
+                  RETURNING VALUE(ro_scr) TYPE REF TO zcl_dynscreen_screen_base.
   PROTECTED SECTION.
     CONSTANTS:
       BEGIN OF mc_default_starting_pos,
@@ -56,6 +60,28 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     IF get_text( ) IS INITIAL.
       set_text( 'Generated Screen' && ` ` && mv_id  ).
     ENDIF.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD deserialize.
+* ---------------------------------------------------------------------
+    CALL TRANSFORMATION id
+    SOURCE XML iv_xml
+    RESULT screen = ro_scr.
+
+* ---------------------------------------------------------------------
+    LOOP AT ro_scr->mt_elements ASSIGNING FIELD-SYMBOL(<ls_elem>) WHERE var = abap_true.
+      DATA(lo_io) = CAST zcl_dynscreen_io_element( <ls_elem>-ref ).
+      IF lo_io->mv_type IS NOT INITIAL.
+        lo_io->set_type( lo_io->mv_type ).
+      ENDIF.
+      IF lo_io->mv_value IS NOT INITIAL.
+        lo_io->set_value( iv_conversion = lo_io->mc_conv_xml
+                          iv_value_str  = lo_io->mv_value    ).
+      ENDIF.
+    ENDLOOP.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -171,43 +197,6 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD set_subscreen.
-* ---------------------------------------------------------------------
-    IF iv_is_subscreen = abap_true.
-      mv_is_window = abap_false.
-    ENDIF.
-    mv_is_subscreen = iv_is_subscreen.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD set_window.
-* ---------------------------------------------------------------------
-    IF iv_is_window = abap_true.
-      mv_is_subscreen = abap_false.
-    ENDIF.
-    mv_is_window = iv_is_window.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD set_pretty_print.
-* ---------------------------------------------------------------------
-    mv_pretty_print = iv_pretty_print.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD get_pretty_print.
-* ---------------------------------------------------------------------
-    rv_pretty_print = mv_pretty_print.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
   METHOD get_generation_notice.
 * ---------------------------------------------------------------------
     IF mt_gen_notice IS INITIAL.
@@ -224,6 +213,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 
   METHOD get_generation_target.
 * ---------------------------------------------------------------------
@@ -245,4 +235,51 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
+
+  METHOD get_pretty_print.
+* ---------------------------------------------------------------------
+    rv_pretty_print = mv_pretty_print.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD serialize.
+* ---------------------------------------------------------------------
+    CALL TRANSFORMATION id
+    SOURCE screen = me RESULT XML rv_xml
+    OPTIONS technical_types = 'ignore'.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD set_pretty_print.
+* ---------------------------------------------------------------------
+    mv_pretty_print = iv_pretty_print.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD set_subscreen.
+* ---------------------------------------------------------------------
+    IF iv_is_subscreen = abap_true.
+      mv_is_window = abap_false.
+    ENDIF.
+    mv_is_subscreen = iv_is_subscreen.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD set_window.
+* ---------------------------------------------------------------------
+    IF iv_is_window = abap_true.
+      mv_is_subscreen = abap_false.
+    ENDIF.
+    mv_is_window = iv_is_window.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
 ENDCLASS.
