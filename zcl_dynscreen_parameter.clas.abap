@@ -54,7 +54,8 @@ CLASS zcl_dynscreen_parameter IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     APPEND
-    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && lv_type && lv_default_value && '.'
+    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && lv_type &&
+    lv_default_value && ` ` && mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.'
     TO mt_source.
 
 * ---------------------------------------------------------------------

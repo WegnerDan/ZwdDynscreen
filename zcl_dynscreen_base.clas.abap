@@ -48,6 +48,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       END OF mty_s_generated,
       mty_t_generated TYPE STANDARD TABLE OF mty_s_generated WITH DEFAULT KEY.
     CONSTANTS:
+      mc_base22          TYPE i VALUE 22,
+      mc_base22_alphabet TYPE string VALUE '0123456789ABCDEFGHIJKLMNOPQRSTUV',
       BEGIN OF mc_syn,
         funcpool          TYPE c LENGTH 13 VALUE 'FUNCTION-POOL',
         sq                TYPE c LENGTH 1  VALUE '''', " single quote
@@ -131,7 +133,11 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       generate,
       generate_open ABSTRACT,
       generate_close ABSTRACT,
-      pretty_print FINAL CHANGING ct_source TYPE mty_t_source.
+      pretty_print FINAL CHANGING ct_source TYPE mty_t_source,
+      base10_to_22 FINAL IMPORTING iv_decimal       TYPE any
+                         RETURNING VALUE(rv_base22) TYPE string,
+      base22_to_10 FINAL IMPORTING iv_base22         TYPE any
+                         RETURNING VALUE(rv_decimal) TYPE i.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -234,10 +240,13 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     APPEND 'ENDIF.' TO rt_events_source.
 
 * ---------------------------------------------------------------------
-    IF ms_source_eve-t_selscreen_out IS NOT INITIAL.
-      APPEND mc_syn-eve_selscreen_out && '.' TO rt_events_source.
-      APPEND LINES OF ms_source_eve-t_selscreen_out TO rt_events_source.
-    ENDIF.
+    APPEND mc_syn-eve_selscreen_out && '.' TO rt_events_source.
+    APPEND LINES OF ms_source_eve-t_selscreen_out TO rt_events_source.
+    LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
+      APPEND `go_cb->get_value( exporting iv_id = '` && <ls_var>-id &&
+              `' importing ev_value = ` && <ls_var>-name && ` ).`       TO rt_events_source.
+    ENDLOOP.
+    APPEND 'go_cb->process_pbo( ).' TO rt_events_source.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -445,4 +454,47 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD base10_to_22.
+* ---------------------------------------------------------------------
+    DATA:
+      lv_decimal TYPE i,
+      lv_index   TYPE i.
+
+* ---------------------------------------------------------------------
+    lv_decimal = iv_decimal.
+    WHILE lv_decimal <> 0.
+      lv_index   = lv_decimal MOD mc_base22.
+      rv_base22  = mc_base22_alphabet+lv_index(1) && rv_base22.
+      lv_decimal = lv_decimal DIV mc_base22.
+    ENDWHILE.
+    IF rv_base22 IS INITIAL.
+      rv_base22 = '0'.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+  METHOD base22_to_10.
+* ---------------------------------------------------------------------
+    DATA:
+      lv_base22 TYPE string,
+      lv_length TYPE i,
+      lv_last   TYPE i.
+
+* ---------------------------------------------------------------------
+    lv_base22 = iv_base22.
+    CONDENSE lv_base22.
+    lv_length = strlen( lv_base22 ).
+    lv_last = lv_length - 1.
+    WHILE lv_last >= 0.
+      rv_decimal = rv_decimal + find( val = mc_base22_alphabet sub = lv_base22+lv_last(1) )
+                   * ( mc_base22 ** ( lv_length - lv_last - 1 ) ).
+      lv_last = lv_last - 1.
+    ENDWHILE.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

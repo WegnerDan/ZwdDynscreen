@@ -40,7 +40,13 @@ CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_b
       get_value_ref RETURNING VALUE(rd_value) TYPE REF TO data,
       raise_event ABSTRACT,
       set_ucomm IMPORTING iv_ucomm TYPE sy-ucomm,
-      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm.
+      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm,
+      set_visible IMPORTING iv_visible TYPE abap_bool DEFAULT abap_true,
+      get_visible RETURNING VALUE(rv_visible) TYPE abap_bool,
+      set_obligatory IMPORTING iv_obligatory TYPE abap_bool DEFAULT abap_true,
+      get_obligatory RETURNING VALUE(rv_obligatory) TYPE abap_bool,
+      set_input IMPORTING iv_input TYPE abap_bool DEFAULT abap_true,
+      get_input RETURNING VALUE(rv_input) TYPE abap_bool.
   PROTECTED SECTION.
     CONSTANTS:
       mc_type_generic TYPE typename VALUE '_%_%_GENERIC_%_%_'. "#EC NOTEXT
@@ -51,6 +57,9 @@ CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_b
       mv_type                TYPE typename,
       ms_generic_type_info   TYPE mty_s_generic_type_info,
       mv_generic_type_string TYPE string,
+      mv_visible             TYPE abap_bool,
+      mv_obligatory          TYPE abap_bool,
+      mv_input               TYPE abap_bool,
       mv_value               TYPE string,
       md_value               TYPE REF TO data.
     METHODS:
@@ -90,6 +99,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
         set_text( get_text_generic( ) ).
       ENDIF.
     ENDIF.
+
+* ---------------------------------------------------------------------
+    mv_visible = abap_true.
+    mv_input   = abap_true.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -216,6 +229,14 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
   METHOD get_var_name.
 * ---------------------------------------------------------------------
     rv_var_name = mc_syn-var_prefix && mv_id.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_visible.
+* ---------------------------------------------------------------------
+    rv_visible = mv_visible.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -388,4 +409,45 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD set_visible.
+* ---------------------------------------------------------------------
+    mv_visible = iv_visible.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD set_obligatory.
+* ---------------------------------------------------------------------
+    mv_obligatory = iv_obligatory.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_obligatory.
+* ---------------------------------------------------------------------
+    rv_obligatory = mv_obligatory.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD set_input.
+* ---------------------------------------------------------------------
+    mv_input = iv_input.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_input.
+* ---------------------------------------------------------------------
+    rv_input = mv_input.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

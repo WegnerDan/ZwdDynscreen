@@ -40,7 +40,8 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 * ---------------------------------------------------------------------
     APPEND
     mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` ` && mc_syn-chkbox &&
-    lv_default_value && ` ` && mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && mv_id && '.'
+    lv_default_value && ` ` && mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && mv_id && ` ` &&
+    mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.'
     TO mt_source.
 
 * ---------------------------------------------------------------------

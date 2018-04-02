@@ -44,8 +44,10 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD generate_open.
 * ---------------------------------------------------------------------
-    APPEND mc_syn-data && ` ` && 'D' && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && '.' TO mt_source.
-    APPEND mc_syn-selopt && ` ` && mc_syn-var_prefix && mv_id && ` ` && 'FOR' && ` ` && 'D' && mc_syn-var_prefix && mv_id && '.' TO mt_source.
+    APPEND mc_syn-data && ` ` && 'D' && mc_syn-var_prefix && mv_id && ` ` &&
+           mc_syn-type && ` ` && mv_type && '.' TO mt_source.
+    APPEND mc_syn-selopt && ` ` && mc_syn-var_prefix && mv_id && ` ` && 'FOR' && ` ` && 'D' &&
+           mc_syn-var_prefix && mv_id && ` ` && mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.' TO mt_source.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

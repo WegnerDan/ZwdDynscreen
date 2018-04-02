@@ -55,14 +55,18 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
   METHOD generate_open.
 * ---------------------------------------------------------------------
     APPEND mc_syn-selscreen && ` SKIP 1.` TO mt_source.
-    APPEND mc_syn-selscreen && ` ` && mc_syn-button && ` ` && mv_position && `(` && mv_length && `) ` && mc_syn-btn_prefix && mv_id && ` `
-                            && mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && mv_id && '.' TO mt_source.
+    APPEND mc_syn-selscreen && ` ` && mc_syn-button && ` ` && mv_position && `(` && mv_length && `) ` &&
+           mc_syn-btn_prefix && mv_id && ` ` && mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && mv_id &&
+           ` ` && mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.' TO mt_source.
 
+* ---------------------------------------------------------------------
+    " add event handling code
     APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen.
     APPEND `    go_cb->raise_event( exporting iv_id = '` && mv_id &&
            `' changing cv_ucomm = sy-ucomm ).` TO ms_source_eve-t_selscreen.
     APPEND '  ENDIF.' TO ms_source_eve-t_selscreen.
 
+* ---------------------------------------------------------------------
     IF mv_text IS NOT INITIAL.
       APPEND mc_syn-btn_prefix && mv_id && ` = '` && mv_text && `'.` TO ms_source_eve-t_init.
     ENDIF.
