@@ -123,12 +123,17 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
           WHEN abap_false.
             ls_screen-required = 0.
         ENDCASE.
-        CASE lo_io->get_input( ).
-          WHEN abap_true.
-            ls_screen-input = 1.
-          WHEN abap_false.
-            ls_screen-input = 0.
-        ENDCASE.
+        IF ls_screen-group3 = 'PAR'  " parameter
+        OR ls_screen-group3 = 'PBU'  " button
+        OR ls_screen-group3 = 'LOW'  " low field of select option
+        OR ls_screen-group3 = 'HGH'. " high field of select option
+          CASE lo_io->get_input( ).
+            WHEN abap_true.
+              ls_screen-input = 1.
+            WHEN abap_false.
+              ls_screen-input = 0.
+          ENDCASE.
+        ENDIF.
         MODIFY screen FROM ls_screen.
       ENDIF.
     ENDLOOP.

@@ -95,7 +95,6 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     APPEND mc_syn-cline TO lt_source.
     APPEND `FORM ` && lv_formname && ` USING io_cb TYPE REF TO zcl_dynscreen_callback.` TO lt_source.
     APPEND 'go_cb = io_cb.' TO lt_source.
-    APPEND mc_syn-data && ` lv_subrc ` && mc_syn-type && ` sy-subrc.` TO lt_source.
     IF mv_is_window = abap_true.
       lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
       IF ms_ending_position IS NOT INITIAL.
@@ -103,12 +102,9 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       ENDIF.
     ENDIF.
     APPEND `CALL SELECTION-SCREEN ` && mv_id && lv_position && `.` TO lt_source.
-    APPEND `lv_subrc = sy-subrc.` TO lt_source.
     APPEND LINES OF mt_source_ac TO lt_source.
-    APPEND 'io_cb->set_subrc( lv_subrc ).' TO lt_source.
-*    APPEND LINES OF generate_value_transport( ) TO lt_source.
+    APPEND 'io_cb->set_subrc( sy-subrc ).' TO lt_source.
     APPEND 'ENDFORM.' TO lt_source.
-
 
 * ---------------------------------------------------------------------
     IF mv_pretty_print = abap_true.

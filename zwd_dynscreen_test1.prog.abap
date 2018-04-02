@@ -94,6 +94,5 @@ CLASS lcl_appl IMPLEMENTATION.
 
   METHOD handle_button_click.
     MESSAGE 'Button pressed!' TYPE 'I'.
-    sender->set_ucomm( zcl_dynscreen_base=>mc_com-exit ).
   ENDMETHOD.
 ENDCLASS.
