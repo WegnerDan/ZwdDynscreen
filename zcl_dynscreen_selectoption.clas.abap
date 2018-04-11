@@ -1,8 +1,9 @@
 CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS:
-      constructor IMPORTING !iv_type TYPE typename
-                            !iv_text TYPE textpooltx OPTIONAL,
+      constructor IMPORTING iv_type TYPE typename
+                            iv_text TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error,
       get_value REDEFINITION,
       set_type REDEFINITION,
       raise_event REDEFINITION .
@@ -131,7 +132,7 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
     super->set_type( iv_type  ).
 
 * ---------------------------------------------------------------------
-    TRY .
+    TRY.
         lo_datadescr ?= cl_abap_typedescr=>describe_by_name( 'CHAR1' ).
         APPEND VALUE #( name = 'SIGN'
                         type = lo_datadescr ) TO lt_components.

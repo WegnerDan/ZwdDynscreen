@@ -51,7 +51,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mc_base22          TYPE i VALUE 22,
       mc_base22_alphabet TYPE string VALUE '0123456789ABCDEFGHIJKLMNOPQRSTUV',
       BEGIN OF mc_syn,
-        funcpool          TYPE c LENGTH 13 VALUE 'FUNCTION-POOL',
         sq                TYPE c LENGTH 1  VALUE '''', " single quote
         dq                TYPE c LENGTH 1  VALUE '"',  " double quote
         dat_prefix        TYPE c LENGTH 1  VALUE 'D',
@@ -91,6 +90,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
         ucomm             TYPE c LENGTH 12 VALUE 'USER-COMMAND',
         button            TYPE c LENGTH 10 VALUE 'PUSHBUTTON',
         cline             TYPE c LENGTH 71 VALUE '* ---------------------------------------------------------------------',
+        funcpool          TYPE c LENGTH 13 VALUE 'FUNCTION-POOL',
+        callback          TYPE c LENGTH 22 VALUE 'zcl_dynscreen_callback',
         eve_init          TYPE c LENGTH 15 VALUE 'LOAD-OF-PROGRAM',
         eve_selscreen     TYPE c LENGTH 19 VALUE 'AT SELECTION-SCREEN',
         eve_selscreen_out TYPE c LENGTH 26 VALUE 'AT SELECTION-SCREEN OUTPUT',
@@ -344,6 +345,9 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 
   METHOD get_variables.
+* ---------------------------------------------------------------------
+    generate( ).
+
 * ---------------------------------------------------------------------
     rt_variables = mt_variables.
 

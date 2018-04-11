@@ -1,12 +1,13 @@
 CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_parameter FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
+      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error,
       set_type REDEFINITION,
       set_value REDEFINITION,
       raise_event REDEFINITION.
     EVENTS:
-      checkbox_clicked EXPORTING VALUE(ev_value) TYPE abap_bool.
+      checkbox_clicked EXPORTING VALUE(ev_value) TYPE abap_bool OPTIONAL.
   PROTECTED SECTION.
     METHODS:
       generate_open REDEFINITION.
@@ -46,10 +47,13 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen.
-    APPEND `    go_cb->raise_event( exporting iv_id = '` && mv_id &&
+    APPEND `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&
            `' iv_value = ` && mc_syn-var_prefix && mv_id &&
            ` changing cv_ucomm = sy-ucomm ).`  TO ms_source_eve-t_selscreen.
     APPEND `  ENDIF.` TO ms_source_eve-t_selscreen.
+
+    DATA(lsy) = sy.
+    RAISE EVENT checkbox_clicked.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

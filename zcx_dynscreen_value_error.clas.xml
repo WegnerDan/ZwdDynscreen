@@ -3,10 +3,11 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_DYNSCREEN_CALLBACK</CLSNAME>
+    <CLSNAME>ZCX_DYNSCREEN_VALUE_ERROR</CLSNAME>
     <VERSION>1</VERSION>
     <LANGU>E</LANGU>
-    <DESCRIPT>Dynscreen Callback</DESCRIPT>
+    <DESCRIPT>dyn screen value error</DESCRIPT>
+    <CATEGORY>40</CATEGORY>
     <EXPOSURE>2</EXPOSURE>
     <STATE>1</STATE>
     <CLSFINAL>X</CLSFINAL>
@@ -14,6 +15,14 @@
     <FIXPT>X</FIXPT>
     <UNICODE>X</UNICODE>
    </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCX_DYNSCREEN_VALUE_ERROR</CLSNAME>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>CONSTRUCTOR</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
   </asx:values>
  </asx:abap>
 </abapGit>

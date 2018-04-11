@@ -3,7 +3,8 @@ CLASS zcl_dynscreen_button DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_el
     METHODS:
       constructor IMPORTING iv_text   TYPE textpooltx OPTIONAL
                             iv_pos    TYPE i OPTIONAL
-                            iv_length TYPE i OPTIONAL,
+                            iv_length TYPE i OPTIONAL
+                  RAISING   zcx_dynscreen_type_error,
       set_position IMPORTING iv_pos TYPE i,
       get_position RETURNING VALUE(rv_pos) TYPE i,
       set_length IMPORTING iv_length TYPE i,
@@ -32,8 +33,11 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
   METHOD constructor.
 * ---------------------------------------------------------------------
     super->constructor( iv_type         = mc_type_generic
-                        is_generic_type = VALUE #( datatype = mc_type_c length = 1 )
-                        iv_text         = iv_text                                   ).
+                        is_generic_type = VALUE #( datatype = mc_type-c length = 1 )
+                        iv_text         = iv_text                                    ).
+
+* ---------------------------------------------------------------------
+    "zcx_dynscreen_type_error.
     mv_is_variable = abap_false.
     set_position( iv_pos ).
     IF iv_length IS NOT SUPPLIED.
@@ -46,7 +50,7 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD generate_close.
+  METHOD generate_close ##NEEDED.
 * ---------------------------------------------------------------------
 * ---------------------------------------------------------------------
   ENDMETHOD.
