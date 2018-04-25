@@ -26,9 +26,13 @@ go_tab_screen->add( go_pa_table ).
 
 * ---------------------------------------------------------------------
 DO.
-  IF go_tab_screen->display( ) <> zcl_dynscreen_base=>mc_selection_ok.
-    RETURN.
-  ENDIF.
+  TRY.
+      go_tab_screen->display( ).
+    CATCH zcx_dynscreen_canceled.
+      RETURN.
+    CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
+      MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+  ENDTRY.
   gv_tabname = go_pa_table->get_value( ).
   SELECT SINGLE @abap_true
   FROM dd03l
@@ -61,9 +65,13 @@ LOOP AT gt_key_fields ASSIGNING FIELD-SYMBOL(<gs_key_fld>).
 ENDLOOP.
 
 * ---------------------------------------------------------------------
-IF go_sel_screen->display( ) <> zcl_dynscreen_base=>mc_selection_ok.
-  RETURN.
-ENDIF.
+TRY.
+    go_sel_screen->display( ).
+  CATCH zcx_dynscreen_canceled.
+    RETURN.
+  CATCH zcx_dynscreen_syntax_error INTO lx_syntax_error.
+    MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+ENDTRY.
 
 * ---------------------------------------------------------------------
 APPEND INITIAL LINE TO gt_or_selfields ASSIGNING FIELD-SYMBOL(<gs_or_selfields>).

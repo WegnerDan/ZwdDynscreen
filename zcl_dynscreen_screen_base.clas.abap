@@ -7,7 +7,9 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       END OF mty_s_position.
     METHODS:
       constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
-      display RETURNING VALUE(rv_subrc) TYPE sy-subrc,
+      display RETURNING VALUE(rv_subrc) TYPE sy-subrc
+              RAISING   zcx_dynscreen_canceled
+                        zcx_dynscreen_syntax_error,
       set_pretty_print IMPORTING iv_pretty_print TYPE abap_bool DEFAULT abap_true,
       get_pretty_print RETURNING VALUE(rv_pretty_print) TYPE abap_bool,
       serialize FINAL RETURNING VALUE(rv_xml) TYPE string.
@@ -155,19 +157,24 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = lv_gentarget ).
     IF lo_syncheck->subrc <> 0.
-      rv_subrc = mc_selection_canceled.
-      MESSAGE `syntax error: ` && lo_syncheck->message TYPE 'I' DISPLAY LIKE 'E'.
-      RETURN.
+      DATA(lv_syntax_error) = CONV char200( lo_syncheck->message ).
+      RAISE EXCEPTION TYPE zcx_dynscreen_syntax_error
+        EXPORTING
+          textid    = VALUE #( msgid = '00'
+                               msgno = 1
+                               attr1 = lv_syntax_error+000(50)
+                               attr2 = lv_syntax_error+050(50)
+                               attr3 = lv_syntax_error+100(50)
+                               attr4 = lv_syntax_error+150(50) )
+          syn_check = lo_syncheck.
     ENDIF.
 
 * ---------------------------------------------------------------------
     PERFORM (lv_formname) IN PROGRAM (lv_gentarget) USING lo_callback.
 
 * ---------------------------------------------------------------------
-    IF lo_callback->get_subrc( ) = 0.
-      rv_subrc = mc_selection_ok.
-    ELSE.
-      rv_subrc = mc_selection_canceled.
+    IF lo_callback->get_subrc( ) <> 0.
+      RAISE EXCEPTION TYPE zcx_dynscreen_canceled.
     ENDIF.
 
 * ---------------------------------------------------------------------
