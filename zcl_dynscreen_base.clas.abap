@@ -31,8 +31,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_id RETURNING VALUE(rv_id) TYPE i,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
-    TYPE-POOLS:
-      abap.
     TYPES:
       BEGIN OF mty_s_screen_element,
         id  TYPE mty_id,
@@ -40,7 +38,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
         var TYPE abap_bool,
       END OF mty_s_screen_element,
       mty_t_screen_elements TYPE SORTED TABLE OF mty_s_screen_element WITH UNIQUE KEY id,
-      "mty_source             TYPE c LENGTH 254,
       mty_source            TYPE string,
       mty_t_source          TYPE STANDARD TABLE OF mty_source WITH DEFAULT KEY,
       BEGIN OF mty_s_generated,
@@ -154,6 +151,50 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
                       ref = io_screen_element
                       var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
     ENDIF.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD base10_to_22.
+* ---------------------------------------------------------------------
+    DATA:
+      lv_decimal TYPE i,
+      lv_index   TYPE i.
+
+* ---------------------------------------------------------------------
+    lv_decimal = iv_decimal.
+    WHILE lv_decimal <> 0.
+      lv_index   = lv_decimal MOD mc_base22.
+      rv_base22  = mc_base22_alphabet+lv_index(1) && rv_base22.
+      lv_decimal = lv_decimal DIV mc_base22.
+    ENDWHILE.
+    IF rv_base22 IS INITIAL.
+      rv_base22 = '0'.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD base22_to_10.
+* ---------------------------------------------------------------------
+    DATA:
+      lv_base22 TYPE string,
+      lv_length TYPE i,
+      lv_last   TYPE i.
+
+* ---------------------------------------------------------------------
+    lv_base22 = iv_base22.
+    CONDENSE lv_base22.
+    TRANSLATE lv_base22 TO UPPER CASE.
+    lv_length = strlen( lv_base22 ).
+    lv_last = lv_length - 1.
+    WHILE lv_last >= 0.
+      rv_decimal = rv_decimal + find( val = mc_base22_alphabet sub = lv_base22+lv_last(1) )
+                   * ( mc_base22 ** ( lv_length - lv_last - 1 ) ).
+      lv_last = lv_last - 1.
+    ENDWHILE.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -442,48 +483,4 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
-
-  METHOD base10_to_22.
-* ---------------------------------------------------------------------
-    DATA:
-      lv_decimal TYPE i,
-      lv_index   TYPE i.
-
-* ---------------------------------------------------------------------
-    lv_decimal = iv_decimal.
-    WHILE lv_decimal <> 0.
-      lv_index   = lv_decimal MOD mc_base22.
-      rv_base22  = mc_base22_alphabet+lv_index(1) && rv_base22.
-      lv_decimal = lv_decimal DIV mc_base22.
-    ENDWHILE.
-    IF rv_base22 IS INITIAL.
-      rv_base22 = '0'.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-  METHOD base22_to_10.
-* ---------------------------------------------------------------------
-    DATA:
-      lv_base22 TYPE string,
-      lv_length TYPE i,
-      lv_last   TYPE i.
-
-* ---------------------------------------------------------------------
-    lv_base22 = iv_base22.
-    CONDENSE lv_base22.
-    TRANSLATE lv_base22 TO UPPER CASE.
-    lv_length = strlen( lv_base22 ).
-    lv_last = lv_length - 1.
-    WHILE lv_last >= 0.
-      rv_decimal = rv_decimal + find( val = mc_base22_alphabet sub = lv_base22+lv_last(1) )
-                   * ( mc_base22 ** ( lv_length - lv_last - 1 ) ).
-      lv_last = lv_last - 1.
-    ENDWHILE.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
 ENDCLASS.

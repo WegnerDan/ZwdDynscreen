@@ -66,7 +66,7 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
 * ---------------------------------------------------------------------
     " add event handling code
     APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen.
-    APPEND `    go_cb->raise_event( exporting iv_id = '` && mv_id &&
+    APPEND `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&
            `' changing cv_ucomm = sy-ucomm ).` TO ms_source_eve-t_selscreen.
     APPEND '  ENDIF.' TO ms_source_eve-t_selscreen.
 
