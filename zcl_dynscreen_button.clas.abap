@@ -1,5 +1,7 @@
 CLASS zcl_dynscreen_button DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC.
   PUBLIC SECTION.
+    INTERFACES:
+      zif_dynscreen_uc_event.
     METHODS:
       constructor IMPORTING iv_text   TYPE textpooltx OPTIONAL
                             iv_pos    TYPE i OPTIONAL
@@ -8,8 +10,7 @@ CLASS zcl_dynscreen_button DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_el
       set_position IMPORTING iv_pos TYPE i,
       get_position RETURNING VALUE(rv_pos) TYPE i,
       set_length IMPORTING iv_length TYPE i,
-      get_length RETURNING VALUE(rv_length) TYPE i,
-      raise_event REDEFINITION.
+      get_length RETURNING VALUE(rv_length) TYPE i.
     EVENTS:
       button_click.
   PROTECTED SECTION.
@@ -27,7 +28,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_button IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_BUTTON IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -37,7 +38,6 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
                         iv_text         = iv_text                                    ).
 
 * ---------------------------------------------------------------------
-    "zcx_dynscreen_type_error.
     mv_is_variable = abap_false.
     set_position( iv_pos ).
     IF iv_length IS NOT SUPPLIED.
@@ -95,14 +95,6 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD raise_event.
-* ---------------------------------------------------------------------
-    RAISE EVENT button_click.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
   METHOD set_length.
 * ---------------------------------------------------------------------
     IF iv_length < 1.
@@ -126,6 +118,14 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
     ELSE.
       mv_position = iv_pos.
     ENDIF.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD zif_dynscreen_uc_event~raise.
+* ---------------------------------------------------------------------
+    RAISE EVENT button_click.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

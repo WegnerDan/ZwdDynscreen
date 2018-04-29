@@ -5,6 +5,8 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
         x TYPE n LENGTH 3,
         y TYPE n LENGTH 3,
       END OF mty_s_position.
+    DATA:
+      mv_gentarget TYPE zcl_dynscreen_screen_base=>mty_srcname READ-ONLY.
     METHODS:
       constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
       display RETURNING VALUE(rv_subrc) TYPE sy-subrc
@@ -47,7 +49,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -113,10 +115,10 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     lo_callback->set_caller( me ).
 
 * ---------------------------------------------------------------------
-    DATA(lv_gentarget) = get_generation_target( ).
+    mv_gentarget = get_generation_target( ).
 
 * ---------------------------------------------------------------------
-    APPEND mc_syn-funcpool && ` ` && lv_gentarget && '.' TO lt_source.
+    APPEND mc_syn-funcpool && ` ` && mv_gentarget && '.' TO lt_source.
     APPEND LINES OF get_generation_notice( ) TO lt_source.
     APPEND mc_syn-data && ` go_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source.
     APPEND LINES OF mt_source TO lt_source.
@@ -146,16 +148,16 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    INSERT REPORT lv_gentarget FROM lt_source.
+    INSERT REPORT mv_gentarget FROM lt_source.
 
 * ---------------------------------------------------------------------
-    READ TEXTPOOL lv_gentarget INTO lt_old_texts.
+    READ TEXTPOOL mv_gentarget INTO lt_old_texts.
     IF lt_old_texts <> mt_textpool.
-      INSERT TEXTPOOL lv_gentarget FROM mt_textpool.
+      INSERT TEXTPOOL mv_gentarget FROM mt_textpool.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = lv_gentarget ).
+    DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = mv_gentarget ).
     IF lo_syncheck->subrc <> 0.
       DATA(lv_syntax_error) = CONV char200( lo_syncheck->message ).
       RAISE EXCEPTION TYPE zcx_dynscreen_syntax_error
@@ -170,7 +172,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    PERFORM (lv_formname) IN PROGRAM (lv_gentarget) USING lo_callback.
+    PERFORM (lv_formname) IN PROGRAM (mv_gentarget) USING lo_callback.
 
 * ---------------------------------------------------------------------
     IF lo_callback->get_subrc( ) <> 0.
@@ -230,12 +232,8 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
   METHOD get_generation_target.
 * ---------------------------------------------------------------------
-    CONSTANTS:
-      lc_repl TYPE c LENGTH 3 VALUE '%%%'.
-
-* ---------------------------------------------------------------------
     rv_srcname = replace( val  = mc_gentarget_incname
-                          sub  = lc_repl
+                          sub  = '%%%'
                           with = mv_source_id         ).
 
 * ---------------------------------------------------------------------

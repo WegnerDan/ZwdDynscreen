@@ -13,7 +13,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       END OF mty_s_variable,
       mty_t_variables TYPE SORTED TABLE OF mty_s_variable WITH UNIQUE KEY id.
     CONSTANTS:
-      mc_gentarget_incname  TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
+      mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
       BEGIN OF mc_com,
         exit TYPE sy-ucomm VALUE '_%_%_EXIT_%_%_',
       END OF mc_com.
@@ -270,6 +270,10 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
       APPEND mc_syn-eve_init && '.' TO rt_events_source.
       APPEND LINES OF ms_source_eve-t_init TO rt_events_source.
     ENDIF.
+
+* ---------------------------------------------------------------------
+    APPEND LINES OF ms_source_eve-t_selscreen_ohr TO rt_events_source.
+    APPEND LINES OF ms_source_eve-t_selscreen_ovr TO rt_events_source.
 
 * ---------------------------------------------------------------------
     APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.

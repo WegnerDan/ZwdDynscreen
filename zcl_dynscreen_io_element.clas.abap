@@ -1,4 +1,5 @@
-CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_base.
+CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC
+GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
   PUBLIC SECTION.
     TYPES:
       BEGIN OF mty_s_generic_type_info,
@@ -44,7 +45,6 @@ CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_b
                             PREFERRED PARAMETER iv_value
                 RAISING   zcx_dynscreen_value_error,
       get_value_ref RETURNING VALUE(rd_value) TYPE REF TO data,
-      raise_event ABSTRACT,
       set_ucomm IMPORTING iv_ucomm TYPE sy-ucomm,
       get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm,
       set_visible IMPORTING iv_visible TYPE abap_bool DEFAULT abap_true,
@@ -77,7 +77,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_io_element IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
 
 
   METHOD constructor.

@@ -5,8 +5,7 @@ CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen
                             iv_text TYPE textpooltx OPTIONAL
                   RAISING   zcx_dynscreen_type_error,
       get_value REDEFINITION,
-      set_type REDEFINITION,
-      raise_event REDEFINITION .
+      set_type REDEFINITION.
   PROTECTED SECTION.
     DATA:
       mo_tabledescr TYPE REF TO cl_abap_tabledescr .
@@ -19,7 +18,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_SELECTOPTION IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -115,10 +114,6 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
     rv_var_name = super->get_var_name( ) && '[]'.
 
 * ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD raise_event.
   ENDMETHOD.
 
 
