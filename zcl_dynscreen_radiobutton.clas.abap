@@ -11,14 +11,15 @@ CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       mv_radiobutton_grp TYPE mty_radiobutton_grp .
     METHODS:
       constructor IMPORTING !iv_radiobutton_grp TYPE mty_radiobutton_grp
-                            !iv_text            TYPE textpooltx OPTIONAL,
+                            !iv_text            TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error,
       generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_RADIOBUTTON IMPLEMENTATION.
+CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
 
   METHOD constructor.

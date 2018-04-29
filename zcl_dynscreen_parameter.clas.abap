@@ -64,27 +64,27 @@ CLASS zcl_dynscreen_parameter IMPLEMENTATION.
 * ---------------------------------------------------------------------
     lv_nr_of_handlers = 0.
     SYSTEM-CALL EVENTS
-    GET NUM_HANDLERS FOR zif_dynscreen_request_event~help_request OF INST me INTO lv_nr_of_handlers.
+    GET NUM_HANDLERS FOR zif_dynscreen_request_event~help_request OF INST me INTO lv_nr_of_handlers. "#EC CI_SYSTEMCALL
     IF lv_nr_of_handlers > 0.
       APPEND
       mc_syn-eve_selscreen_ohr && ` ` && mc_syn-var_prefix && mv_id && '.'
       TO ms_source_eve-t_selscreen_ohr.
       APPEND
-      `go_cb->raise_request_event( iv_id = '` && mv_id &&
-      `' iv_kind = ` && zif_dynscreen_request_event~kind_help_request && ` ).`
+      `go_cb->raise_request_event( iv_id = '` && mv_id &&                      ##NO_TEXT
+      `' iv_kind = ` && zif_dynscreen_request_event~kind_help_request && ` ).` ##NO_TEXT
       TO ms_source_eve-t_selscreen_ohr.
     ENDIF.
     lv_nr_of_handlers = 0.
     SYSTEM-CALL EVENTS
-    GET NUM_HANDLERS FOR zif_dynscreen_request_event~value_request OF INST me INTO lv_nr_of_handlers.
+    GET NUM_HANDLERS FOR zif_dynscreen_request_event~value_request OF INST me INTO lv_nr_of_handlers. "#EC CI_SYSTEMCALL
     IF lv_nr_of_handlers > 0.
       APPEND
       mc_syn-eve_selscreen_ovr && ` ` && mc_syn-var_prefix && mv_id && '.'
       TO ms_source_eve-t_selscreen_ovr.
       APPEND
-      `go_cb->raise_request_event( EXPORTING iv_id = '` && mv_id &&
-      `' iv_kind = ` && zif_dynscreen_request_event~kind_value_request &&
-      ` CHANGING cv_value = ` && mc_syn-var_prefix && mv_id && ` ).`
+      `go_cb->raise_request_event( EXPORTING iv_id = '` && mv_id &&         ##NO_TEXT
+      `' iv_kind = ` && zif_dynscreen_request_event~kind_value_request &&   ##NO_TEXT
+      ` CHANGING cv_value = ` && mc_syn-var_prefix && mv_id && ` ).`        ##NO_TEXT
       TO ms_source_eve-t_selscreen_ovr.
     ENDIF.
 

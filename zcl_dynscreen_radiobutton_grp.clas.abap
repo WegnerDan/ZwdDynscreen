@@ -1,5 +1,7 @@
 CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_radiobutton.
   PUBLIC SECTION.
+    INTERFACES:
+      zif_dynscreen_uc_event.
     TYPES:
       BEGIN OF mty_s_radiobutton,
         id   TYPE mty_id,
@@ -7,9 +9,9 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
       END OF mty_s_radiobutton,
       mty_t_radiobutton TYPE SORTED TABLE OF mty_s_radiobutton WITH UNIQUE KEY id.
     METHODS:
-      constructor IMPORTING !it_radiobuttons TYPE mty_t_radiobutton OPTIONAL,
-      add REDEFINITION,
-      raise_event REDEFINITION.
+      constructor IMPORTING it_radiobuttons TYPE mty_t_radiobutton OPTIONAL
+                  RAISING   zcx_dynscreen_type_error,
+      add REDEFINITION.
   PROTECTED SECTION.
     TYPES:
       BEGIN OF mty_s_radiobutton_ref.
@@ -29,7 +31,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
 
 
   METHOD add.
@@ -68,7 +70,7 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
   METHOD generate_close.
 * ---------------------------------------------------------------------
     APPEND
-    'CASE abap_true.'
+    'CASE abap_true.' ##NO_TEXT
     TO mt_source_ac.
 
 * ---------------------------------------------------------------------
@@ -103,10 +105,9 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD raise_event.
+  METHOD zif_dynscreen_uc_event~raise.
 * ---------------------------------------------------------------------
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
 ENDCLASS.

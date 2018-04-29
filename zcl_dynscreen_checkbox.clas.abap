@@ -1,11 +1,12 @@
 CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_parameter FINAL CREATE PUBLIC.
   PUBLIC SECTION.
+    INTERFACES:
+      zif_dynscreen_uc_event.
     METHODS:
       constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
                   RAISING   zcx_dynscreen_type_error,
       set_type REDEFINITION,
-      set_value REDEFINITION,
-      raise_event REDEFINITION.
+      set_value REDEFINITION.
     EVENTS:
       checkbox_clicked EXPORTING VALUE(ev_value) TYPE abap_bool OPTIONAL.
   PROTECTED SECTION.
@@ -16,7 +17,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_CHECKBOX IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -46,11 +47,11 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
     TO mt_source.
 
 * ---------------------------------------------------------------------
-    APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen.
-    APPEND `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&
-           `' iv_value = ` && mc_syn-var_prefix && mv_id &&
-           ` changing cv_ucomm = sy-ucomm ).`  TO ms_source_eve-t_selscreen.
-    APPEND `  ENDIF.` TO ms_source_eve-t_selscreen.
+    APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen ##NO_TEXT.
+    APPEND `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&     ##NO_TEXT
+           `' iv_value = ` && mc_syn-var_prefix && mv_id &&                 ##NO_TEXT
+           ` changing cv_ucomm = sy-ucomm ).`  TO ms_source_eve-t_selscreen ##NO_TEXT .
+    APPEND `  ENDIF.` TO ms_source_eve-t_selscreen ##NO_TEXT.
 
     DATA(lsy) = sy.
     RAISE EVENT checkbox_clicked.
@@ -98,7 +99,8 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
-  METHOD raise_event.
+
+  METHOD zif_dynscreen_uc_event~raise.
 * ---------------------------------------------------------------------
     FIELD-SYMBOLS:
       <lv_value> TYPE abap_bool.
@@ -109,6 +111,4 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
-
 ENDCLASS.

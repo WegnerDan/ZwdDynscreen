@@ -105,7 +105,6 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
             WHEN lo_req_eve->kind_value_request.
               DATA(lv_var_name) = lo_io->get_var_name( ).
               DATA(lo_parent) = CAST zcl_dynscreen_screen_base( lo_io->get_parent( ) ).
-
               DATA lt_dynpfields TYPE dynpread_t.
               lt_dynpfields = VALUE #( ( fieldname = lv_var_name ) ).
               CALL FUNCTION 'DYNP_VALUES_READ'

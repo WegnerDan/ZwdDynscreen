@@ -1,5 +1,7 @@
 CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC.
   PUBLIC SECTION.
+    INTERFACES:
+      zif_dynscreen_request_event.
     METHODS:
       constructor IMPORTING iv_type TYPE typename
                             iv_text TYPE textpooltx OPTIONAL
@@ -18,7 +20,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_SELECTOPTION IMPLEMENTATION.
+CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -145,4 +147,21 @@ CLASS ZCL_DYNSCREEN_SELECTOPTION IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD zif_dynscreen_request_event~raise_help_request.
+* ---------------------------------------------------------------------
+    RAISE EVENT zif_dynscreen_request_event~help_request.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD zif_dynscreen_request_event~raise_value_request.
+* ---------------------------------------------------------------------
+    RAISE EVENT zif_dynscreen_request_event~value_request.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

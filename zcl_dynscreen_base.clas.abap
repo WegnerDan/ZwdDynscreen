@@ -138,7 +138,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
+CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 
   METHOD add.
@@ -279,11 +279,11 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
     APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
     LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
       APPEND
-      `go_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).`
+      `go_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).` ##NO_TEXT
       TO rt_events_source.
     ENDLOOP.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
-    APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source.
+    APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
     APPEND '  LEAVE TO SCREEN 0.' TO rt_events_source.
     APPEND 'ENDIF.' TO rt_events_source.
 
@@ -291,10 +291,12 @@ CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
     APPEND mc_syn-eve_selscreen_out && '.' TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_out TO rt_events_source.
     LOOP AT mt_variables ASSIGNING <ls_var>.
-      APPEND `go_cb->get_value( exporting iv_id = '` && <ls_var>-id &&
-              `' importing ev_value = ` && <ls_var>-name && ` ).`       TO rt_events_source.
+      APPEND
+      `go_cb->get_value( exporting iv_id = '` && <ls_var>-id &&  ##NO_TEXT
+      `' importing ev_value = ` && <ls_var>-name && ` ).`        ##NO_TEXT
+      TO rt_events_source.
     ENDLOOP.
-    APPEND 'go_cb->process_pbo( ).' TO rt_events_source.
+    APPEND 'go_cb->process_pbo( ).' TO rt_events_source  ##NO_TEXT.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

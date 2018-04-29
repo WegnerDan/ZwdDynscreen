@@ -62,7 +62,7 @@ CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     IF get_text( ) IS INITIAL.
-      set_text( 'Generated Screen' && ` ` && mv_id  ).
+      set_text( 'Generated Screen' && ` ` && mv_id  ) ##NO_TEXT.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -129,8 +129,8 @@ CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
     APPEND '' TO lt_source.
     APPEND mc_syn-cline TO lt_source.
     APPEND `FORM ` && lv_formname && ` ` &&
-           `USING io_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source.
-    APPEND 'go_cb = io_cb.' TO lt_source.
+           `USING io_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source ##NO_TEXT.
+    APPEND 'go_cb = io_cb.' TO lt_source ##NO_TEXT.
     IF mv_is_window = abap_true.
       lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
       IF ms_ending_position IS NOT INITIAL.
@@ -139,7 +139,7 @@ CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
     ENDIF.
     APPEND `CALL ` && mc_syn-selscreen && ` `  && mv_id && lv_position && `.` TO lt_source.
     APPEND LINES OF mt_source_ac TO lt_source.
-    APPEND 'io_cb->set_subrc( sy-subrc ).' TO lt_source.
+    APPEND 'io_cb->set_subrc( sy-subrc ).' TO lt_source ##NO_TEXT.
     APPEND 'ENDFORM.' TO lt_source.
 
 * ---------------------------------------------------------------------
