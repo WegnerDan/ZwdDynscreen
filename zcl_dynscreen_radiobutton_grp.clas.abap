@@ -1,4 +1,4 @@
-CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_radiobutton.
+CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_radiobutton.
   PUBLIC SECTION.
     INTERFACES:
       zif_dynscreen_uc_event.
@@ -32,7 +32,7 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-    IF '\CLASS=ZWD_DYNSCREEN_RADIOBUTTON' = cl_abap_classdescr=>get_class_name( io_screen_element ).
+    IF '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON' = cl_abap_classdescr=>get_class_name( io_screen_element ).
       super->add( io_screen_element ).
     ENDIF.
 

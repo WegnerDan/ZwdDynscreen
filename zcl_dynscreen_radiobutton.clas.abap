@@ -1,18 +1,16 @@
-CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_parameter FINAL CREATE PROTECTED GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
+CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_radiobutton_grp FINAL CREATE PUBLIC
+GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
   PUBLIC SECTION.
     METHODS:
+      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error,
       set_generic_type REDEFINITION,
       set_type REDEFINITION,
       set_value REDEFINITION.
   PROTECTED SECTION.
-    TYPES:
-      mty_radiobutton_grp TYPE c LENGTH 4 .
     DATA:
-      mv_radiobutton_grp TYPE mty_radiobutton_grp .
+      mv_from_constructor TYPE abap_bool.
     METHODS:
-      constructor IMPORTING !iv_radiobutton_grp TYPE mty_radiobutton_grp
-                            !iv_text            TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
       generate_open REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
@@ -24,11 +22,11 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type = 'ABAP_BOOL'
-                        iv_text = iv_text     ).
-
-* ---------------------------------------------------------------------
-    mv_radiobutton_grp = iv_radiobutton_grp.
+    super->constructor( ).
+    mv_from_constructor = abap_true.
+    set_type( 'ABAP_BOOL' ).
+    set_text( iv_text ).
+    mv_from_constructor = abap_false.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -46,7 +44,8 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     APPEND
-    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` ` && mc_syn-radiob && ` ` && mv_radiobutton_grp && lv_default_value && '.'
+    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` `
+    && mc_syn-radiob && ` ` && get_parent( )->get_id( ) && lv_default_value && '.'
     TO mt_source.
 
 * ---------------------------------------------------------------------
@@ -55,8 +54,12 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD set_generic_type.
 * ---------------------------------------------------------------------
-    " not supported for radiobuttons
-    RETURN.
+    IF mv_from_constructor = abap_true.
+      super->set_generic_type( is_type_info ).
+    ELSE.
+      " not supported for radiobuttons
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -64,8 +67,12 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD set_type.
 * ---------------------------------------------------------------------
-    " not supported for radiobuttons
-    RETURN.
+    IF mv_from_constructor = abap_true.
+      super->set_type( iv_type ).
+    ELSE.
+      " not supported for radiobuttons
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -79,16 +86,16 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
     AND iv_value_str IS NOT SUPPLIED.
       IF  iv_value <> abap_true
       AND iv_value <> abap_false.
-        RETURN.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
       ENDIF.
     ELSEIF iv_value     IS NOT SUPPLIED
     AND    iv_value_str IS SUPPLIED.
       IF iv_value_str <> abap_true
       OR iv_value_str <> abap_false.
-        RETURN.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
       ENDIF.
     ELSE.
-      RETURN.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
     ENDIF.
 
 * ---------------------------------------------------------------------

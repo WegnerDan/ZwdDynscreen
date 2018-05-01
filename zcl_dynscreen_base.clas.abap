@@ -148,6 +148,9 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
                       var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
+    ELSE.
+      " why 199? i can't remember -> TODO: find out what I was thinking
+      BREAK-POINT.
     ENDIF.
 
 * ---------------------------------------------------------------------
