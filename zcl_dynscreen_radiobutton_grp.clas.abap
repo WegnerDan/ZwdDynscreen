@@ -8,21 +8,17 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
       constructor IMPORTING it_radiobuttons TYPE mty_t_radiobutton OPTIONAL
                   RAISING   zcx_dynscreen_type_error,
       add REDEFINITION.
+    EVENTS:
+      radiobutton_click.
   PROTECTED SECTION.
-*    TYPES:
-*      BEGIN OF mty_s_radiobutton_ref.
-*            INCLUDE TYPE mty_s_radiobutton.
-*    TYPES:
-*      refid TYPE mty_id,
-*      ref   TYPE REF TO zcl_dynscreen_radiobutton,
-*      END OF mty_s_radiobutton_ref,
-*      mty_t_radiobutton_ref TYPE SORTED TABLE OF mty_s_radiobutton_ref WITH UNIQUE KEY id.
-    DATA:
-      mt_radiobuttons TYPE mty_t_radiobutton.
     METHODS:
       generate_close REDEFINITION,
-      generate_open REDEFINITION.
+      generate_open REDEFINITION,
+      get_first_radiobutton FINAL RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton
+                                  RAISING   cx_sy_itab_line_not_found.
   PRIVATE SECTION.
+    DATA:
+      mt_radiobuttons TYPE mty_t_radiobutton.
 ENDCLASS.
 
 
@@ -90,12 +86,25 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
     TO mt_source.
 
 * ---------------------------------------------------------------------
+    append_uc_event_src( ).
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
 
   METHOD zif_dynscreen_uc_event~raise.
 * ---------------------------------------------------------------------
+    RAISE EVENT radiobutton_click.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD get_first_radiobutton.
+* ---------------------------------------------------------------------
+    ro_radiobutton = mt_radiobuttons[ 1 ].
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

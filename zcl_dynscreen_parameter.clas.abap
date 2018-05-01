@@ -63,8 +63,8 @@ CLASS zcl_dynscreen_parameter IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     lv_nr_of_handlers = 0.
-    SYSTEM-CALL EVENTS
-    GET NUM_HANDLERS FOR zif_dynscreen_request_event~help_request OF INST me INTO lv_nr_of_handlers. "#EC CI_SYSTEMCALL
+    SYSTEM-CALL EVENTS GET NUM_HANDLERS FOR zif_dynscreen_request_event~help_request
+    OF INST me INTO lv_nr_of_handlers.               "#EC CI_SYSTEMCALL
     IF lv_nr_of_handlers > 0.
       APPEND
       mc_syn-eve_selscreen_ohr && ` ` && mc_syn-var_prefix && mv_id && '.'
@@ -75,8 +75,8 @@ CLASS zcl_dynscreen_parameter IMPLEMENTATION.
       TO ms_source_eve-t_selscreen_ohr.
     ENDIF.
     lv_nr_of_handlers = 0.
-    SYSTEM-CALL EVENTS
-    GET NUM_HANDLERS FOR zif_dynscreen_request_event~value_request OF INST me INTO lv_nr_of_handlers. "#EC CI_SYSTEMCALL
+    SYSTEM-CALL EVENTS GET NUM_HANDLERS FOR zif_dynscreen_request_event~value_request
+    OF INST me INTO lv_nr_of_handlers.               "#EC CI_SYSTEMCALL
     IF lv_nr_of_handlers > 0.
       APPEND
       mc_syn-eve_selscreen_ovr && ` ` && mc_syn-var_prefix && mv_id && '.'

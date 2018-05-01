@@ -25,8 +25,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING iv_text TYPE textpooltx,
       add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base,
-      set_id IMPORTING iv_id TYPE i,
-      get_id RETURNING VALUE(rv_id) TYPE i,
+      get_id RETURNING VALUE(rv_id) TYPE mty_id,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
     TYPES:
@@ -122,6 +121,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       set_last_id IMPORTING !iv_last_id TYPE i,
       get_last_id RETURNING VALUE(rv_id) TYPE i.
     METHODS:
+      set_id IMPORTING iv_id TYPE i,
       generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
       is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
@@ -490,4 +490,6 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
 ENDCLASS.

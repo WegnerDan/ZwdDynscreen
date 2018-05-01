@@ -43,9 +43,19 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
+    DATA(lo_rb_grp) = CAST zcl_dynscreen_radiobutton_grp( get_parent( ) ).
+
+* ---------------------------------------------------------------------
+    IF lo_rb_grp->get_first_radiobutton( )->get_id( ) = mv_id.
+      DATA(lv_usercommand) = mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && lo_rb_grp->get_id( ).
+    ELSE.
+      lv_usercommand = ''.
+    ENDIF.
+
+* ---------------------------------------------------------------------
     APPEND
-    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` `
-    && mc_syn-radiob && ` ` && get_parent( )->get_id( ) && lv_default_value && '.'
+    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` ` &&
+    mc_syn-radiob && ` ` && lo_rb_grp->get_id( ) && lv_default_value && ` ` && lv_usercommand &&'.'
     TO mt_source.
 
 * ---------------------------------------------------------------------

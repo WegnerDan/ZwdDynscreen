@@ -71,13 +71,14 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
     METHODS:
       get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
       get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
-      get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx.
+      get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx,
+      append_uc_event_src.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
+CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -455,8 +456,9 @@ CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
             RAISE EXCEPTION TYPE zcx_dynscreen_value_error EXPORTING previous = lx_tr.
         ENDTRY.
       WHEN mc_conv_write.
-
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
       WHEN OTHERS.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
     ENDCASE.
 
 * ---------------------------------------------------------------------
@@ -469,4 +471,27 @@ CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD append_uc_event_src.
+* ---------------------------------------------------------------------
+    APPEND
+    `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. `    ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+    IF mv_is_variable = abap_true.
+      DATA(lv_value) = `iv_value = ` && get_var_name( ) ##NO_TEXT.
+    ELSE.
+      lv_value = ''.
+    ENDIF.
+    APPEND
+    `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&  ##NO_TEXT
+    `' ` && lv_value && ` changing cv_ucomm = sy-ucomm ).`        ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+    APPEND
+    `  ENDIF.`                                                    ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

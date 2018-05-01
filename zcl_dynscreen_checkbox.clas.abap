@@ -8,7 +8,7 @@ CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_par
       set_type REDEFINITION,
       set_value REDEFINITION.
     EVENTS:
-      checkbox_clicked EXPORTING VALUE(ev_value) TYPE abap_bool OPTIONAL.
+      checkbox_click EXPORTING VALUE(ev_value) TYPE abap_bool OPTIONAL.
   PROTECTED SECTION.
     METHODS:
       generate_open REDEFINITION.
@@ -17,7 +17,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_CHECKBOX IMPLEMENTATION.
+CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -41,20 +41,13 @@ CLASS ZCL_DYNSCREEN_CHECKBOX IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     APPEND
-    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` ` && mc_syn-chkbox &&
-    lv_default_value && ` ` && mc_syn-ucomm && ` ` && mc_syn-ucm_prefix && mv_id && ` ` &&
-    mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.'
+    mc_syn-param && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_type && ` ` &&
+    mc_syn-chkbox && lv_default_value && ` ` && mc_syn-ucomm && ` ` &&
+    mc_syn-ucm_prefix && mv_id && ` ` && mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.'
     TO mt_source.
 
 * ---------------------------------------------------------------------
-    APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen ##NO_TEXT.
-    APPEND `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&     ##NO_TEXT
-           `' iv_value = ` && mc_syn-var_prefix && mv_id &&                 ##NO_TEXT
-           ` changing cv_ucomm = sy-ucomm ).`  TO ms_source_eve-t_selscreen ##NO_TEXT .
-    APPEND `  ENDIF.` TO ms_source_eve-t_selscreen ##NO_TEXT.
-
-    DATA(lsy) = sy.
-    RAISE EVENT checkbox_clicked.
+    append_uc_event_src( ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -63,7 +56,7 @@ CLASS ZCL_DYNSCREEN_CHECKBOX IMPLEMENTATION.
   METHOD set_type.
 * ---------------------------------------------------------------------
     " not supported for checkboxes
-    RETURN.
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -78,16 +71,16 @@ CLASS ZCL_DYNSCREEN_CHECKBOX IMPLEMENTATION.
       AND iv_value_str IS NOT SUPPLIED.
         IF  iv_value <> abap_true
         AND iv_value <> abap_false.
-          RETURN.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
         ENDIF.
       ELSEIF iv_value     IS NOT SUPPLIED
       AND    iv_value_str IS SUPPLIED.
         IF iv_value_str <> abap_true
         OR iv_value_str <> abap_false.
-          RETURN.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
         ENDIF.
       ELSE.
-        RETURN.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
       ENDIF.
     ENDIF.
 
@@ -107,7 +100,7 @@ CLASS ZCL_DYNSCREEN_CHECKBOX IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     ASSIGN md_value->* TO <lv_value>.
-    RAISE EVENT checkbox_clicked EXPORTING ev_value = <lv_value>.
+    RAISE EVENT checkbox_click EXPORTING ev_value = <lv_value>.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
