@@ -1,18 +1,24 @@
 REPORT zwd_dynscreen_test1.
 
-CLASS lcl_appl DEFINITION CREATE PUBLIC.
+CLASS lcl DEFINITION CREATE PUBLIC.
   PUBLIC SECTION.
-    METHODS process.
+    METHODS:
+      run.
   PRIVATE SECTION.
-    METHODS handle_button_click FOR EVENT button_click OF zcl_dynscreen_button IMPORTING sender.
+    METHODS:
+      handle_button_click  FOR EVENT button_click OF zcl_dynscreen_button
+        IMPORTING sender,
+      handle_program_value_request FOR EVENT zif_dynscreen_request_event~value_request OF zcl_dynscreen_parameter
+        IMPORTING sender.
+
 ENDCLASS.
 
-NEW lcl_appl( )->process( ).
+NEW lcl( )->run( ).
 
 
-CLASS lcl_appl IMPLEMENTATION.
+CLASS lcl IMPLEMENTATION.
 
-  METHOD process.
+  METHOD run.
 * ---------------------------------------------------------------------
     DATA:
       lo_screen     TYPE REF TO zcl_dynscreen_screen,
@@ -23,7 +29,8 @@ CLASS lcl_appl IMPLEMENTATION.
       lo_pa_ebeln   TYPE REF TO zcl_dynscreen_parameter,
       lo_rb_grp1    TYPE REF TO zcl_dynscreen_radiobutton_grp,
       lo_rb_option1 TYPE REF TO zcl_dynscreen_radiobutton,
-      lo_rb_option2 TYPE REF TO zcl_dynscreen_radiobutton.
+      lo_rb_option2 TYPE REF TO zcl_dynscreen_radiobutton,
+      lo_pa_program TYPE REF TO zcl_dynscreen_parameter.
 
 * ---------------------------------------------------------------------
     lo_screen = NEW #( ).
@@ -57,6 +64,9 @@ CLASS lcl_appl IMPLEMENTATION.
         lo_screen->add( lo_so_vbeln ).
         lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
         lo_screen->add( lo_pa_ebeln ).
+        lo_pa_program = NEW #( iv_type = 'RS38M-PROGRAMM' ).
+        lo_screen->add( lo_pa_program ).
+        SET HANDLER handle_program_value_request FOR lo_pa_program.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error INTO lx.
         MESSAGE lx TYPE 'E'.
@@ -112,6 +122,8 @@ CLASS lcl_appl IMPLEMENTATION.
 
         WRITE: `lo_pa_ebeln: `, lv_ebeln, /.
 
+        WRITE: `lo_pa_program: `, lo_pa_program->get_value( ), /.
+
         WRITE: `lo_rb_option1: `, lo_rb_option1->get_value( ), /.
         WRITE: `lo_rb_option2: `, lo_rb_option2->get_value( ), /.
 
@@ -125,4 +137,11 @@ CLASS lcl_appl IMPLEMENTATION.
   METHOD handle_button_click.
     MESSAGE 'Button pressed!' TYPE 'I'.
   ENDMETHOD.
+
+  METHOD handle_program_value_request.
+    FIELD-SYMBOLS <lv_program> TYPE rs38m-programm.
+    ASSIGN sender->zif_dynscreen_request_event~md_request_value->* TO <lv_program>.
+    PERFORM program_directory IN PROGRAM saplwbabap USING <lv_program> abap_true.
+  ENDMETHOD.
+
 ENDCLASS.

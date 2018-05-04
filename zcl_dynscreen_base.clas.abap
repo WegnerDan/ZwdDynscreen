@@ -90,6 +90,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
         eve_selscreen     TYPE c LENGTH 19 VALUE 'AT SELECTION-SCREEN',
         eve_selscreen_out TYPE c LENGTH 26 VALUE 'AT SELECTION-SCREEN OUTPUT',
         eve_selscreen_on  TYPE c LENGTH 23 VALUE 'AT SELECTION-SCREEN ON',
+        eve_selscreen_one TYPE c LENGTH 30 VALUE 'AT SELECTION-SCREEN ON END OF',
         eve_selscreen_obl TYPE c LENGTH 28 VALUE 'AT SELECTION-SCREEN ON BLOCK',
         eve_selscreen_org TYPE c LENGTH 40 VALUE 'AT SELECTION-SCREEN ON RADIOBUTTON GROUP',
         eve_selscreen_ovr TYPE c LENGTH 40 VALUE 'AT SELECTION-SCREEN ON VALUE-REQUEST FOR',
@@ -275,6 +276,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
+    APPEND LINES OF ms_source_eve-t_selscreen_on  TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_ohr TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_ovr TO rt_events_source.
 
@@ -419,6 +421,9 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       lt_lineindex TYPE STANDARD TABLE OF edlineindx.
 
 * ---------------------------------------------------------------------
+    lt_source = ct_source.
+
+* ---------------------------------------------------------------------
     CALL FUNCTION 'RS_WORKBENCH_CUSTOMIZING'
       EXPORTING
         suppress_dialog = abap_true
@@ -436,25 +441,21 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       EXPORTING
         inctoo             = abap_false
       TABLES
-        ntext              = ct_source
-        otext              = ct_source
+        ntext              = lt_source
+        otext              = lt_source
       EXCEPTIONS
         enqueue_table_full = 1
         include_enqueued   = 2
         include_readerror  = 3
         include_writeerror = 4
         OTHERS             = 5.
-
     IF sy-subrc <> 0.
-*   MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
-*              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+      RETURN.
     ENDIF.
-    MOVE-CORRESPONDING ct_source TO lt_source.
     PERFORM change_case_for_content_new IN PROGRAM sapllocal_edt1 IF FOUND
       TABLES lt_source
              lt_lineindex
       USING  'HIKEY'.
-    MOVE-CORRESPONDING lt_source TO ct_source.
 
 * ---------------------------------------------------------------------
     IF ls_settings-indent <> '2'.
@@ -463,6 +464,9 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
           name  = 'INDENT'
           value = ls_settings-indent.
     ENDIF.
+
+* ---------------------------------------------------------------------
+    ct_source = lt_source.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
