@@ -111,24 +111,32 @@ CLASS lcl IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
         WRITE: `lo_pa_matnr1: `, lv_matnr1, /.
+        ULINE.
 
         WRITE: `lo_pa_matnr2: `, <lv_matnr2>, /.
+        ULINE.
 
         WRITE: 'lo_so_vbeln:', /.
         LOOP AT lr_vbeln ASSIGNING FIELD-SYMBOL(<lrs_vbeln>).
           WRITE: <lrs_vbeln>-sign, ` `, <lrs_vbeln>-option, ` `, <lrs_vbeln>-low, ` `, <lrs_vbeln>-high, /.
         ENDLOOP.
-        WRITE /.
+        ULINE.
 
         WRITE: `lo_pa_ebeln: `, lv_ebeln, /.
+        ULINE.
 
         WRITE: `lo_pa_program: `, lo_pa_program->get_value( ), /.
+        ULINE.
 
         WRITE: `lo_rb_option1: `, lo_rb_option1->get_value( ), /.
         WRITE: `lo_rb_option2: `, lo_rb_option2->get_value( ), /.
+        ULINE.
+
+* ---------------------------------------------------------------------
+        MESSAGE 'Selection successful!' TYPE 'S'.
 
       CATCH zcx_dynscreen_canceled.
-        MESSAGE 'Selection canceled' TYPE 'I'.
+        MESSAGE 'Selection canceled' TYPE 'S' DISPLAY LIKE 'E'.
       CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
         MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.

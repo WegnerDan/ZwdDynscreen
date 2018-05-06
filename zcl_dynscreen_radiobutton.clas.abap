@@ -11,13 +11,14 @@ GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
     DATA:
       mv_from_constructor TYPE abap_bool.
     METHODS:
-      generate_open REDEFINITION.
+      generate_open REDEFINITION,
+      generate_close REDEFINITION.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_RADIOBUTTON IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -28,6 +29,12 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
     set_text( iv_text ).
     mv_from_constructor = abap_false.
 
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD generate_close.
+* ---------------------------------------------------------------------
 * ---------------------------------------------------------------------
   ENDMETHOD.
 

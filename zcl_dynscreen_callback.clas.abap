@@ -103,10 +103,6 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
     DATA:
       lt_fieldvalues TYPE STANDARD TABLE OF rsselread WITH DEFAULT KEY,
       ld_value       TYPE REF TO data.
-    FIELD-SYMBOLS:
-      <lt>           TYPE INDEX TABLE,
-      <ls>           TYPE any,
-      <lv_src_field> TYPE any.
 
 * ---------------------------------------------------------------------
     TRY.
