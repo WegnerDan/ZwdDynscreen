@@ -9,7 +9,7 @@ CLASS zcl_dynscreen_callback DEFINITION PUBLIC FINAL CREATE PUBLIC.
                 EXPORTING ev_value TYPE any,
       raise_uc_event IMPORTING iv_id    TYPE zcl_dynscreen_base=>mty_id
                                iv_value TYPE any OPTIONAL
-                     CHANGING  cv_ucomm TYPE sy-ucomm,
+                     CHANGING  cv_ucomm TYPE sscrfields-ucomm,
       raise_request_event IMPORTING iv_id    TYPE zcl_dynscreen_base=>mty_id
                                     iv_vname TYPE zcl_dynscreen_base=>mty_varname
                                     iv_kind  TYPE i
@@ -30,7 +30,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_callback IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_CALLBACK IMPLEMENTATION.
 
 
   METHOD get_subrc.

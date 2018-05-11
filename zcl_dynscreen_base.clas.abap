@@ -15,8 +15,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
     CONSTANTS:
       mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
       BEGIN OF mc_com,
-        exit  TYPE sy-ucomm VALUE '_%_%_EXIT_%_%_',
-        dummy TYPE sy-ucomm VALUE '_%_%_%_%_DUMMY_%_%_%_%_',
+        exit  TYPE sscrfields-ucomm VALUE '_%_%_EXIT_%_%_',
+        dummy TYPE sscrfields-ucomm VALUE '_%_%_%_%_DUMMY_%_%_%_%_',
       END OF mc_com.
     CLASS-METHODS:
       class_constructor.

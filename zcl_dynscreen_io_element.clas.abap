@@ -46,8 +46,8 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
                             PREFERRED PARAMETER iv_value
                 RAISING   zcx_dynscreen_value_error,
       get_value_ref RETURNING VALUE(rd_value) TYPE REF TO data,
-      set_ucomm IMPORTING iv_ucomm TYPE sy-ucomm,
-      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm,
+      set_ucomm IMPORTING iv_ucomm TYPE sscrfields-ucomm,
+      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sscrfields-ucomm,
       set_visible IMPORTING iv_visible TYPE abap_bool DEFAULT abap_true,
       get_visible RETURNING VALUE(rv_visible) TYPE abap_bool,
       set_obligatory IMPORTING iv_obligatory TYPE abap_bool DEFAULT abap_true,
@@ -58,7 +58,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
     CONSTANTS:
       mc_type_generic TYPE typename VALUE '_%_%_GENERIC_%_%_'. "#EC NOTEXT
     DATA:
-      mv_ucomm               TYPE sy-ucomm,
+      mv_ucomm               TYPE sscrfields-ucomm,
       mo_elemdescr           TYPE REF TO cl_abap_elemdescr,
       mv_ddic_text           TYPE c LENGTH 40,
       mv_type                TYPE typename,
