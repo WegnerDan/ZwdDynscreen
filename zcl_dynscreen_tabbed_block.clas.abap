@@ -3,8 +3,8 @@ CLASS zcl_dynscreen_tabbed_block DEFINITION PUBLIC INHERITING FROM zcl_dynscreen
     TYPES:
       mty_lines TYPE n LENGTH 3 .
     METHODS:
-      constructor IMPORTING !iv_lines TYPE mty_lines OPTIONAL,
-      set_lines IMPORTING !iv_lines TYPE mty_lines,
+      constructor IMPORTING iv_lines TYPE mty_lines OPTIONAL,
+      set_lines IMPORTING iv_lines TYPE mty_lines,
       get_lines RETURNING VALUE(rv_lines) TYPE mty_lines.
   PROTECTED SECTION.
     DATA:

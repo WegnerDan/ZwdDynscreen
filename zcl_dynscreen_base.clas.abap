@@ -15,7 +15,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
     CONSTANTS:
       mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
       BEGIN OF mc_com,
-        exit TYPE sy-ucomm VALUE '_%_%_EXIT_%_%_',
+        exit  TYPE sy-ucomm VALUE '_%_%_EXIT_%_%_',
+        dummy TYPE sy-ucomm VALUE '_%_%_%_%_DUMMY_%_%_%_%_',
       END OF mc_com.
     CLASS-METHODS:
       class_constructor.
@@ -24,7 +25,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_variables RETURNING VALUE(rt_variables) TYPE mty_t_variables,
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING iv_text TYPE textpooltx,
-      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base,
+      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
+          RAISING   zcx_dynscreen_incompatible,
       get_id RETURNING VALUE(rv_id) TYPE mty_id,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
@@ -105,16 +107,17 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mv_text        TYPE textpooltx,
       mt_elements    TYPE mty_t_screen_elements,
       mt_source      TYPE mty_t_source,
-      mt_source_ac   TYPE mty_t_source,
+      mt_source_ac   TYPE mty_t_source, " after screen call
+      mt_source_as   TYPE mty_t_source, " after standard screen definitions
       BEGIN OF ms_source_eve,
-        t_init          TYPE mty_t_source,
-        t_selscreen     TYPE mty_t_source,
-        t_selscreen_out TYPE mty_t_source,
-        t_selscreen_on  TYPE mty_t_source,
-        t_selscreen_obl TYPE mty_t_source,
-        t_selscreen_org TYPE mty_t_source,
-        t_selscreen_ovr TYPE mty_t_source,
-        t_selscreen_ohr TYPE mty_t_source,
+        t_init          TYPE mty_t_source, " initialization
+        t_selscreen     TYPE mty_t_source, " at selection-screen
+        t_selscreen_out TYPE mty_t_source, " at selection-screen output
+        t_selscreen_on  TYPE mty_t_source, " at selection-screen on
+        t_selscreen_obl TYPE mty_t_source, " at selection-screen on block
+        t_selscreen_org TYPE mty_t_source, " at selection-screen on radiobutton group
+        t_selscreen_ovr TYPE mty_t_source, " at selection-screen on value-request for
+        t_selscreen_ohr TYPE mty_t_source, " at selection-screen on help-request for
       END OF ms_source_eve,
       mt_variables TYPE mty_t_variables,
       mt_textpool  TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key.
@@ -139,12 +142,16 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_base IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_BASE IMPLEMENTATION.
 
 
   METHOD add.
 * ---------------------------------------------------------------------
     IF lines( mt_elements ) < 199.
+      IF '\CLASS=ZCL_DYNSCREEN_POPUP' = cl_abap_classdescr=>get_class_name( io_screen_element )
+      OR '\CLASS=ZCL_DYNSCREEN_SCREEN' = cl_abap_classdescr=>get_class_name( io_screen_element ).
+        RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+      ENDIF.
       io_screen_element->mo_parent = me.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
@@ -237,7 +244,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       lo_io TYPE REF TO zcl_dynscreen_io_element.
 
 * ---------------------------------------------------------------------
-    FREE: mt_source, mt_source_ac, ms_source_eve.
+    FREE: mt_source, mt_source_ac, mt_source_as, ms_source_eve.
 
 * ---------------------------------------------------------------------
     generate_open( ).
@@ -253,6 +260,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
                         ref  = lo_io                 ) INTO TABLE mt_variables.
       ENDIF.
       APPEND LINES OF <ls_element>-ref->mt_source_ac                  TO mt_source_ac.
+      APPEND LINES OF <ls_element>-ref->mt_source_as                  TO mt_source_as.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_init          TO ms_source_eve-t_init.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_selscreen     TO ms_source_eve-t_selscreen.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_selscreen_out TO ms_source_eve-t_selscreen_out.
@@ -288,7 +296,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       TO rt_events_source.
     ENDLOOP.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
-    APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
+    APPEND `IF sscrfields-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
     APPEND '  LEAVE TO SCREEN 0.' TO rt_events_source.
     APPEND 'ENDIF.' TO rt_events_source.
 
@@ -494,6 +502,4 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
-
 ENDCLASS.

@@ -168,7 +168,12 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
         lo_io->set_ucomm( cv_ucomm ).
         DATA(lo_uc_event) = CAST zif_dynscreen_uc_event( lo_io ).
         lo_uc_event->raise( ).
-        cv_ucomm = lo_io->get_ucomm( ).
+        DATA(lv_ucomm) = lo_io->get_ucomm( ).
+        IF lv_ucomm = cv_ucomm.
+          cv_ucomm = lo_io->mc_com-dummy.
+        ELSE.
+          cv_ucomm = lo_io->get_ucomm( ).
+        ENDIF.
       CATCH cx_sy_itab_line_not_found
             zcx_dynscreen_base.
     ENDTRY.

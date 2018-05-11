@@ -1,4 +1,4 @@
-REPORT zwd_dynscreen_test1.
+REPORT zwd_dynscreen_test4_tabs.
 
 CLASS lcl DEFINITION CREATE PUBLIC.
   PUBLIC SECTION.
@@ -21,7 +21,11 @@ CLASS lcl IMPLEMENTATION.
   METHOD run.
 * ---------------------------------------------------------------------
     DATA:
+      lx            TYPE REF TO cx_root,
       lo_screen     TYPE REF TO zcl_dynscreen_screen,
+      lo_tab_block  TYPE REF TO zcl_dynscreen_tabbed_block,
+      lo_tab1       TYPE REF TO zcl_dynscreen_tab,
+      lo_tab2       TYPE REF TO zcl_dynscreen_tab,
       lo_btn        TYPE REF TO zcl_dynscreen_button,
       lo_pa_matnr1  TYPE REF TO zcl_dynscreen_parameter,
       lo_pa_matnr2  TYPE REF TO zcl_dynscreen_parameter,
@@ -35,7 +39,21 @@ CLASS lcl IMPLEMENTATION.
 * ---------------------------------------------------------------------
     lo_screen = NEW #( ).
     lo_screen->set_pretty_print( ).
-    lo_screen->set_text( 'Selection Screen Generation Test' ).
+    lo_screen->set_text( 'Selection Screen Tab Test' ).
+
+    lo_tab_block = NEW #( iv_lines = 6 ).
+    lo_tab1 = NEW #( iv_text = 'Tab1' ).
+    lo_tab2 = NEW #( iv_text = 'Tab2' ).
+
+    TRY.
+        lo_tab_block->add( lo_tab1 ).
+        lo_tab_block->add( lo_tab2 ).
+        lo_screen->add( lo_tab_block ).
+      CATCH zcx_dynscreen_incompatible INTO lx.
+        MESSAGE lx TYPE 'E'.
+    ENDTRY.
+
+
 
     TRY.
         lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
@@ -43,18 +61,18 @@ CLASS lcl IMPLEMENTATION.
         lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
         lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
         lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
-        lo_screen->add( lo_pa_matnr1 ).
-        lo_screen->add( lo_pa_matnr2 ).
+        lo_tab1->add( lo_pa_matnr1 ).
+        lo_tab2->add( lo_pa_matnr2 ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
-            zcx_dynscreen_incompatible INTO DATA(lx).
+            zcx_dynscreen_incompatible INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
     TRY.
         lo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
         SET HANDLER handle_button_click FOR lo_btn.
-        lo_screen->add( lo_btn ).
+        lo_tab1->add( lo_btn ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible INTO lx.
         MESSAGE lx TYPE 'E'.
@@ -63,9 +81,9 @@ CLASS lcl IMPLEMENTATION.
 
     TRY.
         lo_so_vbeln = NEW #( iv_type = 'VBAK-VBELN' ).
-        lo_screen->add( lo_so_vbeln ).
+        lo_tab1->add( lo_so_vbeln ).
         lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
-        lo_screen->add( lo_pa_ebeln ).
+        lo_tab2->add( lo_pa_ebeln ).
         lo_pa_program = NEW #( iv_type = 'RS38M-PROGRAMM' ).
         lo_screen->add( lo_pa_program ).
         SET HANDLER handle_program_value_request FOR lo_pa_program.
@@ -80,7 +98,7 @@ CLASS lcl IMPLEMENTATION.
         lo_rb_option2 = NEW #( iv_text = 'Option 2' ).
         lo_rb_grp1    = NEW #( it_radiobuttons = VALUE #( ( lo_rb_option1 )
                                                           ( lo_rb_option2 ) ) ).
-        lo_screen->add( lo_rb_grp1 ).
+        lo_tab2->add( lo_rb_grp1 ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible INTO lx.
         MESSAGE lx TYPE 'E'.

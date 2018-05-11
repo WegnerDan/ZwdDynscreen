@@ -25,6 +25,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
         decfloat34 TYPE dd01l-datatype VALUE 'D34S' ##NO_TEXT,
       END OF mc_type.
     METHODS:
+      add REDEFINITION,
       get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx,
       set_ddic_text IMPORTING iv_ddic_text TYPE textpooltx,
       set_generic_type IMPORTING is_type_info TYPE mty_s_generic_type_info
@@ -79,6 +80,37 @@ ENDCLASS.
 
 
 CLASS zcl_dynscreen_io_element IMPLEMENTATION.
+
+
+  METHOD add.
+* ---------------------------------------------------------------------
+    " io elements usually have no children
+    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD append_uc_event_src.
+* ---------------------------------------------------------------------
+    APPEND
+    `  IF sscrfields-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. `    ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+    IF mv_is_variable = abap_true.
+      DATA(lv_value) = `iv_value = ` && get_var_name( ) ##NO_TEXT.
+    ELSE.
+      lv_value = ''.
+    ENDIF.
+    APPEND
+    `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&   ##NO_TEXT
+    `' ` && lv_value && ` changing cv_ucomm = sscrfields-ucomm ).` ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+    APPEND
+    `  ENDIF.`                                                     ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
 
 
   METHOD constructor.
@@ -471,28 +503,4 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
-
-  METHOD append_uc_event_src.
-* ---------------------------------------------------------------------
-    APPEND
-    `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. `    ##NO_TEXT
-    TO ms_source_eve-t_selscreen.
-    IF mv_is_variable = abap_true.
-      DATA(lv_value) = `iv_value = ` && get_var_name( ) ##NO_TEXT.
-    ELSE.
-      lv_value = ''.
-    ENDIF.
-    APPEND
-    `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&  ##NO_TEXT
-    `' ` && lv_value && ` changing cv_ucomm = sy-ucomm ).`        ##NO_TEXT
-    TO ms_source_eve-t_selscreen.
-    APPEND
-    `  ENDIF.`                                                    ##NO_TEXT
-    TO ms_source_eve-t_selscreen.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
 ENDCLASS.

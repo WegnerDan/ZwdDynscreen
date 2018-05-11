@@ -6,7 +6,8 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
       mty_t_radiobutton TYPE STANDARD TABLE OF REF TO zcl_dynscreen_radiobutton WITH DEFAULT KEY.
     METHODS:
       constructor IMPORTING it_radiobuttons TYPE mty_t_radiobutton OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible,
       add REDEFINITION.
     EVENTS:
       radiobutton_click.
@@ -29,7 +30,12 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
   METHOD add.
 * ---------------------------------------------------------------------
     IF '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON' = cl_abap_classdescr=>get_class_name( io_screen_element ).
-      super->add( io_screen_element ).
+      io_screen_element->mo_parent = me.
+      INSERT VALUE #( id  = io_screen_element->get_id( )
+                      ref = io_screen_element
+                      var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
+    ELSE.
+      RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
     ENDIF.
 
 * ---------------------------------------------------------------------
