@@ -77,6 +77,8 @@ LOOP AT gt_key_fields ASSIGNING FIELD-SYMBOL(<gs_key_fld>) TO 200.
       go_sel_screen->add( <gs_selfield>-so_ref ).
     CATCH zcx_dynscreen_type_error.
       CONTINUE.
+    CATCH zcx_dynscreen_too_many_elems.
+      EXIT.
   ENDTRY.
 ENDLOOP.
 

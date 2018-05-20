@@ -26,7 +26,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING iv_text TYPE textpooltx,
       add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
-          RAISING   zcx_dynscreen_incompatible,
+          RAISING   zcx_dynscreen_incompatible
+                    zcx_dynscreen_too_many_elems,
       get_id RETURNING VALUE(rv_id) TYPE mty_id,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
@@ -147,7 +148,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-*    IF lines( mt_elements ) < 199.
+    IF lines( mt_elements ) < 199.
       IF '\CLASS=ZCL_DYNSCREEN_POPUP' = cl_abap_classdescr=>get_class_name( io_screen_element )
       OR '\CLASS=ZCL_DYNSCREEN_SCREEN' = cl_abap_classdescr=>get_class_name( io_screen_element ).
         RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
@@ -156,10 +157,10 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
                       var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
-*    ELSE.
-*      " why 199? i can't remember -> TODO: find out what I was thinking
-*      BREAK-POINT.
-*    ENDIF.
+    ELSE.
+      " after about 200 elements selection screen activation fails
+      RAISE EXCEPTION TYPE zcx_dynscreen_too_many_elems.
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

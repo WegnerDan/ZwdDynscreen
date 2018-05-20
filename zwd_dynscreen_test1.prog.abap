@@ -47,7 +47,8 @@ CLASS lcl IMPLEMENTATION.
         lo_screen->add( lo_pa_matnr2 ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
-            zcx_dynscreen_incompatible INTO DATA(lx).
+            zcx_dynscreen_incompatible
+            zcx_dynscreen_too_many_elems INTO DATA(lx).
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
@@ -56,7 +57,8 @@ CLASS lcl IMPLEMENTATION.
         SET HANDLER handle_button_click FOR lo_btn.
         lo_screen->add( lo_btn ).
       CATCH zcx_dynscreen_type_error
-            zcx_dynscreen_incompatible INTO lx.
+            zcx_dynscreen_incompatible
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
@@ -71,7 +73,8 @@ CLASS lcl IMPLEMENTATION.
         SET HANDLER handle_program_value_request FOR lo_pa_program.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
-            zcx_dynscreen_incompatible INTO lx.
+            zcx_dynscreen_incompatible
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
@@ -82,7 +85,8 @@ CLASS lcl IMPLEMENTATION.
                                                           ( lo_rb_option2 ) ) ).
         lo_screen->add( lo_rb_grp1 ).
       CATCH zcx_dynscreen_type_error
-            zcx_dynscreen_incompatible INTO lx.
+            zcx_dynscreen_incompatible
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
