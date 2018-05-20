@@ -10,6 +10,8 @@ TYPES:
 DATA:
   go_tab_screen   TYPE REF TO zcl_dynscreen_screen,
   go_pa_table     TYPE REF TO zcl_dynscreen_parameter,
+  go_checkbox_key TYPE REF TO zcl_dynscreen_checkbox,
+  gv_keys_only    TYPE abap_bool,
   gv_tabname      TYPE tabname,
   gt_selfields    TYPE gty_t_selfield,
   go_sel_screen   TYPE REF TO zcl_dynscreen_screen,
@@ -23,6 +25,12 @@ go_tab_screen->set_pretty_print( ).
 * ---------------------------------------------------------------------
 go_pa_table = NEW #( iv_type = 'DATABROWSE-TABLENAME' ).
 go_tab_screen->add( go_pa_table ).
+go_checkbox_key = NEW #( iv_text = 'Generate Select-Options for keys only' ).
+TRY.
+    go_checkbox_key->set_value( abap_true ).
+  CATCH zcx_dynscreen_value_error.
+ENDTRY.
+go_tab_screen->add( go_checkbox_key ).
 
 * ---------------------------------------------------------------------
 DO.
@@ -47,21 +55,29 @@ DO.
 ENDDO.
 
 * ---------------------------------------------------------------------
+go_checkbox_key->get_value( IMPORTING ev_value = gv_keys_only ).
+
+* ---------------------------------------------------------------------
 SELECT fieldname
 FROM dd03l
 INTO TABLE @DATA(gt_key_fields)
 WHERE tabname   =  @gv_tabname
 AND   as4local  =  'A'
 AND   fieldname <> 'MANDT'
-AND   keyflag   =   @abap_true.
+AND   keyflag   =   @gv_keys_only
+ORDER BY position.
 
 * ---------------------------------------------------------------------
 FREE gt_selfields.
 go_sel_screen = NEW #( ).
-LOOP AT gt_key_fields ASSIGNING FIELD-SYMBOL(<gs_key_fld>).
-  INSERT VALUE #( fieldname = <gs_key_fld>-fieldname
-                  so_ref    = NEW #( iv_type = gv_tabname && '-' && <gs_key_fld>-fieldname ) ) INTO TABLE gt_selfields ASSIGNING FIELD-SYMBOL(<gs_selfield>).
-  go_sel_screen->add( <gs_selfield>-so_ref ).
+LOOP AT gt_key_fields ASSIGNING FIELD-SYMBOL(<gs_key_fld>) TO 200.
+  TRY.
+      INSERT VALUE #( fieldname = <gs_key_fld>-fieldname
+                      so_ref    = NEW #( iv_type = gv_tabname && '-' && <gs_key_fld>-fieldname ) ) INTO TABLE gt_selfields ASSIGNING FIELD-SYMBOL(<gs_selfield>).
+      go_sel_screen->add( <gs_selfield>-so_ref ).
+    CATCH zcx_dynscreen_type_error.
+      CONTINUE.
+  ENDTRY.
 ENDLOOP.
 
 * ---------------------------------------------------------------------
@@ -94,4 +110,10 @@ CALL FUNCTION 'SE16N_INTERFACE'
   TABLES
     it_or_selfields = gt_or_selfields
   EXCEPTIONS
-    OTHERS          = 0.
+    no_values       = 1
+    OTHERS          = 2.
+IF sy-subrc <> 0.
+  MESSAGE ID sy-msgid TYPE 'S' NUMBER sy-msgno
+  WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4
+  DISPLAY LIKE 'E'.
+ENDIF.

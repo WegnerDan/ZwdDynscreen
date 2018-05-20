@@ -17,7 +17,9 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       serialize FINAL RETURNING VALUE(rv_xml) TYPE string.
     CLASS-METHODS:
       deserialize IMPORTING iv_xml        TYPE string
-                  RETURNING VALUE(ro_scr) TYPE REF TO zcl_dynscreen_screen_base.
+                  RETURNING VALUE(ro_scr) TYPE REF TO zcl_dynscreen_screen_base
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_value_error.
   PROTECTED SECTION.
     CONSTANTS:
       BEGIN OF mc_default_starting_pos,
@@ -49,7 +51,7 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
 
 
   METHOD constructor.
@@ -81,17 +83,11 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     LOOP AT ro_scr->mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
       IF <ls_var>-ref->mv_type IS NOT INITIAL.
-        TRY.
-            <ls_var>-ref->set_type( <ls_var>-ref->mv_type ).
-          CATCH zcx_dynscreen_type_error.
-        ENDTRY.
+        <ls_var>-ref->set_type( <ls_var>-ref->mv_type ).
       ENDIF.
       IF <ls_var>-ref->mv_value IS NOT INITIAL.
-        TRY.
-            <ls_var>-ref->set_value( iv_conversion = <ls_var>-ref->mc_conv_xml
-                                     iv_value_str  = <ls_var>-ref->mv_value    ).
-          CATCH zcx_dynscreen_value_error.
-        ENDTRY.
+        <ls_var>-ref->set_value( iv_conversion = <ls_var>-ref->mc_conv_xml
+                                 iv_value_str  = <ls_var>-ref->mv_value    ).
       ENDIF.
     ENDLOOP.
 

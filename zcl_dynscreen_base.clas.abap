@@ -147,7 +147,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-    IF lines( mt_elements ) < 199.
+*    IF lines( mt_elements ) < 199.
       IF '\CLASS=ZCL_DYNSCREEN_POPUP' = cl_abap_classdescr=>get_class_name( io_screen_element )
       OR '\CLASS=ZCL_DYNSCREEN_SCREEN' = cl_abap_classdescr=>get_class_name( io_screen_element ).
         RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
@@ -156,10 +156,10 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
                       var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
-    ELSE.
-      " why 199? i can't remember -> TODO: find out what I was thinking
-      BREAK-POINT.
-    ENDIF.
+*    ELSE.
+*      " why 199? i can't remember -> TODO: find out what I was thinking
+*      BREAK-POINT.
+*    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
