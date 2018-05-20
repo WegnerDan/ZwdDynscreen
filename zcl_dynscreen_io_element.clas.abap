@@ -25,6 +25,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
         decfloat34 TYPE dd01l-datatype VALUE 'D34S' ##NO_TEXT,
       END OF mc_type.
     METHODS:
+      add REDEFINITION,
       get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx,
       set_ddic_text IMPORTING iv_ddic_text TYPE textpooltx,
       set_generic_type IMPORTING is_type_info TYPE mty_s_generic_type_info
@@ -45,8 +46,8 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
                             PREFERRED PARAMETER iv_value
                 RAISING   zcx_dynscreen_value_error,
       get_value_ref RETURNING VALUE(rd_value) TYPE REF TO data,
-      set_ucomm IMPORTING iv_ucomm TYPE sy-ucomm,
-      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sy-ucomm,
+      set_ucomm IMPORTING iv_ucomm TYPE sscrfields-ucomm,
+      get_ucomm RETURNING VALUE(rv_ucomm) TYPE sscrfields-ucomm,
       set_visible IMPORTING iv_visible TYPE abap_bool DEFAULT abap_true,
       get_visible RETURNING VALUE(rv_visible) TYPE abap_bool,
       set_obligatory IMPORTING iv_obligatory TYPE abap_bool DEFAULT abap_true,
@@ -57,7 +58,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
     CONSTANTS:
       mc_type_generic TYPE typename VALUE '_%_%_GENERIC_%_%_'. "#EC NOTEXT
     DATA:
-      mv_ucomm               TYPE sy-ucomm,
+      mv_ucomm               TYPE sscrfields-ucomm,
       mo_elemdescr           TYPE REF TO cl_abap_elemdescr,
       mv_ddic_text           TYPE c LENGTH 40,
       mv_type                TYPE typename,
@@ -71,13 +72,45 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
     METHODS:
       get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
       get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
-      get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx.
+      get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx,
+      append_uc_event_src.
   PRIVATE SECTION.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
+CLASS zcl_dynscreen_io_element IMPLEMENTATION.
+
+
+  METHOD add.
+* ---------------------------------------------------------------------
+    " io elements usually have no children
+    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD append_uc_event_src.
+* ---------------------------------------------------------------------
+    APPEND
+    `  IF sscrfields-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. `    ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+    IF mv_is_variable = abap_true.
+      DATA(lv_value) = `iv_value = ` && get_var_name( ) ##NO_TEXT.
+    ELSE.
+      lv_value = ''.
+    ENDIF.
+    APPEND
+    `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&   ##NO_TEXT
+    `' ` && lv_value && ` changing cv_ucomm = sscrfields-ucomm ).` ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+    APPEND
+    `  ENDIF.`                                                     ##NO_TEXT
+    TO ms_source_eve-t_selscreen.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
 
 
   METHOD constructor.
@@ -455,8 +488,9 @@ CLASS ZCL_DYNSCREEN_IO_ELEMENT IMPLEMENTATION.
             RAISE EXCEPTION TYPE zcx_dynscreen_value_error EXPORTING previous = lx_tr.
         ENDTRY.
       WHEN mc_conv_write.
-
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
       WHEN OTHERS.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
     ENDCASE.
 
 * ---------------------------------------------------------------------

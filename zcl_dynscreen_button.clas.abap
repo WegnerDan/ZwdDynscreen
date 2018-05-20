@@ -64,16 +64,12 @@ CLASS zcl_dynscreen_button IMPLEMENTATION.
            ` ` && mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.' TO mt_source.
 
 * ---------------------------------------------------------------------
-    " add event handling code
-    APPEND `  IF sy-ucomm = '` && mc_syn-ucm_prefix && mv_id && `'. ` TO ms_source_eve-t_selscreen ##NO_TEXT.
-    APPEND `    go_cb->raise_uc_event( exporting iv_id = '` && mv_id &&
-           `' changing cv_ucomm = sy-ucomm ).` TO ms_source_eve-t_selscreen.
-    APPEND '  ENDIF.' TO ms_source_eve-t_selscreen.
-
-* ---------------------------------------------------------------------
     IF mv_text IS NOT INITIAL.
       APPEND mc_syn-btn_prefix && mv_id && ` = '` && mv_text && `'.` TO ms_source_eve-t_init.
     ENDIF.
+
+* ---------------------------------------------------------------------
+    append_uc_event_src( ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

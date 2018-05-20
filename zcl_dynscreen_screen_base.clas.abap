@@ -17,7 +17,9 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       serialize FINAL RETURNING VALUE(rv_xml) TYPE string.
     CLASS-METHODS:
       deserialize IMPORTING iv_xml        TYPE string
-                  RETURNING VALUE(ro_scr) TYPE REF TO zcl_dynscreen_screen_base.
+                  RETURNING VALUE(ro_scr) TYPE REF TO zcl_dynscreen_screen_base
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_value_error.
   PROTECTED SECTION.
     CONSTANTS:
       BEGIN OF mc_default_starting_pos,
@@ -81,17 +83,11 @@ CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
 * ---------------------------------------------------------------------
     LOOP AT ro_scr->mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
       IF <ls_var>-ref->mv_type IS NOT INITIAL.
-        TRY.
-            <ls_var>-ref->set_type( <ls_var>-ref->mv_type ).
-          CATCH zcx_dynscreen_type_error.
-        ENDTRY.
+        <ls_var>-ref->set_type( <ls_var>-ref->mv_type ).
       ENDIF.
       IF <ls_var>-ref->mv_value IS NOT INITIAL.
-        TRY.
-            <ls_var>-ref->set_value( iv_conversion = <ls_var>-ref->mc_conv_xml
-                                     iv_value_str  = <ls_var>-ref->mv_value    ).
-          CATCH zcx_dynscreen_value_error.
-        ENDTRY.
+        <ls_var>-ref->set_value( iv_conversion = <ls_var>-ref->mc_conv_xml
+                                 iv_value_str  = <ls_var>-ref->mv_value    ).
       ENDIF.
     ENDLOOP.
 
@@ -121,7 +117,11 @@ CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
     APPEND mc_syn-funcpool && ` ` && mv_gentarget && '.' TO lt_source.
     APPEND LINES OF get_generation_notice( ) TO lt_source.
     APPEND mc_syn-data && ` go_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source.
+    APPEND 'TABLES: sscrfields.' TO lt_source.
     APPEND LINES OF mt_source TO lt_source.
+    APPEND '' TO lt_source.
+    APPEND LINES OF mt_source_as TO lt_source.
+    APPEND '' TO lt_source.
     APPEND LINES OF generate_events( ) TO lt_source.
 
 * ---------------------------------------------------------------------
@@ -138,8 +138,8 @@ CLASS ZCL_DYNSCREEN_SCREEN_BASE IMPLEMENTATION.
       ENDIF.
     ENDIF.
     APPEND `CALL ` && mc_syn-selscreen && ` `  && mv_id && lv_position && `.` TO lt_source.
-    APPEND LINES OF mt_source_ac TO lt_source.
     APPEND 'io_cb->set_subrc( sy-subrc ).' TO lt_source ##NO_TEXT.
+    APPEND LINES OF mt_source_ac TO lt_source.
     APPEND 'ENDFORM.' TO lt_source.
 
 * ---------------------------------------------------------------------

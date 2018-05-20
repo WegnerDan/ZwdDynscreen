@@ -10,7 +10,8 @@ CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen
       set_type REDEFINITION.
   PROTECTED SECTION.
     DATA:
-      mo_tabledescr TYPE REF TO cl_abap_tabledescr .
+      md_request_value TYPE REF TO data,
+      mo_tabledescr    TYPE REF TO cl_abap_tabledescr.
     METHODS:
       generate_close REDEFINITION,
       generate_open REDEFINITION,
@@ -46,10 +47,58 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD generate_open.
 * ---------------------------------------------------------------------
+    DATA:
+      lv_nr_of_handlers TYPE i,
+      lt_selcrit        TYPE STANDARD TABLE OF string WITH DEFAULT KEY.
+
+* ---------------------------------------------------------------------
     APPEND mc_syn-data && ` ` && 'D' && mc_syn-var_prefix && mv_id && ` ` &&
            mc_syn-type && ` ` && mv_type && '.' TO mt_source.
     APPEND mc_syn-selopt && ` ` && mc_syn-var_prefix && mv_id && ` ` && 'FOR' && ` ` && 'D' &&
            mc_syn-var_prefix && mv_id && ` ` && mc_syn-modif && ` ` && base10_to_22( mv_id ) && '.' TO mt_source.
+
+* ---------------------------------------------------------------------
+    APPEND
+    mc_syn-eve_selscreen_one && ` ` && mc_syn-var_prefix && mv_id && '.'
+    TO ms_source_eve-t_selscreen_on.
+    APPEND
+    `go_cb->set_value( iv_id = '` && mv_id && `' iv_value = ` && get_var_name( ) && ` ).` ##NO_TEXT
+    TO ms_source_eve-t_selscreen_on.
+
+* ---------------------------------------------------------------------
+    lt_selcrit = VALUE #( ( `LOW`  )
+                          ( `HIGH` ) ).
+    lv_nr_of_handlers = 0.
+    SYSTEM-CALL EVENTS GET NUM_HANDLERS FOR zif_dynscreen_request_event~help_request
+    OF INST me INTO lv_nr_of_handlers.               "#EC CI_SYSTEMCALL
+    IF lv_nr_of_handlers > 0.
+      LOOP AT lt_selcrit ASSIGNING FIELD-SYMBOL(<lv_selcrit>).
+        APPEND
+        mc_syn-eve_selscreen_ohr && ` ` && mc_syn-var_prefix && mv_id && '-' && <lv_selcrit> && '.'
+        TO ms_source_eve-t_selscreen_ohr.
+        APPEND
+        `go_cb->raise_request_event( iv_id = '` && mv_id &&                             ##NO_TEXT
+        ` iv_vname = '` && mc_syn-var_prefix && mv_id && '-' && <lv_selcrit> && '''' && ##NO_TEXT
+        `' iv_kind = ` && zif_dynscreen_request_event=>kind_help_request && ` ).`       ##NO_TEXT
+        TO ms_source_eve-t_selscreen_ohr.
+      ENDLOOP.
+    ENDIF.
+    lv_nr_of_handlers = 0.
+    SYSTEM-CALL EVENTS GET NUM_HANDLERS FOR zif_dynscreen_request_event~value_request
+    OF INST me INTO lv_nr_of_handlers.               "#EC CI_SYSTEMCALL
+    IF lv_nr_of_handlers > 0.
+      LOOP AT lt_selcrit ASSIGNING <lv_selcrit>.
+        APPEND
+        mc_syn-eve_selscreen_ovr && ` ` && mc_syn-var_prefix && mv_id && '-' && <lv_selcrit> && '.'
+        TO ms_source_eve-t_selscreen_ovr.
+        APPEND
+        `go_cb->raise_request_event( EXPORTING iv_id = '` && mv_id &&                   ##NO_TEXT
+        `' iv_kind = ` && zif_dynscreen_request_event=>kind_value_request &&            ##NO_TEXT
+        ` iv_vname = '` && mc_syn-var_prefix && mv_id && '-' && <lv_selcrit> && '''' && ##NO_TEXT
+        ` CHANGING cv_value = ` && mc_syn-var_prefix && mv_id && '-' && <lv_selcrit> && ` ).` ##NO_TEXT
+        TO ms_source_eve-t_selscreen_ovr.
+      ENDLOOP.
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -124,9 +173,17 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
     DATA:
       lo_datadescr  TYPE REF TO cl_abap_datadescr,
       lt_components TYPE cl_abap_structdescr=>component_table.
+    FIELD-SYMBOLS:
+      <lv> TYPE any.
 
 * ---------------------------------------------------------------------
     super->set_type( iv_type  ).
+
+* ---------------------------------------------------------------------
+    ASSIGN md_value->* TO <lv>.
+    IF cl_abap_elemdescr=>get_data_type_kind( <lv> ) = 'F'.
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+    ENDIF.
 
 * ---------------------------------------------------------------------
     TRY.
@@ -143,7 +200,16 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
         mo_tabledescr = cl_abap_tabledescr=>create( cl_abap_structdescr=>create( lt_components ) ).
         CREATE DATA md_value TYPE HANDLE mo_tabledescr.
       CATCH cx_root.
+        RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
     ENDTRY.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD zif_dynscreen_request_event~set_req_field_ref.
+* ---------------------------------------------------------------------
+    zif_dynscreen_request_event~md_request_value = id_value.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

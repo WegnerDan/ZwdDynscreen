@@ -15,7 +15,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
     CONSTANTS:
       mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
       BEGIN OF mc_com,
-        exit TYPE sy-ucomm VALUE '_%_%_EXIT_%_%_',
+        exit  TYPE sscrfields-ucomm VALUE '_%_%_EXIT_%_%_',
+        dummy TYPE sscrfields-ucomm VALUE '_%_%_%_%_DUMMY_%_%_%_%_',
       END OF mc_com.
     CLASS-METHODS:
       class_constructor.
@@ -24,9 +25,10 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_variables RETURNING VALUE(rt_variables) TYPE mty_t_variables,
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING iv_text TYPE textpooltx,
-      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base,
-      set_id IMPORTING iv_id TYPE i,
-      get_id RETURNING VALUE(rv_id) TYPE i,
+      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
+          RAISING   zcx_dynscreen_incompatible
+                    zcx_dynscreen_too_many_elems,
+      get_id RETURNING VALUE(rv_id) TYPE mty_id,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
     TYPES:
@@ -91,6 +93,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
         eve_selscreen     TYPE c LENGTH 19 VALUE 'AT SELECTION-SCREEN',
         eve_selscreen_out TYPE c LENGTH 26 VALUE 'AT SELECTION-SCREEN OUTPUT',
         eve_selscreen_on  TYPE c LENGTH 23 VALUE 'AT SELECTION-SCREEN ON',
+        eve_selscreen_one TYPE c LENGTH 30 VALUE 'AT SELECTION-SCREEN ON END OF',
         eve_selscreen_obl TYPE c LENGTH 28 VALUE 'AT SELECTION-SCREEN ON BLOCK',
         eve_selscreen_org TYPE c LENGTH 40 VALUE 'AT SELECTION-SCREEN ON RADIOBUTTON GROUP',
         eve_selscreen_ovr TYPE c LENGTH 40 VALUE 'AT SELECTION-SCREEN ON VALUE-REQUEST FOR',
@@ -105,16 +108,17 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mv_text        TYPE textpooltx,
       mt_elements    TYPE mty_t_screen_elements,
       mt_source      TYPE mty_t_source,
-      mt_source_ac   TYPE mty_t_source,
+      mt_source_ac   TYPE mty_t_source, " after screen call
+      mt_source_as   TYPE mty_t_source, " after standard screen definitions
       BEGIN OF ms_source_eve,
-        t_init          TYPE mty_t_source,
-        t_selscreen     TYPE mty_t_source,
-        t_selscreen_out TYPE mty_t_source,
-        t_selscreen_on  TYPE mty_t_source,
-        t_selscreen_obl TYPE mty_t_source,
-        t_selscreen_org TYPE mty_t_source,
-        t_selscreen_ovr TYPE mty_t_source,
-        t_selscreen_ohr TYPE mty_t_source,
+        t_init          TYPE mty_t_source, " initialization
+        t_selscreen     TYPE mty_t_source, " at selection-screen
+        t_selscreen_out TYPE mty_t_source, " at selection-screen output
+        t_selscreen_on  TYPE mty_t_source, " at selection-screen on
+        t_selscreen_obl TYPE mty_t_source, " at selection-screen on block
+        t_selscreen_org TYPE mty_t_source, " at selection-screen on radiobutton group
+        t_selscreen_ovr TYPE mty_t_source, " at selection-screen on value-request for
+        t_selscreen_ohr TYPE mty_t_source, " at selection-screen on help-request for
       END OF ms_source_eve,
       mt_variables TYPE mty_t_variables,
       mt_textpool  TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key.
@@ -122,6 +126,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       set_last_id IMPORTING !iv_last_id TYPE i,
       get_last_id RETURNING VALUE(rv_id) TYPE i.
     METHODS:
+      set_id IMPORTING iv_id TYPE i,
       generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
       is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
@@ -144,10 +149,17 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
   METHOD add.
 * ---------------------------------------------------------------------
     IF lines( mt_elements ) < 199.
+      IF '\CLASS=ZCL_DYNSCREEN_POPUP' = cl_abap_classdescr=>get_class_name( io_screen_element )
+      OR '\CLASS=ZCL_DYNSCREEN_SCREEN' = cl_abap_classdescr=>get_class_name( io_screen_element ).
+        RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+      ENDIF.
       io_screen_element->mo_parent = me.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
                       var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
+    ELSE.
+      " after about 200 elements selection screen activation fails
+      RAISE EXCEPTION TYPE zcx_dynscreen_too_many_elems.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -233,7 +245,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       lo_io TYPE REF TO zcl_dynscreen_io_element.
 
 * ---------------------------------------------------------------------
-    FREE: mt_source, mt_source_ac, ms_source_eve.
+    FREE: mt_source, mt_source_ac, mt_source_as, ms_source_eve.
 
 * ---------------------------------------------------------------------
     generate_open( ).
@@ -249,6 +261,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
                         ref  = lo_io                 ) INTO TABLE mt_variables.
       ENDIF.
       APPEND LINES OF <ls_element>-ref->mt_source_ac                  TO mt_source_ac.
+      APPEND LINES OF <ls_element>-ref->mt_source_as                  TO mt_source_as.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_init          TO ms_source_eve-t_init.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_selscreen     TO ms_source_eve-t_selscreen.
       APPEND LINES OF <ls_element>-ref->ms_source_eve-t_selscreen_out TO ms_source_eve-t_selscreen_out.
@@ -272,6 +285,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
+    APPEND LINES OF ms_source_eve-t_selscreen_on  TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_ohr TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_ovr TO rt_events_source.
 
@@ -283,7 +297,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       TO rt_events_source.
     ENDLOOP.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
-    APPEND `IF sy-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
+    APPEND `IF sscrfields-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
     APPEND '  LEAVE TO SCREEN 0.' TO rt_events_source.
     APPEND 'ENDIF.' TO rt_events_source.
 
@@ -416,6 +430,9 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       lt_lineindex TYPE STANDARD TABLE OF edlineindx.
 
 * ---------------------------------------------------------------------
+    lt_source = ct_source.
+
+* ---------------------------------------------------------------------
     CALL FUNCTION 'RS_WORKBENCH_CUSTOMIZING'
       EXPORTING
         suppress_dialog = abap_true
@@ -433,25 +450,21 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       EXPORTING
         inctoo             = abap_false
       TABLES
-        ntext              = ct_source
-        otext              = ct_source
+        ntext              = lt_source
+        otext              = lt_source
       EXCEPTIONS
         enqueue_table_full = 1
         include_enqueued   = 2
         include_readerror  = 3
         include_writeerror = 4
         OTHERS             = 5.
-
     IF sy-subrc <> 0.
-*   MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
-*              WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+      RETURN.
     ENDIF.
-    MOVE-CORRESPONDING ct_source TO lt_source.
     PERFORM change_case_for_content_new IN PROGRAM sapllocal_edt1 IF FOUND
       TABLES lt_source
              lt_lineindex
       USING  'HIKEY'.
-    MOVE-CORRESPONDING lt_source TO ct_source.
 
 * ---------------------------------------------------------------------
     IF ls_settings-indent <> '2'.
@@ -460,6 +473,9 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
           name  = 'INDENT'
           value = ls_settings-indent.
     ENDIF.
+
+* ---------------------------------------------------------------------
+    ct_source = lt_source.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
