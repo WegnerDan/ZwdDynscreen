@@ -68,7 +68,8 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mv_obligatory          TYPE abap_bool,
       mv_input               TYPE abap_bool,
       mv_value               TYPE string,
-      md_value               TYPE REF TO data.
+      md_value               TYPE REF TO data,
+      mv_is_line_item        TYPE abap_bool.
     METHODS:
       get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
       get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
