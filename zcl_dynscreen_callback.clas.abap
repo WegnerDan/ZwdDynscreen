@@ -48,6 +48,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
                                                                     iv_id  = iv_id     )-ref ).
         lo_io->get_value( IMPORTING ev_value = ev_value ).
       CATCH cx_sy_itab_line_not_found.
+        "TODO
     ENDTRY.
 
 * ---------------------------------------------------------------------
@@ -91,6 +92,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
           ENDIF.
           MODIFY screen FROM ls_screen.
         CATCH cx_sy_itab_line_not_found.
+          "TODO
       ENDTRY.
     ENDLOOP.
 
@@ -151,8 +153,10 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
                 lo_req_eve->raise_value_request( ).
             ENDCASE.
           CATCH zcx_dynscreen_base.
+            "TODO
         ENDTRY.
       CATCH cx_sy_itab_line_not_found.
+        "TODO
     ENDTRY.
 
 * ---------------------------------------------------------------------
@@ -176,6 +180,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
         ENDIF.
       CATCH cx_sy_itab_line_not_found
             zcx_dynscreen_base.
+        "TODO
     ENDTRY.
 
 * ---------------------------------------------------------------------
@@ -228,7 +233,9 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
                                                                     iv_id  = iv_id     )-ref ).
         lo_io->set_value( iv_value ).
       CATCH cx_sy_itab_line_not_found.
+        "TODO
       CATCH zcx_dynscreen_base.
+        "TODO
     ENDTRY.
 
 * ---------------------------------------------------------------------
