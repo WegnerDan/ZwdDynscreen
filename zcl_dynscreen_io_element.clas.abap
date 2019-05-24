@@ -1,8 +1,6 @@
 CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC
 GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
   PUBLIC SECTION.
-    INTERFACES:
-      zif_dynscreen_line_item.
     TYPES:
       BEGIN OF mty_s_generic_type_info,
         datatype  TYPE dd01l-datatype,
@@ -506,34 +504,5 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
-
-  METHOD zif_dynscreen_line_item~set_line_pos.
-* ---------------------------------------------------------------------
-    IF zif_dynscreen_line_item~mv_is_line_item = abap_false.
-      RAISE EXCEPTION TYPE zcx_dynscreen_line_space_error.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-    IF iv_pos > zif_dynscreen_line_item~mc_max_pos.
-      RAISE EXCEPTION TYPE zcx_dynscreen_line_space_error.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD zif_dynscreen_line_item~set_line_len.
-* ---------------------------------------------------------------------
-    IF zif_dynscreen_line_item~mv_is_line_item = abap_false.
-      RAISE EXCEPTION TYPE zcx_dynscreen_line_space_error.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-    IF iv_len > zif_dynscreen_line_item~mc_max_len.
-      RAISE EXCEPTION TYPE zcx_dynscreen_line_space_error.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
 
 ENDCLASS.
