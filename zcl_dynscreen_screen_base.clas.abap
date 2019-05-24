@@ -43,10 +43,12 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       mv_source_id TYPE mty_source_id.
     DATA:
       mv_pretty_print TYPE abap_bool,
-      mt_gen_notice   LIKE mt_source.
+      mt_gen_notice   LIKE mt_source,
+      mv_hash         TYPE zzdynscreen_buff-hash.
     METHODS:
       get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source,
-      get_generation_target RETURNING VALUE(rv_srcname) TYPE mty_srcname.
+      get_new_generation_target RETURNING VALUE(rv_srcname) TYPE mty_srcname,
+      get_buffered_generation_target RETURNING VALUE(rv_srcname) TYPE mty_srcname.
 ENDCLASS.
 
 
@@ -100,75 +102,83 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     DATA:
       lt_source    LIKE mt_source,
       lt_old_texts LIKE mt_textpool,
-      lv_position  TYPE string.
+      lv_position  TYPE string,
+      lv_formname  TYPE string.
 
 * ---------------------------------------------------------------------
-    generate( ).
-    generate_texts( ).
+    lv_formname = 'DISPLAY_' && mv_id.
 
 * ---------------------------------------------------------------------
     DATA(lo_callback) = NEW zcl_dynscreen_callback( ).
     lo_callback->set_caller( me ).
 
 * ---------------------------------------------------------------------
-    mv_gentarget = get_generation_target( ).
+    mv_gentarget = get_buffered_generation_target( ).
+    IF mv_gentarget IS INITIAL.
 
 * ---------------------------------------------------------------------
-    APPEND mc_syn-funcpool && ` ` && mv_gentarget && '.' TO lt_source.
-    APPEND LINES OF get_generation_notice( ) TO lt_source.
-    APPEND mc_syn-data && ` go_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source.
-    APPEND 'TABLES: sscrfields.' TO lt_source.
-    APPEND LINES OF mt_source TO lt_source.
-    APPEND '' TO lt_source.
-    APPEND LINES OF mt_source_as TO lt_source.
-    APPEND '' TO lt_source.
-    APPEND LINES OF generate_events( ) TO lt_source.
+      mv_gentarget = get_new_generation_target( ).
 
 * ---------------------------------------------------------------------
-    DATA(lv_formname) = 'DISPLAY_' && mv_id.
-    APPEND '' TO lt_source.
-    APPEND mc_syn-cline TO lt_source.
-    APPEND `FORM ` && lv_formname && ` ` &&
-           `USING io_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source ##NO_TEXT.
-    APPEND 'go_cb = io_cb.' TO lt_source ##NO_TEXT.
-    IF mv_is_window = abap_true.
-      lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
-      IF ms_ending_position IS NOT INITIAL.
-        lv_position = lv_position && ` ENDING AT ` && ms_ending_position-x && ` ` && ms_ending_position-y.
+      generate( ).
+      generate_texts( ).
+
+* ---------------------------------------------------------------------
+      APPEND mc_syn-funcpool && ` ` && mv_gentarget && '.' TO lt_source.
+      APPEND LINES OF get_generation_notice( ) TO lt_source.
+      APPEND mc_syn-data && ` go_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source.
+      APPEND 'TABLES: sscrfields.' TO lt_source.
+      APPEND LINES OF mt_source TO lt_source.
+      APPEND '' TO lt_source.
+      APPEND LINES OF mt_source_as TO lt_source.
+      APPEND '' TO lt_source.
+      APPEND LINES OF generate_events( ) TO lt_source.
+
+* ---------------------------------------------------------------------
+      APPEND '' TO lt_source.
+      APPEND mc_syn-cline TO lt_source.
+      APPEND `FORM ` && lv_formname && ` ` &&
+             `USING io_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source ##NO_TEXT.
+      APPEND 'go_cb = io_cb.' TO lt_source ##NO_TEXT.
+      IF mv_is_window = abap_true.
+        lv_position = ` STARTING AT ` && ms_starting_position-x && ` ` && ms_starting_position-y.
+        IF ms_ending_position IS NOT INITIAL.
+          lv_position = lv_position && ` ENDING AT ` && ms_ending_position-x && ` ` && ms_ending_position-y.
+        ENDIF.
       ENDIF.
-    ENDIF.
-    APPEND `CALL ` && mc_syn-selscreen && ` `  && mv_id && lv_position && `.` TO lt_source.
-    APPEND 'io_cb->set_subrc( sy-subrc ).' TO lt_source ##NO_TEXT.
-    APPEND LINES OF mt_source_ac TO lt_source.
-    APPEND 'ENDFORM.' TO lt_source.
+      APPEND `CALL ` && mc_syn-selscreen && ` `  && mv_id && lv_position && `.` TO lt_source.
+      APPEND 'io_cb->set_subrc( sy-subrc ).' TO lt_source ##NO_TEXT.
+      APPEND LINES OF mt_source_ac TO lt_source.
+      APPEND 'ENDFORM.' TO lt_source.
 
 * ---------------------------------------------------------------------
-    IF mv_pretty_print = abap_true.
-      pretty_print( CHANGING ct_source = lt_source ).
-    ENDIF.
+      IF mv_pretty_print = abap_true.
+        pretty_print( CHANGING ct_source = lt_source ).
+      ENDIF.
 
 * ---------------------------------------------------------------------
-    INSERT REPORT mv_gentarget FROM lt_source.
+      INSERT REPORT mv_gentarget FROM lt_source.
 
 * ---------------------------------------------------------------------
-    READ TEXTPOOL mv_gentarget INTO lt_old_texts.
-    IF lt_old_texts <> mt_textpool.
-      INSERT TEXTPOOL mv_gentarget FROM mt_textpool.
-    ENDIF.
+      READ TEXTPOOL mv_gentarget INTO lt_old_texts.
+      IF lt_old_texts <> mt_textpool.
+        INSERT TEXTPOOL mv_gentarget FROM mt_textpool.
+      ENDIF.
 
 * ---------------------------------------------------------------------
-    DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = mv_gentarget ).
-    IF lo_syncheck->subrc <> 0.
-      DATA(lv_syntax_error) = CONV char200( lo_syncheck->message ).
-      RAISE EXCEPTION TYPE zcx_dynscreen_syntax_error
-        EXPORTING
-          textid    = VALUE #( msgid = '00'
-                               msgno = 1
-                               attr1 = lv_syntax_error+000(50)
-                               attr2 = lv_syntax_error+050(50)
-                               attr3 = lv_syntax_error+100(50)
-                               attr4 = lv_syntax_error+150(50) )
-          syn_check = lo_syncheck.
+      DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = mv_gentarget ).
+      IF lo_syncheck->subrc <> 0.
+        DATA(lv_syntax_error) = CONV char200( lo_syncheck->message ).
+        RAISE EXCEPTION TYPE zcx_dynscreen_syntax_error
+          EXPORTING
+            textid    = VALUE #( msgid = '00'
+                                 msgno = 1
+                                 attr1 = lv_syntax_error+000(50)
+                                 attr2 = lv_syntax_error+050(50)
+                                 attr3 = lv_syntax_error+100(50)
+                                 attr4 = lv_syntax_error+150(50) )
+            syn_check = lo_syncheck.
+      ENDIF.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -230,11 +240,39 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD get_generation_target.
+  METHOD get_buffered_generation_target.
 * ---------------------------------------------------------------------
-    rv_srcname = replace( val  = mc_gentarget_incname
-                          sub  = '%%%'
-                          with = mv_source_id         ).
+    TRY.
+        cl_abap_message_digest=>calculate_hash_for_char( EXPORTING if_algorithm   = 'MD5' " fast and good enough
+                                                                   if_data        = serialize( )
+                                                         IMPORTING ef_hashxstring = DATA(lv_hash) ).
+      CATCH cx_abap_message_digest.
+    ENDTRY.
+
+* ---------------------------------------------------------------------
+    mv_hash = lv_hash.
+
+* ---------------------------------------------------------------------
+    SELECT SINGLE gentarget
+    FROM zzdynscreen_buff
+    INTO @rv_srcname
+    WHERE hash = @mv_hash.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_new_generation_target.
+* ---------------------------------------------------------------------
+    DATA:
+      ls_buffer TYPE zzdynscreen_buff.
+    FIELD-SYMBOLS:
+      <lv_source_id> LIKE mv_source_id.
+
+** ---------------------------------------------------------------------
+*    rv_srcname = replace( val  = mc_gentarget_incname
+*                          sub  = '%%%'
+*                          with = mv_source_id         ).
 
 * ---------------------------------------------------------------------
     " MV_SOURCE_ID is a static member var
@@ -242,6 +280,22 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     " this is necessary to enable generating different screens in the same origin LUW
     " a side effect of this is that even if the same screen is used twice, the generation target will differ
     mv_source_id = mv_source_id + 1.
+
+    SELECT MAX( gentarget )
+    FROM zzdynscreen_buff
+    INTO rv_srcname.
+    IF sy-subrc = 0.
+      ASSIGN rv_srcname+23(3) TO <lv_source_id> CASTING.
+      <lv_source_id> = <lv_source_id> + 1.
+    ELSE.
+      rv_srcname = mc_gentarget_incname.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+    ls_buffer-hash = mv_hash.
+    ls_buffer-gentarget = rv_srcname.
+    INSERT zzdynscreen_buff FROM ls_buffer.
+    COMMIT WORK AND WAIT.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -293,4 +347,5 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

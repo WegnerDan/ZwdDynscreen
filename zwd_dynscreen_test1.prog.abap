@@ -9,6 +9,8 @@ CLASS lcl DEFINITION CREATE PUBLIC.
       handle_button_click  FOR EVENT button_click OF zcl_dynscreen_button
         IMPORTING sender,
       handle_program_value_request FOR EVENT zif_dynscreen_request_event~value_request OF zcl_dynscreen_parameter
+        IMPORTING sender,
+      handle_radiobutton_selected FOR EVENT radiobutton_click OF zcl_dynscreen_radiobutton_grp
         IMPORTING sender.
 
 ENDCLASS.
@@ -84,6 +86,7 @@ CLASS lcl IMPLEMENTATION.
         lo_rb_grp1    = NEW #( it_radiobuttons = VALUE #( ( lo_rb_option1 )
                                                           ( lo_rb_option2 ) ) ).
         lo_screen->add( lo_rb_grp1 ).
+        SET HANDLER handle_radiobutton_selected FOR lo_rb_grp1.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
             zcx_dynscreen_too_many_elems INTO lx.
@@ -148,16 +151,37 @@ CLASS lcl IMPLEMENTATION.
       CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
         MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
+
 
   METHOD handle_button_click.
+* ---------------------------------------------------------------------
     MESSAGE 'Button pressed!' TYPE 'I'.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
+
   METHOD handle_program_value_request.
-    FIELD-SYMBOLS <lv_program> TYPE rs38m-programm.
+* ---------------------------------------------------------------------
+    FIELD-SYMBOLS:
+      <lv_program> TYPE rs38m-programm.
+
     ASSIGN sender->zif_dynscreen_request_event~md_request_value->* TO <lv_program>.
+
     PERFORM program_directory IN PROGRAM saplwbabap USING <lv_program> abap_true.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD handle_radiobutton_selected.
+* ---------------------------------------------------------------------
+    MESSAGE sender->get_selected_radiobutton( )->get_text( ) && ` selected!` TYPE 'S'.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
 ENDCLASS.

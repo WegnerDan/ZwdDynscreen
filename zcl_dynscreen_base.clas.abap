@@ -13,7 +13,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       END OF mty_s_variable,
       mty_t_variables TYPE SORTED TABLE OF mty_s_variable WITH UNIQUE KEY id.
     CONSTANTS:
-      mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
+      mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_000' ##NO_TEXT,
       BEGIN OF mc_com,
         exit  TYPE sscrfields-ucomm VALUE '_%_%_EXIT_%_%_',
         dummy TYPE sscrfields-ucomm VALUE '_%_%_%_%_DUMMY_%_%_%_%_',

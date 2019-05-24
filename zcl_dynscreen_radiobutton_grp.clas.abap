@@ -7,8 +7,10 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
     METHODS:
       constructor IMPORTING it_radiobuttons TYPE mty_t_radiobutton OPTIONAL
                   RAISING   zcx_dynscreen_type_error
-                            zcx_dynscreen_incompatible,
-      add REDEFINITION.
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
+      add REDEFINITION,
+      get_selected_radiobutton RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton.
     EVENTS:
       radiobutton_click.
   PROTECTED SECTION.
@@ -29,7 +31,7 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-    IF '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON' = cl_abap_classdescr=>get_class_name( io_screen_element ).
+    IF cl_abap_classdescr=>get_class_name( io_screen_element ) = '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON'.
       io_screen_element->mo_parent = me.
       INSERT VALUE #( id  = io_screen_element->get_id( )
                       ref = io_screen_element
@@ -109,6 +111,19 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
   METHOD get_first_radiobutton.
 * ---------------------------------------------------------------------
     ro_radiobutton = mt_radiobuttons[ 1 ].
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_selected_radiobutton.
+* ---------------------------------------------------------------------
+    LOOP AT mt_radiobuttons INTO DATA(lo_radiobutton).
+      IF lo_radiobutton->get_value( ) = abap_true.
+        ro_radiobutton = lo_radiobutton.
+        RETURN.
+      ENDIF.
+    ENDLOOP.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
