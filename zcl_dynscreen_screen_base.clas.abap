@@ -127,7 +127,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       APPEND mc_syn-funcpool && ` ` && mv_gentarget && '.' TO lt_source.
       APPEND LINES OF get_generation_notice( ) TO lt_source.
       APPEND mc_syn-data && ` go_cb ` && mc_syn-type_ref && ` ` && mc_syn-callback && '.' TO lt_source.
-      APPEND 'TABLES: sscrfields.' TO lt_source.
+      APPEND 'TABLES: sscrfields.' TO lt_source ##NO_TEXT.
       APPEND LINES OF mt_source TO lt_source.
       APPEND '' TO lt_source.
       APPEND LINES OF mt_source_as TO lt_source.
@@ -283,7 +283,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
     SELECT MAX( gentarget )
     FROM zzdynscreen_buff
-    INTO rv_srcname.
+    INTO rv_srcname.                                    "#EC CI_NOWHERE
     IF sy-subrc = 0.
       ASSIGN rv_srcname+23(3) TO <lv_source_id> CASTING.
       <lv_source_id> = <lv_source_id> + 1.

@@ -227,6 +227,9 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
       <lv_value> TYPE any.
 
 * ---------------------------------------------------------------------
+    FREE ev_value.
+
+* ---------------------------------------------------------------------
     ASSIGN md_value->* TO <lv_value>.
     IF <lv_value> IS NOT ASSIGNED.
       RETURN.

@@ -3,7 +3,9 @@ GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
   PUBLIC SECTION.
     METHODS:
       constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       add REDEFINITION,
       set_generic_type REDEFINITION,
       set_type REDEFINITION,
