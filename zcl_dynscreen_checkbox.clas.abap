@@ -64,7 +64,7 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
   METHOD set_value.
 * ---------------------------------------------------------------------
-    IF iv_conversion = zwd_dynscreen_io_element=>mc_conv_cast.
+    IF iv_conversion = zcl_dynscreen_io_element=>mc_conv_cast.
       " only either iv_value or iv_value_str are allowed to be supplied
       " only abap_true and abap_false are allowed values
       IF  iv_value     IS SUPPLIED
