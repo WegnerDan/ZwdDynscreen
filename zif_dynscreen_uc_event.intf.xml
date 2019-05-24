@@ -4,7 +4,6 @@
   <asx:values>
    <VSEOINTERF>
     <CLSNAME>ZIF_DYNSCREEN_UC_EVENT</CLSNAME>
-    <VERSION>1</VERSION>
     <LANGU>E</LANGU>
     <DESCRIPT>user command event handling</DESCRIPT>
     <EXPOSURE>2</EXPOSURE>
