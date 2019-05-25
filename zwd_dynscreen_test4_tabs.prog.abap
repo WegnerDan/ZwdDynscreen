@@ -162,10 +162,11 @@ CLASS lcl IMPLEMENTATION.
 * ---------------------------------------------------------------------
         MESSAGE 'Selection successful!' TYPE 'S'.
 
-      CATCH zcx_dynscreen_canceled.
-        MESSAGE 'Selection canceled' TYPE 'S' DISPLAY LIKE 'E'.
-      CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
-        MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_canceled INTO lx.
+        MESSAGE lx TYPE 'S' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_syntax_error
+            zcx_dynscreen_value_error INTO lx.
+        MESSAGE lx TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
   ENDMETHOD.
 

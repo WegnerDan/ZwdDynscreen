@@ -32,7 +32,8 @@ CLASS lcl IMPLEMENTATION.
       lo_rb_grp1    TYPE REF TO zcl_dynscreen_radiobutton_grp,
       lo_rb_option1 TYPE REF TO zcl_dynscreen_radiobutton,
       lo_rb_option2 TYPE REF TO zcl_dynscreen_radiobutton,
-      lo_pa_program TYPE REF TO zcl_dynscreen_parameter.
+      lo_pa_program TYPE REF TO zcl_dynscreen_parameter,
+      lx            TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     lo_screen = NEW #( ).
@@ -50,7 +51,7 @@ CLASS lcl IMPLEMENTATION.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
             zcx_dynscreen_incompatible
-            zcx_dynscreen_too_many_elems INTO DATA(lx).
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
@@ -148,8 +149,9 @@ CLASS lcl IMPLEMENTATION.
 
       CATCH zcx_dynscreen_canceled INTO DATA(lx_canceled).
         MESSAGE lx_canceled TYPE 'S' DISPLAY LIKE 'E'.
-      CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
-        MESSAGE lx_syntax_error TYPE 'I' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_value_error
+            zcx_dynscreen_syntax_error INTO lx.
+        MESSAGE lx TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
 
 * ---------------------------------------------------------------------

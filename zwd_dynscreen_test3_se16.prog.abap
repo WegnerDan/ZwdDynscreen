@@ -25,7 +25,7 @@ go_tab_screen->set_pretty_print( ).
 * ---------------------------------------------------------------------
 go_pa_table = NEW #( iv_type = 'DATABROWSE-TABLENAME' ).
 go_tab_screen->add( go_pa_table ).
-go_checkbox_key = NEW #( iv_text = 'Generate Select-Options for keys only' ).
+go_checkbox_key = NEW #( iv_text = 'Gen. SelOpts for keys only' ).
 TRY.
     go_checkbox_key->set_value( abap_true ).
   CATCH zcx_dynscreen_value_error.

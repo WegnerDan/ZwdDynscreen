@@ -20,7 +20,8 @@ CLASS lcl_appl IMPLEMENTATION.
       lo_pa_matnr1 TYPE REF TO zcl_dynscreen_parameter,
       lo_pa_matnr2 TYPE REF TO zcl_dynscreen_parameter,
       lo_so_vbeln  TYPE REF TO zcl_dynscreen_selectoption,
-      lo_pa_ebeln  TYPE REF TO zcl_dynscreen_parameter.
+      lo_pa_ebeln  TYPE REF TO zcl_dynscreen_parameter,
+      lx           TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     lo_popup = NEW #( ).
@@ -36,7 +37,7 @@ CLASS lcl_appl IMPLEMENTATION.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
             zcx_dynscreen_incompatible
-            zcx_dynscreen_too_many_elems INTO DATA(lx).
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
@@ -101,14 +102,20 @@ CLASS lcl_appl IMPLEMENTATION.
 
         WRITE: `lo_pa_ebeln: `, lv_ebeln, /.
 
-      CATCH zcx_dynscreen_canceled.
-        MESSAGE 'Selection canceled' TYPE 'I'.
-      CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
-        MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_canceled INTO lx.
+        MESSAGE lx TYPE 'S' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_syntax_error
+            zcx_dynscreen_value_error INTO lx.
+        MESSAGE lx TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
   METHOD handle_button_click.
+* ---------------------------------------------------------------------
     MESSAGE 'Button pressed!' TYPE 'I'.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 ENDCLASS.
