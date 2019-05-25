@@ -14,7 +14,9 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
                         zcx_dynscreen_syntax_error,
       set_pretty_print IMPORTING iv_pretty_print TYPE abap_bool DEFAULT abap_true,
       get_pretty_print RETURNING VALUE(rv_pretty_print) TYPE abap_bool,
-      serialize FINAL RETURNING VALUE(rv_xml) TYPE string.
+      serialize FINAL RETURNING VALUE(rv_xml) TYPE string,
+      enable_screen_buffer FINAL,
+      disable_screen_buffer FINAL.
     CLASS-METHODS:
       deserialize IMPORTING iv_xml        TYPE string
                   RETURNING VALUE(ro_scr) TYPE REF TO zcl_dynscreen_screen_base
@@ -42,9 +44,10 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
     CLASS-DATA:
       mv_source_id TYPE mty_source_id.
     DATA:
-      mv_pretty_print TYPE abap_bool,
-      mt_gen_notice   LIKE mt_source,
-      mv_hash         TYPE zzdynscreen_buff-hash.
+      mv_pretty_print  TYPE abap_bool,
+      mt_gen_notice    LIKE mt_source,
+      mv_hash          TYPE zzdynscreen_buff-hash,
+      mv_screen_buffer TYPE abap_bool.
     METHODS:
       get_generation_notice RETURNING VALUE(rt_src) LIKE mt_source,
       get_new_generation_target RETURNING VALUE(rv_srcname) TYPE mty_srcname,
@@ -63,6 +66,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     set_text( iv_text ).
     mv_is_variable = abap_false.
+    enable_screen_buffer( ).
 
 * ---------------------------------------------------------------------
     IF get_text( ) IS INITIAL.
@@ -100,10 +104,9 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
   METHOD display.
 * ---------------------------------------------------------------------
     DATA:
-      lt_source    LIKE mt_source,
-      lt_old_texts LIKE mt_textpool,
-      lv_position  TYPE string,
-      lv_formname  TYPE string.
+      lt_source   LIKE mt_source,
+      lv_position TYPE string,
+      lv_formname TYPE string.
 
 * ---------------------------------------------------------------------
     lv_formname = 'DISPLAY_' && mv_id.
@@ -160,10 +163,8 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       INSERT REPORT mv_gentarget FROM lt_source.
 
 * ---------------------------------------------------------------------
-      READ TEXTPOOL mv_gentarget INTO lt_old_texts.
-      IF lt_old_texts <> mt_textpool.
-        INSERT TEXTPOOL mv_gentarget FROM mt_textpool.
-      ENDIF.
+      INSERT TEXTPOOL mv_gentarget FROM mt_textpool.
+
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -246,10 +247,29 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     mv_hash = lv_hash.
 
 * ---------------------------------------------------------------------
-    SELECT SINGLE gentarget
+    SELECT SINGLE *
     FROM zzdynscreen_buff
-    INTO @rv_srcname
+    INTO @DATA(ls_buffer)
     WHERE hash = @mv_hash.
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+    IF mv_screen_buffer = abap_false.
+      DELETE FROM zzdynscreen_buff WHERE hash = @mv_hash.
+      RETURN.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+    rv_srcname = ls_buffer-gentarget.
+
+* ---------------------------------------------------------------------
+    GET TIME STAMP FIELD ls_buffer-last_used.
+
+* ---------------------------------------------------------------------
+    UPDATE zzdynscreen_buff FROM ls_buffer.
+    COMMIT WORK.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -258,7 +278,8 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
   METHOD get_new_generation_target.
 * ---------------------------------------------------------------------
     DATA:
-      ls_buffer TYPE zzdynscreen_buff.
+      ls_buffer TYPE zzdynscreen_buff,
+      lv_ts_old TYPE timestampl.
     FIELD-SYMBOLS:
       <lv_source_id> LIKE mv_source_id.
 
@@ -274,6 +295,14 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     " a side effect of this is that even if the same screen is used twice, the generation target will differ
     mv_source_id = mv_source_id + 1.
 
+* ---------------------------------------------------------------------
+    GET TIME STAMP FIELD lv_ts_old.
+    lv_ts_old = cl_abap_tstmp=>subtractsecs( tstmp = lv_ts_old
+                                             secs  = 1 " days
+                                                   * 24 * 60 * 60 ).
+    DELETE FROM zzdynscreen_buff WHERE last_used < lv_ts_old.
+
+* ---------------------------------------------------------------------
     FREE rv_srcname.
     SELECT MAX( gentarget )
     FROM zzdynscreen_buff
@@ -286,10 +315,13 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    ls_buffer-hash = mv_hash.
-    ls_buffer-gentarget = rv_srcname.
-    INSERT zzdynscreen_buff FROM ls_buffer.
-    COMMIT WORK AND WAIT.
+    IF mv_screen_buffer = abap_true.
+      ls_buffer-hash = mv_hash.
+      ls_buffer-gentarget = rv_srcname.
+      GET TIME STAMP FIELD ls_buffer-last_used.
+      INSERT zzdynscreen_buff FROM ls_buffer.
+      COMMIT WORK AND WAIT.
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -339,6 +371,22 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       mv_is_subscreen = abap_false.
     ENDIF.
     mv_is_window = iv_is_window.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD disable_screen_buffer.
+* ---------------------------------------------------------------------
+    mv_screen_buffer = abap_false.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD enable_screen_buffer.
+* ---------------------------------------------------------------------
+    mv_screen_buffer = abap_true.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
