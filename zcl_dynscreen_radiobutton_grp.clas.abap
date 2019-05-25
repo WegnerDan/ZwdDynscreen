@@ -6,8 +6,7 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
       mty_t_radiobutton TYPE STANDARD TABLE OF REF TO zcl_dynscreen_radiobutton WITH DEFAULT KEY.
     METHODS:
       constructor IMPORTING it_radiobuttons TYPE mty_t_radiobutton OPTIONAL
-                  RAISING   zcx_dynscreen_type_error
-                            zcx_dynscreen_incompatible
+                  RAISING   zcx_dynscreen_incompatible
                             zcx_dynscreen_too_many_elems,
       add REDEFINITION,
       get_selected_radiobutton RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton.
@@ -31,14 +30,18 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-    IF cl_abap_classdescr=>get_class_name( io_screen_element ) = '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON'.
-      io_screen_element->mo_parent = me.
-      INSERT VALUE #( id  = io_screen_element->get_id( )
-                      ref = io_screen_element
-                      var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
-    ELSE.
-      RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+    IF cl_abap_classdescr=>get_class_name( io_screen_element ) <> '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON'.
+      RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
+        EXPORTING
+          parent_class       = me
+          incompatible_class = io_screen_element.
     ENDIF.
+
+* ---------------------------------------------------------------------
+    io_screen_element->mo_parent = me.
+    INSERT VALUE #( id  = io_screen_element->get_id( )
+                    ref = io_screen_element
+                    var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -50,7 +53,8 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
       lo_radiobutton TYPE REF TO zcl_dynscreen_radiobutton.
 
 * ---------------------------------------------------------------------
-    super->constructor( is_generic_type = VALUE #( datatype = mc_type-n length = 3 ) ).
+    super->constructor( is_generic_type = VALUE #( datatype = mc_type-n
+                                                   length   = 3         ) ).
 
 * ---------------------------------------------------------------------
     LOOP AT it_radiobuttons ASSIGNING FIELD-SYMBOL(<lo_rb>).
@@ -118,8 +122,13 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD get_selected_radiobutton.
 * ---------------------------------------------------------------------
+    DATA:
+      lv_radiobutton_value TYPE abap_bool.
+
+* ---------------------------------------------------------------------
     LOOP AT mt_radiobuttons INTO DATA(lo_radiobutton).
-      IF lo_radiobutton->get_value( ) = abap_true.
+      lo_radiobutton->get_value( IMPORTING ev_value = lv_radiobutton_value ).
+      IF lv_radiobutton_value = abap_true.
         ro_radiobutton = lo_radiobutton.
         RETURN.
       ENDIF.

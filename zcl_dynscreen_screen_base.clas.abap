@@ -32,8 +32,8 @@ CLASS zcl_dynscreen_screen_base DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
       ms_starting_position TYPE mty_s_position VALUE mc_default_starting_pos,
       ms_ending_position   TYPE mty_s_position.
     METHODS:
-      set_subscreen IMPORTING !iv_is_subscreen TYPE abap_bool DEFAULT abap_true,
-      set_window IMPORTING !iv_is_window TYPE abap_bool DEFAULT abap_true,
+      set_subscreen IMPORTING iv_is_subscreen TYPE abap_bool DEFAULT abap_true,
+      set_window IMPORTING iv_is_window TYPE abap_bool DEFAULT abap_true,
       generate_close REDEFINITION,
       generate_open REDEFINITION.
   PRIVATE SECTION.
@@ -164,21 +164,14 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       IF lt_old_texts <> mt_textpool.
         INSERT TEXTPOOL mv_gentarget FROM mt_textpool.
       ENDIF.
+    ENDIF.
 
 * ---------------------------------------------------------------------
-      DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = mv_gentarget ).
-      IF lo_syncheck->subrc <> 0.
-        DATA(lv_syntax_error) = CONV char200( lo_syncheck->message ).
-        RAISE EXCEPTION TYPE zcx_dynscreen_syntax_error
-          EXPORTING
-            textid    = VALUE #( msgid = '00'
-                                 msgno = 1
-                                 attr1 = lv_syntax_error+000(50)
-                                 attr2 = lv_syntax_error+050(50)
-                                 attr3 = lv_syntax_error+100(50)
-                                 attr4 = lv_syntax_error+150(50) )
-            syn_check = lo_syncheck.
-      ENDIF.
+    DATA(lo_syncheck) = NEW cl_abap_syntax_check_norm( p_program = mv_gentarget ).
+    IF lo_syncheck->subrc <> 0.
+      RAISE EXCEPTION TYPE zcx_dynscreen_syntax_error
+        EXPORTING
+          syn_check = lo_syncheck.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -269,10 +262,10 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     FIELD-SYMBOLS:
       <lv_source_id> LIKE mv_source_id.
 
-** ---------------------------------------------------------------------
-*    rv_srcname = replace( val  = mc_gentarget_incname
-*                          sub  = '%%%'
-*                          with = mv_source_id         ).
+* ---------------------------------------------------------------------
+    rv_srcname = replace( val  = mc_gentarget_incname
+                          sub  = '%%%'
+                          with = mv_source_id         ).
 
 * ---------------------------------------------------------------------
     " MV_SOURCE_ID is a static member var
@@ -281,10 +274,11 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     " a side effect of this is that even if the same screen is used twice, the generation target will differ
     mv_source_id = mv_source_id + 1.
 
+    FREE rv_srcname.
     SELECT MAX( gentarget )
     FROM zzdynscreen_buff
     INTO rv_srcname.                                    "#EC CI_NOWHERE
-    IF sy-subrc = 0.
+    IF rv_srcname IS NOT INITIAL.
       ASSIGN rv_srcname+23(3) TO <lv_source_id> CASTING.
       <lv_source_id> = <lv_source_id> + 1.
     ELSE.
@@ -313,7 +307,8 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     CALL TRANSFORMATION id
     SOURCE screen = me RESULT XML rv_xml
-    OPTIONS technical_types = 'ignore'.
+    OPTIONS data_refs       = 'heap-or-create'
+            technical_types = 'ignore'.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

@@ -3,8 +3,7 @@ CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_par
     INTERFACES:
       zif_dynscreen_uc_event.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
+      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
       set_type REDEFINITION,
       set_value REDEFINITION.
     EVENTS:
@@ -55,8 +54,10 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
   METHOD set_type.
 * ---------------------------------------------------------------------
-    " not supported for checkboxes
-    RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+      EXPORTING
+        textid       = zcx_dynscreen_type_error=>type_change_not_supported
+        parent_class = me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -71,16 +72,26 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
       AND iv_value_str IS NOT SUPPLIED.
         IF  iv_value <> abap_true
         AND iv_value <> abap_false.
-          RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+            EXPORTING
+              textid       = zcx_dynscreen_value_error=>invalid_value
+              value        = iv_value
+              parent_class = me.
         ENDIF.
       ELSEIF iv_value     IS NOT SUPPLIED
       AND    iv_value_str IS SUPPLIED.
         IF iv_value_str <> abap_true
         OR iv_value_str <> abap_false.
-          RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+            EXPORTING
+              textid       = zcx_dynscreen_value_error=>invalid_value
+              value        = iv_value_str
+              parent_class = me.
         ENDIF.
       ELSE.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid = zcx_dynscreen_value_error=>no_value_provided.
       ENDIF.
     ENDIF.
 

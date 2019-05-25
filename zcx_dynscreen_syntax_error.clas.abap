@@ -1,10 +1,18 @@
 CLASS zcx_dynscreen_syntax_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
+    CONSTANTS:
+      BEGIN OF zcx_dynscreen_syntax_error,
+        msgid TYPE symsgid VALUE 'Z_DYNSCREEN',
+        msgno TYPE symsgno VALUE '000',
+        attr1 TYPE scx_attrname VALUE 'SYNTAX_ERROR+000(50)',
+        attr2 TYPE scx_attrname VALUE 'SYNTAX_ERROR+050(50)',
+        attr3 TYPE scx_attrname VALUE 'SYNTAX_ERROR+100(50)',
+        attr4 TYPE scx_attrname VALUE 'SYNTAX_ERROR+150(50)',
+      END OF zcx_dynscreen_syntax_error.
+    DATA:
+      syntax_error TYPE c LENGTH 200.
     METHODS:
-      constructor IMPORTING textid    LIKE if_t100_message=>t100key OPTIONAL
-                            previous  LIKE previous OPTIONAL
-                            syn_check TYPE REF TO cl_abap_syntax_check_norm OPTIONAL,
-      get_text REDEFINITION,
+      constructor IMPORTING syn_check TYPE REF TO cl_abap_syntax_check_norm,
       get_syntax_check RETURNING VALUE(ro_syntax_check) TYPE REF TO cl_abap_syntax_check_norm.
   PROTECTED SECTION.
     DATA:
@@ -16,23 +24,19 @@ ENDCLASS.
 
 CLASS zcx_dynscreen_syntax_error IMPLEMENTATION.
 
-
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
-    super->constructor( previous = previous ).
+    super->constructor( ).
 
 * ---------------------------------------------------------------------
     CLEAR me->textid.
 
 * ---------------------------------------------------------------------
-    IF textid IS INITIAL.
-      if_t100_message~t100key = if_t100_message=>default_textid.
-    ELSE.
-      if_t100_message~t100key = textid.
-    ENDIF.
+    mo_syntax_check = syn_check.
+    me->syntax_error = mo_syntax_check->message.
 
 * ---------------------------------------------------------------------
-    mo_syntax_check = syn_check.
+    if_t100_message~t100key = zcx_dynscreen_syntax_error.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -45,11 +49,4 @@ CLASS zcx_dynscreen_syntax_error IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
-
-  METHOD get_text.
-* ---------------------------------------------------------------------
-    result = mo_syntax_check->message.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
 ENDCLASS.

@@ -26,7 +26,10 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
+      EXPORTING
+        parent_class       = me
+        incompatible_class = io_screen_element.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -86,7 +89,10 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
       super->set_generic_type( is_type_info ).
     ELSE.
       " not supported for radiobuttons
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+        EXPORTING
+          textid       = zcx_dynscreen_type_error=>type_change_not_supported
+          parent_class = me.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -99,7 +105,10 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
       super->set_type( iv_type ).
     ELSE.
       " not supported for radiobuttons
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+        EXPORTING
+          textid       = zcx_dynscreen_type_error=>type_change_not_supported
+          parent_class = me.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -114,16 +123,26 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
     AND iv_value_str IS NOT SUPPLIED.
       IF  iv_value <> abap_true
       AND iv_value <> abap_false.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid       = zcx_dynscreen_value_error=>invalid_value
+            value        = iv_value
+            parent_class = me.
       ENDIF.
     ELSEIF iv_value     IS NOT SUPPLIED
     AND    iv_value_str IS SUPPLIED.
       IF iv_value_str <> abap_true
       OR iv_value_str <> abap_false.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid       = zcx_dynscreen_value_error=>invalid_value
+            value        = iv_value_str
+            parent_class = me.
       ENDIF.
     ELSE.
-      RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+        EXPORTING
+          textid = zcx_dynscreen_value_error=>no_value_provided.
     ENDIF.
 
 * ---------------------------------------------------------------------

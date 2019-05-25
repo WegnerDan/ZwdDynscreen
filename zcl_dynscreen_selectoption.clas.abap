@@ -175,7 +175,8 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 * ---------------------------------------------------------------------
     DATA:
       lo_datadescr  TYPE REF TO cl_abap_datadescr,
-      lt_components TYPE cl_abap_structdescr=>component_table.
+      lt_components TYPE cl_abap_structdescr=>component_table,
+      lx_root       TYPE REF TO cx_root.
     FIELD-SYMBOLS:
       <lv> TYPE any.
 
@@ -185,7 +186,9 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 * ---------------------------------------------------------------------
     ASSIGN md_value->* TO <lv>.
     IF cl_abap_elemdescr=>get_data_type_kind( <lv> ) = 'F'.
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+        EXPORTING
+          textid = zcx_dynscreen_type_error=>float_selopt.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -202,8 +205,11 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
                         type = mo_elemdescr ) TO lt_components.
         mo_tabledescr = cl_abap_tabledescr=>create( cl_abap_structdescr=>create( lt_components ) ).
         CREATE DATA md_value TYPE HANDLE mo_tabledescr.
-      CATCH cx_root.
-        RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      CATCH cx_root INTO lx_root.
+        RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+          EXPORTING
+            textid   = zcx_dynscreen_type_error=>type_error_with_prev
+            previous = lx_root.
     ENDTRY.
 
 * ---------------------------------------------------------------------
