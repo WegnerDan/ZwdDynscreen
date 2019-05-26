@@ -1,4 +1,4 @@
-CLASS zcx_dynscreen_base DEFINITION PUBLIC INHERITING FROM cx_static_check ABSTRACT CREATE PUBLIC.
+CLASS zcx_dynscreen_dyna_chk_base DEFINITION PUBLIC INHERITING FROM cx_dynamic_check ABSTRACT CREATE PUBLIC.
   PUBLIC SECTION.
     INTERFACES:
       if_t100_message.
@@ -17,7 +17,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_dynscreen_base IMPLEMENTATION.
+CLASS zcx_dynscreen_dyna_chk_base IMPLEMENTATION.
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------

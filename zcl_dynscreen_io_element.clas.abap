@@ -443,8 +443,9 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
   METHOD set_type.
 * ---------------------------------------------------------------------
     DATA:
-      lo_typedescr TYPE REF TO cl_abap_typedescr,
-      lx_root      TYPE REF TO cx_root.
+      lo_typedescr  TYPE REF TO cl_abap_typedescr,
+      lx_type_error TYPE REF TO zcx_dynscreen_type_error,
+      lx_root       TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     TRY.
@@ -461,6 +462,8 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
         mo_elemdescr ?= lo_typedescr.
         mv_type = iv_type.
         CREATE DATA md_value TYPE HANDLE mo_elemdescr.
+      CATCH zcx_dynscreen_type_error INTO lx_type_error.
+        RAISE EXCEPTION lx_type_error.
       CATCH cx_root INTO lx_root.
         RAISE EXCEPTION TYPE zcx_dynscreen_type_error
           EXPORTING

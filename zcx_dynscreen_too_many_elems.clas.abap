@@ -1,4 +1,4 @@
-CLASS zcx_dynscreen_too_many_elems DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_base FINAL CREATE PUBLIC.
+CLASS zcx_dynscreen_too_many_elems DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_dyna_chk_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     CONSTANTS:
       BEGIN OF zcx_dynscreen_too_many_elems,
@@ -17,7 +17,8 @@ ENDCLASS.
 
 
 
-CLASS zcx_dynscreen_too_many_elems IMPLEMENTATION.
+CLASS ZCX_DYNSCREEN_TOO_MANY_ELEMS IMPLEMENTATION.
+
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
@@ -31,5 +32,4 @@ CLASS zcx_dynscreen_too_many_elems IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
 ENDCLASS.

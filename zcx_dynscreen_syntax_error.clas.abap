@@ -1,13 +1,13 @@
-CLASS zcx_dynscreen_syntax_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_base FINAL CREATE PUBLIC.
+CLASS zcx_dynscreen_syntax_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_dyna_chk_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     CONSTANTS:
       BEGIN OF zcx_dynscreen_syntax_error,
         msgid TYPE symsgid VALUE 'Z_DYNSCREEN',
         msgno TYPE symsgno VALUE '000',
-        attr1 TYPE scx_attrname VALUE 'SYNTAX_ERROR+000(50)',
-        attr2 TYPE scx_attrname VALUE 'SYNTAX_ERROR+050(50)',
-        attr3 TYPE scx_attrname VALUE 'SYNTAX_ERROR+100(50)',
-        attr4 TYPE scx_attrname VALUE 'SYNTAX_ERROR+150(50)',
+        attr1 TYPE scx_attrname VALUE 'SYNTAX_ERROR+000(50)' ##MG_MIS_ATT,
+        attr2 TYPE scx_attrname VALUE 'SYNTAX_ERROR+050(50)' ##MG_MIS_ATT,
+        attr3 TYPE scx_attrname VALUE 'SYNTAX_ERROR+100(50)' ##MG_MIS_ATT,
+        attr4 TYPE scx_attrname VALUE 'SYNTAX_ERROR+150(50)' ##MG_MIS_ATT,
       END OF zcx_dynscreen_syntax_error.
     DATA:
       syntax_error TYPE c LENGTH 200.
@@ -22,7 +22,8 @@ ENDCLASS.
 
 
 
-CLASS zcx_dynscreen_syntax_error IMPLEMENTATION.
+CLASS ZCX_DYNSCREEN_SYNTAX_ERROR IMPLEMENTATION.
+
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
@@ -48,5 +49,4 @@ CLASS zcx_dynscreen_syntax_error IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
-
 ENDCLASS.

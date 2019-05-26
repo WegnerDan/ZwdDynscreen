@@ -1,4 +1,4 @@
-CLASS zcx_dynscreen_canceled DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_base FINAL CREATE PUBLIC.
+CLASS zcx_dynscreen_canceled DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_stat_chk_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     CONSTANTS:
       BEGIN OF zcx_dynscreen_canceled,

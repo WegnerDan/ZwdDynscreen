@@ -148,7 +148,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
-    IF lines( mt_elements ) < 199.
+    IF lines( mt_elements ) < 199 ##NUMBER_OK.
       IF cl_abap_classdescr=>get_class_name( io_screen_element ) = '\CLASS=ZCL_DYNSCREEN_POPUP'
       OR cl_abap_classdescr=>get_class_name( io_screen_element ) = '\CLASS=ZCL_DYNSCREEN_SCREEN'.
         RAISE EXCEPTION TYPE zcx_dynscreen_incompatible

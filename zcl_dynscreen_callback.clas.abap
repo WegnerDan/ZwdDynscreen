@@ -152,7 +152,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
                 lo_req_eve->set_req_field_ref( ld_value ).
                 lo_req_eve->raise_value_request( ).
             ENDCASE.
-          CATCH zcx_dynscreen_base.
+          CATCH zcx_dynscreen_dyna_chk_base.
             "TODO
         ENDTRY.
       CATCH cx_sy_itab_line_not_found.
@@ -179,7 +179,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
           cv_ucomm = lo_io->get_ucomm( ).
         ENDIF.
       CATCH cx_sy_itab_line_not_found
-            zcx_dynscreen_base.
+            zcx_dynscreen_dyna_chk_base.
         "TODO
     ENDTRY.
 
@@ -234,7 +234,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
         lo_io->set_value( iv_value ).
       CATCH cx_sy_itab_line_not_found.
         "TODO
-      CATCH zcx_dynscreen_base.
+      CATCH zcx_dynscreen_dyna_chk_base.
         "TODO
     ENDTRY.
 

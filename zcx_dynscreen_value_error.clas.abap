@@ -1,21 +1,21 @@
-CLASS zcx_dynscreen_value_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_base FINAL CREATE PUBLIC.
+CLASS zcx_dynscreen_value_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_dyna_chk_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     CONSTANTS:
       BEGIN OF zcx_dynscreen_value_error,
         msgid TYPE symsgid VALUE 'Z_DYNSCREEN',
         msgno TYPE symsgno VALUE '010',
-        attr1 TYPE scx_attrname VALUE '',
-        attr2 TYPE scx_attrname VALUE '',
-        attr3 TYPE scx_attrname VALUE '',
-        attr4 TYPE scx_attrname VALUE '',
+        attr1 TYPE scx_attrname VALUE '' ##MG_MISSING,
+        attr2 TYPE scx_attrname VALUE '' ##MG_MISSING,
+        attr3 TYPE scx_attrname VALUE '' ##MG_MISSING,
+        attr4 TYPE scx_attrname VALUE '' ##MG_MISSING,
       END OF zcx_dynscreen_value_error,
       BEGIN OF value_error_with_prev,
         msgid TYPE symsgid VALUE 'Z_DYNSCREEN',
         msgno TYPE symsgno VALUE '010',
-        attr1 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+000(50)',
-        attr2 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+050(50)',
-        attr3 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+100(50)',
-        attr4 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+150(50)',
+        attr1 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+000(50)' ##MG_MIS_ATT,
+        attr2 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+050(50)' ##MG_MIS_ATT,
+        attr3 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+100(50)' ##MG_MIS_ATT,
+        attr4 TYPE scx_attrname VALUE 'PREVIOUS_ERROR+150(50)' ##MG_MIS_ATT,
       END OF value_error_with_prev,
       BEGIN OF no_value_provided,
         msgid TYPE symsgid VALUE 'Z_DYNSCREEN',
@@ -66,7 +66,7 @@ ENDCLASS.
 
 
 
-CLASS zcx_dynscreen_value_error IMPLEMENTATION.
+CLASS ZCX_DYNSCREEN_VALUE_ERROR IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.

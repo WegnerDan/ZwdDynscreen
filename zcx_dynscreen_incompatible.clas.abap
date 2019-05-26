@@ -1,4 +1,4 @@
-CLASS zcx_dynscreen_incompatible DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_base FINAL CREATE PUBLIC.
+CLASS zcx_dynscreen_incompatible DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_dyna_chk_base FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     CONSTANTS:
       BEGIN OF zcx_dynscreen_incompatible,

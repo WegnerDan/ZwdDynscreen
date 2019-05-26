@@ -43,10 +43,10 @@ CLASS lcl IMPLEMENTATION.
     TRY.
         lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
         lo_pa_matnr1->set_value( 'DEFAULT' ).
-        lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
         lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
-        lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
         lo_screen->add( lo_pa_matnr1 ).
+        lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
         lo_screen->add( lo_pa_matnr2 ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
