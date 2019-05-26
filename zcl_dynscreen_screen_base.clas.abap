@@ -58,7 +58,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
     super->constructor( ).

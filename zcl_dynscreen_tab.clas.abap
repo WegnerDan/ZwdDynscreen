@@ -17,7 +17,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_tab IMPLEMENTATION.
 
-
   METHOD add.
 * ---------------------------------------------------------------------
     IF mo_screen IS BOUND.
@@ -83,4 +82,5 @@ CLASS zcl_dynscreen_tab IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

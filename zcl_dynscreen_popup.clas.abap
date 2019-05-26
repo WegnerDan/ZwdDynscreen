@@ -14,7 +14,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_popup IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
     super->constructor( iv_text ).
@@ -66,4 +65,5 @@ CLASS zcl_dynscreen_popup IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

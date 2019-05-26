@@ -1,3 +1,5 @@
+"! input/output element base class <br/>
+"! parameters, select-options etc.
 CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC
 GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
   PUBLIC SECTION.
@@ -279,7 +281,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
         IF ev_value IS SUPPLIED.
           ev_value = <lv_value>.
         ENDIF.
-        rv_value = <lv_value>.
+        " don't fill rv_value, if <lv_value> points to table
+        IF cl_abap_datadescr=>get_data_type_kind( <lv_value> ) <> cl_abap_datadescr=>typekind_table.
+          rv_value = <lv_value>.
+        ENDIF.
 
 * ---------------------------------------------------------------------
       WHEN OTHERS.

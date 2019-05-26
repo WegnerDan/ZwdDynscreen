@@ -23,7 +23,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
-
   METHOD add.
 * ---------------------------------------------------------------------
     RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
@@ -152,4 +151,5 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

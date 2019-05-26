@@ -59,6 +59,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
         tab_prefix        TYPE c LENGTH 4  VALUE 'TAB_',
         btn_prefix        TYPE c LENGTH 3  VALUE 'BT_',
         ucm_prefix        TYPE c LENGTH 3  VALUE 'UC_',
+        itab_body         TYPE c LENGTH 2  VALUE '[]',
         data              TYPE c LENGTH 4  VALUE 'DATA',
         param             TYPE c LENGTH 10 VALUE 'PARAMETERS',
         selopt            TYPE c LENGTH 14 VALUE 'SELECT-OPTIONS',
@@ -343,8 +344,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       "! selection text needs to contain this to use available ddic texts
       lc_seltx_ddic   TYPE c LENGTH 11 VALUE 'D       .',
       "! text length seems to bet set to 9 for ddic entries (but it also works if 0 is provided)
-      lc_seltx_ddicln TYPE i           VALUE 9,
-      lc_tab_body     TYPE c LENGTH  2 VALUE '[]'.
+      lc_seltx_ddicln TYPE i           VALUE 9.
     DATA:
       lv_text  TYPE textpooltx,
       lv_txlen TYPE textpoolln.
@@ -382,7 +382,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       ENDIF.
 
       APPEND VALUE #( id     = lc_id_seltx
-                      key    = replace( val = <ls_var>-name sub = lc_tab_body with = '' )
+                      key    = replace( val = <ls_var>-name sub = mc_syn-itab_body with = '' )
                       entry  = lv_text
                       length = lv_txlen      ) TO mt_textpool.
     ENDLOOP.

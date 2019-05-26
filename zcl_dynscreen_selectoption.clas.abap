@@ -23,7 +23,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
     super->constructor( iv_type = iv_type
@@ -106,58 +105,15 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD get_value.
 * ---------------------------------------------------------------------
-    DATA:
-      lv_value TYPE c LENGTH 1000.
-    FIELD-SYMBOLS:
-      <lv_value> TYPE any.
-
-* ---------------------------------------------------------------------
-    FREE ev_value.
-
-* ---------------------------------------------------------------------
-    ASSIGN md_value->* TO <lv_value>.
-    IF <lv_value> IS NOT ASSIGNED.
-      RETURN.
+    IF iv_conversion = mc_conv_write.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+        EXPORTING
+          textid = zcx_dynscreen_value_error=>get_value_write_conv_selopt.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    IF mv_value IS NOT INITIAL.
-      TRY.
-          CALL TRANSFORMATION id SOURCE XML mv_value RESULT value = <lv_value>.
-        CATCH cx_root.
-          FREE: <lv_value>, mv_value.
-      ENDTRY.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-    CASE iv_conversion.
-
-* ---------------------------------------------------------------------
-      WHEN mc_conv_xml.
-        IF ev_value IS SUPPLIED.
-          ev_value = mv_value.
-        ENDIF.
-        rv_value = mv_value.
-
-* ---------------------------------------------------------------------
-      WHEN mc_conv_write.
-*        WRITE <lv_value> TO lv_value.
-*        IF ev_value IS SUPPLIED.
-*          ev_value = lv_value.
-*        ENDIF.
-*        rv_value = lv_value.
-
-* ---------------------------------------------------------------------
-      WHEN mc_conv_cast.
-        IF ev_value IS SUPPLIED.
-          ev_value = <lv_value>.
-        ENDIF.
-        FREE rv_value.
-
-* ---------------------------------------------------------------------
-      WHEN OTHERS.
-        RETURN.
-    ENDCASE.
+    super->get_value( EXPORTING iv_conversion = iv_conversion
+                      IMPORTING ev_value      = ev_value      ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -165,7 +121,7 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD get_var_name.
 * ---------------------------------------------------------------------
-    rv_var_name = super->get_var_name( ) && '[]'.
+    rv_var_name = super->get_var_name( ) && mc_syn-itab_body.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

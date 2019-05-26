@@ -28,7 +28,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
-
   METHOD add.
 * ---------------------------------------------------------------------
     IF cl_abap_classdescr=>get_class_name( io_screen_element ) <> '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON'.

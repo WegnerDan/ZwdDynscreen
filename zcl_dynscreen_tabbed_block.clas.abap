@@ -19,7 +19,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_tabbed_block IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
     super->constructor( ).
@@ -71,4 +70,5 @@ CLASS zcl_dynscreen_tabbed_block IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

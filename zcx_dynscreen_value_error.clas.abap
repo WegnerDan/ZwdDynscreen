@@ -48,7 +48,15 @@ CLASS zcx_dynscreen_value_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_
         attr2 TYPE scx_attrname VALUE '',
         attr3 TYPE scx_attrname VALUE '',
         attr4 TYPE scx_attrname VALUE '',
-      END OF set_value_write_conv.
+      END OF set_value_write_conv,
+      BEGIN OF get_value_write_conv_selopt,
+        msgid TYPE symsgid VALUE 'Z_DYNSCREEN',
+        msgno TYPE symsgno VALUE '015',
+        attr1 TYPE scx_attrname VALUE '',
+        attr2 TYPE scx_attrname VALUE '',
+        attr3 TYPE scx_attrname VALUE '',
+        attr4 TYPE scx_attrname VALUE '',
+      END OF get_value_write_conv_selopt.
     DATA:
       previous_error TYPE mty_previous_error,
       value          TYPE string,
@@ -66,7 +74,7 @@ ENDCLASS.
 
 
 
-CLASS ZCX_DYNSCREEN_VALUE_ERROR IMPLEMENTATION.
+CLASS zcx_dynscreen_value_error IMPLEMENTATION.
 
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
