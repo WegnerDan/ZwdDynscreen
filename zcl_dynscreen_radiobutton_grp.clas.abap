@@ -16,6 +16,7 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
     METHODS:
       generate_close REDEFINITION,
       generate_open REDEFINITION,
+      generate_callback_set_value REDEFINITION,
       get_first_radiobutton FINAL RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton
                                   RAISING   cx_sy_itab_line_not_found.
   PRIVATE SECTION.
@@ -54,7 +55,7 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     super->constructor( is_generic_type = VALUE #( datatype = mc_type-n
-                                                   length   = 3         ) ).
+                                                   length   = 4         ) ).
 
 * ---------------------------------------------------------------------
     LOOP AT it_radiobuttons ASSIGNING FIELD-SYMBOL(<lo_rb>).
@@ -68,24 +69,6 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD generate_close.
 * ---------------------------------------------------------------------
-    APPEND
-    'CASE abap_true.' ##NO_TEXT
-    TO mt_source_ac.
-
-* ---------------------------------------------------------------------
-    LOOP AT mt_radiobuttons ASSIGNING FIELD-SYMBOL(<lo_rb>).
-      APPEND
-      `  WHEN ` && <lo_rb>->get_var_name( ) && '.'
-      TO mt_source_ac.
-      APPEND
-      `    ` && mc_syn-var_prefix && mv_id && ` = ` && <lo_rb>->get_id( ) && '.'
-      TO mt_source_ac.
-    ENDLOOP.
-
-* ---------------------------------------------------------------------
-    APPEND
-    'ENDCASE.'
-    TO mt_source_ac.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -122,17 +105,40 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD get_selected_radiobutton.
 * ---------------------------------------------------------------------
-    DATA:
-      lv_radiobutton_value TYPE abap_bool.
+    FIELD-SYMBOLS:
+      <lv_value> TYPE mty_id.
 
 * ---------------------------------------------------------------------
-    LOOP AT mt_radiobuttons INTO DATA(lo_radiobutton).
-      lo_radiobutton->get_value( IMPORTING ev_value = lv_radiobutton_value ).
-      IF lv_radiobutton_value = abap_true.
-        ro_radiobutton = lo_radiobutton.
-        RETURN.
-      ENDIF.
-    ENDLOOP.
+    ASSIGN md_value->* TO <lv_value>.
+
+* ---------------------------------------------------------------------
+    ro_radiobutton = mt_radiobuttons[ table_line->mv_id = <lv_value> ].
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD generate_callback_set_value.
+* ---------------------------------------------------------------------
+    IF mt_radiobuttons IS NOT INITIAL.
+      APPEND
+      'CASE abap_true.' ##NO_TEXT
+      TO rt.
+      LOOP AT mt_radiobuttons ASSIGNING FIELD-SYMBOL(<lo_rb>).
+        APPEND
+        `  WHEN ` && <lo_rb>->get_var_name( ) && '.'
+        TO rt.
+        APPEND
+        `    ` && mc_syn-var_prefix && mv_id && ` = ` && <lo_rb>->get_id( ) && '.'
+        TO rt.
+      ENDLOOP.
+      APPEND
+      'ENDCASE.'
+      TO rt.
+    ENDIF.
+
+* ---------------------------------------------------------------------
+    APPEND LINES OF super->generate_callback_set_value( ) TO rt.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

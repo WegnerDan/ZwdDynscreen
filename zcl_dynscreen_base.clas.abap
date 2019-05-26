@@ -48,8 +48,10 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mc_base22          TYPE i VALUE 22,
       mc_base22_alphabet TYPE string VALUE '0123456789ABCDEFGHIJKLMNOPQRSTUV',
       BEGIN OF mc_syn,
-        sq                TYPE c LENGTH 1  VALUE '''', " single quote
-        dq                TYPE c LENGTH 1  VALUE '"',  " double quote
+        "! single quote
+        sq                TYPE c LENGTH 1  VALUE '''',
+        "! double quote
+        dq                TYPE c LENGTH 1  VALUE '"',
         dat_prefix        TYPE c LENGTH 1  VALUE 'D',
         var_prefix        TYPE c LENGTH 2  VALUE 'V_',
         tit_prefix        TYPE c LENGTH 2  VALUE 'T_',
@@ -108,17 +110,28 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mv_text        TYPE textpooltx,
       mt_elements    TYPE mty_t_screen_elements,
       mt_source      TYPE mty_t_source,
-      mt_source_ac   TYPE mty_t_source, " after screen call
-      mt_source_as   TYPE mty_t_source, " after standard screen definitions
+      "! after screen call
+      mt_source_ac   TYPE mty_t_source,
+      "! after standard screen definitions
+      mt_source_as   TYPE mty_t_source,
+      "! sources of events
       BEGIN OF ms_source_eve,
-        t_init          TYPE mty_t_source, " initialization
-        t_selscreen     TYPE mty_t_source, " at selection-screen
-        t_selscreen_out TYPE mty_t_source, " at selection-screen output
-        t_selscreen_on  TYPE mty_t_source, " at selection-screen on
-        t_selscreen_obl TYPE mty_t_source, " at selection-screen on block
-        t_selscreen_org TYPE mty_t_source, " at selection-screen on radiobutton group
-        t_selscreen_ovr TYPE mty_t_source, " at selection-screen on value-request for
-        t_selscreen_ohr TYPE mty_t_source, " at selection-screen on help-request for
+        "! initialization
+        t_init          TYPE mty_t_source,
+        "! at selection-screen
+        t_selscreen     TYPE mty_t_source,
+        "! at selection-screen output
+        t_selscreen_out TYPE mty_t_source,
+        "! at selection-screen on
+        t_selscreen_on  TYPE mty_t_source,
+        "! at selection-screen on block
+        t_selscreen_obl TYPE mty_t_source,
+        "! at selection-screen on radiobutton group
+        t_selscreen_org TYPE mty_t_source,
+        "! at selection-screen on value-request for
+        t_selscreen_ovr TYPE mty_t_source,
+        "! at selection-screen on help-request for
+        t_selscreen_ohr TYPE mty_t_source,
       END OF ms_source_eve,
       mt_variables TYPE mty_t_variables,
       mt_textpool  TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key.
@@ -130,12 +143,19 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
       is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
+      "! generate screen element source
       generate,
+      "! generate screen element opening clause (called before generate method of children) <br/><br/>
+      "! example: SELECTION-SCREEN BEGIN OF SCREEN 0001.
       generate_open ABSTRACT,
+      "! generate screen element closing clause (called before generate method of children) <br/><br/>
+      "! example: SELECTION-SCREEN END OF SCREEN 0001.
       generate_close ABSTRACT,
       pretty_print FINAL CHANGING ct_source TYPE mty_t_source,
+      "! convert base10 number to base22
       base10_to_22 FINAL IMPORTING iv_decimal       TYPE any
                          RETURNING VALUE(rv_base22) TYPE string,
+      "! convert base22 number to base10
       base22_to_10 FINAL IMPORTING iv_base22         TYPE any
                          RETURNING VALUE(rv_decimal) TYPE i.
   PRIVATE SECTION.
@@ -144,7 +164,6 @@ ENDCLASS.
 
 
 CLASS zcl_dynscreen_base IMPLEMENTATION.
-
 
   METHOD add.
 * ---------------------------------------------------------------------
@@ -295,9 +314,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
     LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
-      APPEND
-      `go_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).` ##NO_TEXT
-      TO rt_events_source.
+      APPEND LINES OF <ls_var>-ref->generate_callback_set_value( ) TO rt_events_source.
     ENDLOOP.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
     APPEND `IF sscrfields-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
@@ -308,10 +325,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     APPEND mc_syn-eve_selscreen_out && '.' TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_out TO rt_events_source.
     LOOP AT mt_variables ASSIGNING <ls_var>.
-      APPEND
-      `go_cb->get_value( exporting iv_id = '` && <ls_var>-id &&  ##NO_TEXT
-      `' importing ev_value = ` && <ls_var>-name && ` ).`        ##NO_TEXT
-      TO rt_events_source.
+      APPEND LINES OF <ls_var>-ref->generate_callback_get_value( ) TO rt_events_source.
     ENDLOOP.
     APPEND 'go_cb->process_pbo( ).' TO rt_events_source  ##NO_TEXT.
 
@@ -324,9 +338,12 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     CONSTANTS:
       lc_id_title     TYPE c LENGTH  1 VALUE 'R',
       lc_id_seltx     TYPE c LENGTH  1 VALUE 'S',
-      lc_seltx_prefln TYPE i           VALUE 8,           " selection text needs to be offset by this amount
-      lc_seltx_ddic   TYPE c LENGTH 11 VALUE 'D       .', " selection text needs to contain this to use available ddic texts
-      lc_seltx_ddicln TYPE i           VALUE 9,           " text length seems to bet set to 9 for ddic entries (but it also works if 0 is provided)
+      "! selection text needs to be offset by this amount
+      lc_seltx_prefln TYPE i           VALUE 8,
+      "! selection text needs to contain this to use available ddic texts
+      lc_seltx_ddic   TYPE c LENGTH 11 VALUE 'D       .',
+      "! text length seems to bet set to 9 for ddic entries (but it also works if 0 is provided)
+      lc_seltx_ddicln TYPE i           VALUE 9,
       lc_tab_body     TYPE c LENGTH  2 VALUE '[]'.
     DATA:
       lv_text  TYPE textpooltx,

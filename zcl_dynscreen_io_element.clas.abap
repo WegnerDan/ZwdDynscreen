@@ -74,7 +74,9 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
       get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
       get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx,
-      append_uc_event_src.
+      append_uc_event_src,
+      generate_callback_set_value RETURNING VALUE(rt) TYPE mty_t_source,
+      generate_callback_get_value RETURNING VALUE(rt) TYPE mty_t_source.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -560,5 +562,25 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
+
+  METHOD generate_callback_get_value.
+* ---------------------------------------------------------------------
+    APPEND
+    `go_cb->get_value( exporting iv_id = '` && mv_id &&    ##NO_TEXT
+    `' importing ev_value = ` && get_var_name( ) && ` ).`  ##NO_TEXT
+    TO rt.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD generate_callback_set_value.
+* ---------------------------------------------------------------------
+    APPEND
+    `go_cb->set_value( iv_id = '` && mv_id && `' iv_value = ` && get_var_name( ) && ` ).` ##NO_TEXT
+    TO rt.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
 
 ENDCLASS.
