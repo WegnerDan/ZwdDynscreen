@@ -1,4 +1,4 @@
-CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_radiobutton_grp FINAL CREATE PUBLIC
+CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC
 GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
   PUBLIC SECTION.
     METHODS:
@@ -11,8 +11,6 @@ GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
       set_type REDEFINITION,
       set_value REDEFINITION.
   PROTECTED SECTION.
-    DATA:
-      mv_from_constructor TYPE abap_bool.
     METHODS:
       generate_open REDEFINITION,
       generate_close REDEFINITION.
@@ -36,11 +34,8 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( ).
-    mv_from_constructor = abap_true.
-    set_type( 'ABAP_BOOL' ).
-    set_text( iv_text ).
-    mv_from_constructor = abap_false.
+    super->constructor( iv_type = 'ABAP_BOOL'
+                        iv_text = iv_text    ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -84,15 +79,11 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD set_generic_type.
 * ---------------------------------------------------------------------
-    IF mv_from_constructor = abap_true.
-      super->set_generic_type( is_type_info ).
-    ELSE.
-      " not supported for radiobuttons
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
-        EXPORTING
-          textid       = zcx_dynscreen_type_error=>type_change_not_supported
-          parent_class = me.
-    ENDIF.
+    " not supported for radiobuttons
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+      EXPORTING
+        textid       = zcx_dynscreen_type_error=>type_change_not_supported
+        parent_class = me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -100,15 +91,11 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD set_type.
 * ---------------------------------------------------------------------
-    IF mv_from_constructor = abap_true.
-      super->set_type( iv_type ).
-    ELSE.
-      " not supported for radiobuttons
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
-        EXPORTING
-          textid       = zcx_dynscreen_type_error=>type_change_not_supported
-          parent_class = me.
-    ENDIF.
+    " not supported for radiobuttons
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+      EXPORTING
+        textid       = zcx_dynscreen_type_error=>type_change_not_supported
+        parent_class = me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

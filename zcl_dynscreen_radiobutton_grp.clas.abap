@@ -1,4 +1,5 @@
-CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element CREATE PUBLIC GLOBAL FRIENDS zcl_dynscreen_radiobutton.
+CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element CREATE PUBLIC
+GLOBAL FRIENDS zcl_dynscreen_radiobutton.
   PUBLIC SECTION.
     INTERFACES:
       zif_dynscreen_uc_event.
@@ -17,6 +18,7 @@ CLASS zcl_dynscreen_radiobutton_grp DEFINITION PUBLIC INHERITING FROM zcl_dynscr
       generate_close REDEFINITION,
       generate_open REDEFINITION,
       generate_callback_set_value REDEFINITION,
+      generate_callback_get_value REDEFINITION,
       get_first_radiobutton FINAL RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton
                                   RAISING   cx_sy_itab_line_not_found.
   PRIVATE SECTION.
@@ -26,7 +28,8 @@ ENDCLASS.
 
 
 
-CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
+CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
+
 
   METHOD add.
 * ---------------------------------------------------------------------
@@ -66,52 +69,10 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
   ENDMETHOD.
 
 
-  METHOD generate_close.
+  METHOD generate_callback_get_value.
 * ---------------------------------------------------------------------
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD generate_open.
-* ---------------------------------------------------------------------
-    APPEND
-    mc_syn-data && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_generic_type_string && '.'
-    TO mt_source.
-
-* ---------------------------------------------------------------------
-    append_uc_event_src( ).
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD zif_dynscreen_uc_event~raise.
-* ---------------------------------------------------------------------
-    RAISE EVENT radiobutton_click.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD get_first_radiobutton.
-* ---------------------------------------------------------------------
-    ro_radiobutton = mt_radiobuttons[ 1 ].
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD get_selected_radiobutton.
-* ---------------------------------------------------------------------
-    FIELD-SYMBOLS:
-      <lv_value> TYPE mty_id.
-
-* ---------------------------------------------------------------------
-    ASSIGN md_value->* TO <lv_value>.
-
-* ---------------------------------------------------------------------
-    ro_radiobutton = mt_radiobuttons[ table_line->mv_id = <lv_value> ].
+    " no corresponding screen field exists for radiobutton groups
+    " -> callback get value not necessary
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -142,4 +103,54 @@ CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
+
+  METHOD generate_close.
+* ---------------------------------------------------------------------
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD generate_open.
+* ---------------------------------------------------------------------
+    APPEND
+    mc_syn-data && ` ` && mc_syn-var_prefix && mv_id && ` ` && mc_syn-type && ` ` && mv_generic_type_string && '.'
+    TO mt_source.
+
+* ---------------------------------------------------------------------
+    append_uc_event_src( ).
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_first_radiobutton.
+* ---------------------------------------------------------------------
+    ro_radiobutton = mt_radiobuttons[ 1 ].
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD get_selected_radiobutton.
+* ---------------------------------------------------------------------
+    FIELD-SYMBOLS:
+      <lv_value> TYPE mty_id.
+
+* ---------------------------------------------------------------------
+    ASSIGN md_value->* TO <lv_value>.
+
+* ---------------------------------------------------------------------
+    ro_radiobutton = mt_radiobuttons[ table_line->mv_id = <lv_value> ].
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD zif_dynscreen_uc_event~raise.
+* ---------------------------------------------------------------------
+    RAISE EVENT radiobutton_click.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
 ENDCLASS.
