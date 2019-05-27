@@ -17,8 +17,7 @@ ENDCLASS.
 
 
 
-CLASS ZCX_DYNSCREEN_TOO_MANY_ELEMS IMPLEMENTATION.
-
+CLASS zcx_dynscreen_too_many_elems IMPLEMENTATION.
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
@@ -32,4 +31,5 @@ CLASS ZCX_DYNSCREEN_TOO_MANY_ELEMS IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

@@ -58,10 +58,10 @@ CLASS zcx_dynscreen_value_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_
         attr4 TYPE scx_attrname VALUE '',
       END OF get_value_write_conv_selopt.
     DATA:
-      previous_error TYPE mty_previous_error,
-      value          TYPE string,
-      parent_class   TYPE seoclsname,
-      conversion     TYPE c LENGTH 1.
+      previous_error TYPE mty_previous_error READ-ONLY,
+      value          TYPE string READ-ONLY,
+      parent_class   TYPE seoclsname READ-ONLY,
+      conversion     TYPE c LENGTH 1 READ-ONLY.
     METHODS:
       constructor IMPORTING textid       LIKE if_t100_message=>t100key OPTIONAL
                             previous     LIKE previous OPTIONAL
@@ -75,7 +75,6 @@ ENDCLASS.
 
 
 CLASS zcx_dynscreen_value_error IMPLEMENTATION.
-
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
@@ -103,4 +102,5 @@ CLASS zcx_dynscreen_value_error IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

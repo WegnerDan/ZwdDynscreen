@@ -11,8 +11,7 @@ ENDCLASS.
 
 
 
-CLASS ZCX_DYNSCREEN_STAT_CHK_BASE IMPLEMENTATION.
-
+CLASS zcx_dynscreen_stat_chk_base IMPLEMENTATION.
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
@@ -30,4 +29,5 @@ CLASS ZCX_DYNSCREEN_STAT_CHK_BASE IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

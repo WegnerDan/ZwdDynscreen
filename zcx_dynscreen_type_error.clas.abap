@@ -58,10 +58,10 @@ CLASS zcx_dynscreen_type_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen_d
         attr4 TYPE scx_attrname VALUE '',
       END OF no_type_provided.
     DATA:
-      previous_error    TYPE mty_previous_error,
-      parent_class      TYPE seoclsname,
-      generic_data_type TYPE zcl_dynscreen_io_element=>mty_s_generic_type_info-datatype,
-      type_name         TYPE typename.
+      previous_error    TYPE mty_previous_error READ-ONLY,
+      parent_class      TYPE seoclsname READ-ONLY,
+      generic_data_type TYPE zcl_dynscreen_io_element=>mty_s_generic_type_info-datatype READ-ONLY,
+      type_name         TYPE typename READ-ONLY.
     METHODS:
       constructor IMPORTING textid            LIKE if_t100_message=>t100key OPTIONAL
                             previous          TYPE REF TO cx_root OPTIONAL

@@ -10,8 +10,8 @@ CLASS zcx_dynscreen_incompatible DEFINITION PUBLIC INHERITING FROM zcx_dynscreen
         attr4 TYPE scx_attrname VALUE '',
       END OF zcx_dynscreen_incompatible.
     DATA:
-      parent_class       TYPE seoclsname,
-      incompatible_class TYPE seoclsname.
+      parent_class       TYPE seoclsname READ-ONLY,
+      incompatible_class TYPE seoclsname READ-ONLY.
     METHODS:
       constructor IMPORTING parent_class       TYPE REF TO object
                             incompatible_class TYPE REF TO object.

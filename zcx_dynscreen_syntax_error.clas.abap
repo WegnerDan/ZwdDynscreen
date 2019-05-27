@@ -10,7 +10,7 @@ CLASS zcx_dynscreen_syntax_error DEFINITION PUBLIC INHERITING FROM zcx_dynscreen
         attr4 TYPE scx_attrname VALUE 'SYNTAX_ERROR+150(50)' ##MG_MIS_ATT,
       END OF zcx_dynscreen_syntax_error.
     DATA:
-      syntax_error TYPE c LENGTH 200.
+      syntax_error TYPE c LENGTH 200 READ-ONLY.
     METHODS:
       constructor IMPORTING syn_check TYPE REF TO cl_abap_syntax_check_norm,
       get_syntax_check RETURNING VALUE(ro_syntax_check) TYPE REF TO cl_abap_syntax_check_norm.
@@ -22,8 +22,7 @@ ENDCLASS.
 
 
 
-CLASS ZCX_DYNSCREEN_SYNTAX_ERROR IMPLEMENTATION.
-
+CLASS zcx_dynscreen_syntax_error IMPLEMENTATION.
 
   METHOD constructor ##ADT_SUPPRESS_GENERATION.
 * ---------------------------------------------------------------------
@@ -49,4 +48,5 @@ CLASS ZCX_DYNSCREEN_SYNTAX_ERROR IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.
