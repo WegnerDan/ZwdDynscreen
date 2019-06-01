@@ -7,9 +7,8 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mty_varname TYPE c LENGTH 30,
       mty_srcname TYPE c LENGTH 40,
       BEGIN OF mty_s_variable,
-        id   TYPE mty_id,
-        name TYPE mty_varname,
-        ref  TYPE REF TO zcl_dynscreen_io_element,
+        id  TYPE mty_id,
+        ref TYPE REF TO zcl_dynscreen_io_element,
       END OF mty_s_variable,
       mty_t_variables TYPE SORTED TABLE OF mty_s_variable WITH UNIQUE KEY id.
     CONSTANTS:
@@ -25,9 +24,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_variables RETURNING VALUE(rt_variables) TYPE mty_t_variables,
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING iv_text TYPE textpooltx,
-      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
-          RAISING   zcx_dynscreen_incompatible
-                    zcx_dynscreen_too_many_elems,
       get_id RETURNING VALUE(rv_id) TYPE mty_id,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
@@ -35,7 +31,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       BEGIN OF mty_s_screen_element,
         id  TYPE mty_id,
         ref TYPE REF TO zcl_dynscreen_base,
-        var TYPE abap_bool,
       END OF mty_s_screen_element,
       mty_t_screen_elements TYPE SORTED TABLE OF mty_s_screen_element WITH UNIQUE KEY id,
       mty_source            TYPE string,
@@ -140,6 +135,9 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       set_last_id IMPORTING !iv_last_id TYPE i,
       get_last_id RETURNING VALUE(rv_id) TYPE i.
     METHODS:
+      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
+          RAISING   zcx_dynscreen_incompatible
+                    zcx_dynscreen_too_many_elems,
       set_id IMPORTING iv_id TYPE i,
       generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
@@ -178,8 +176,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       ENDIF.
       io_screen_element->mo_parent = me.
       INSERT VALUE #( id  = io_screen_element->get_id( )
-                      ref = io_screen_element
-                      var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
+                      ref = io_screen_element            ) INTO TABLE mt_elements.
     ELSE.
       " after about 200 elements selection screen activation fails
       RAISE EXCEPTION TYPE zcx_dynscreen_too_many_elems.
@@ -277,11 +274,10 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       APPEND LINES OF <ls_element>-ref->mt_source TO mt_source.
       INSERT LINES OF <ls_element>-ref->mt_variables INTO TABLE mt_variables.
       " if element is a variable (parameters or select options)
-      IF <ls_element>-var = abap_true.
+      IF <ls_element>-ref->mv_is_variable = abap_true.
         lo_io ?= <ls_element>-ref.
         INSERT VALUE #( id   = <ls_element>-id
-                        name = lo_io->get_var_name( )
-                        ref  = lo_io                 ) INTO TABLE mt_variables.
+                        ref  = lo_io           ) INTO TABLE mt_variables.
       ENDIF.
       APPEND LINES OF <ls_element>-ref->mt_source_ac                  TO mt_source_ac.
       APPEND LINES OF <ls_element>-ref->mt_source_as                  TO mt_source_as.
@@ -382,9 +378,12 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       ENDIF.
 
       APPEND VALUE #( id     = lc_id_seltx
-                      key    = replace( val = <ls_var>-name sub = mc_syn-itab_body with = '' )
+                      key    = replace( val  = <ls_var>-ref->get_var_name( )
+                                        sub  = mc_syn-itab_body
+                                        with = ''                            )
                       entry  = lv_text
-                      length = lv_txlen      ) TO mt_textpool.
+                      length = lv_txlen
+                     ) TO mt_textpool.
     ENDLOOP.
 
 * ---------------------------------------------------------------------

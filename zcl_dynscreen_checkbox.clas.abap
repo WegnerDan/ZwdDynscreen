@@ -3,7 +3,10 @@ CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_par
     INTERFACES:
       zif_dynscreen_uc_event.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_screen_base
+                            iv_text   TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       set_type REDEFINITION,
       set_value REDEFINITION.
     EVENTS:
@@ -18,11 +21,11 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type = 'ABAP_BOOL'
-                        iv_text = iv_text     ).
+    super->constructor( io_parent = io_parent
+                        iv_type   = 'ABAP_BOOL'
+                        iv_text   = iv_text     ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

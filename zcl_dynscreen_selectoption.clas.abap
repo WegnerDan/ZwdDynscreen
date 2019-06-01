@@ -3,9 +3,12 @@ CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen
     INTERFACES:
       zif_dynscreen_request_event.
     METHODS:
-      constructor IMPORTING iv_type TYPE typename
-                            iv_text TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_screen_base
+                            iv_type   TYPE typename
+                            iv_text   TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       get_value REDEFINITION,
       set_type REDEFINITION.
   PROTECTED SECTION.
@@ -25,13 +28,12 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type = iv_type
-                        iv_text = iv_text ).
+    super->constructor( io_parent = io_parent
+                        iv_type   = iv_type
+                        iv_text   = iv_text   ).
 
 * ---------------------------------------------------------------------
     set_type( iv_type ).
-*mo_elemdescr
-*md_value
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -130,6 +132,8 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
   METHOD set_type.
 * ---------------------------------------------------------------------
     DATA:
+      lv_sign       TYPE c LENGTH 1,
+      lv_option     TYPE c LENGTH 2,
       lo_datadescr  TYPE REF TO cl_abap_datadescr,
       lt_components TYPE cl_abap_structdescr=>component_table,
       lx_root       TYPE REF TO cx_root.
@@ -149,10 +153,10 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     TRY.
-        lo_datadescr ?= cl_abap_typedescr=>describe_by_name( 'CHAR1' ).
+        lo_datadescr ?= cl_abap_typedescr=>describe_by_data( lv_sign ).
         APPEND VALUE #( name = 'SIGN'
                         type = lo_datadescr ) TO lt_components.
-        lo_datadescr ?= cl_abap_typedescr=>describe_by_name( 'CHAR2' ).
+        lo_datadescr ?= cl_abap_typedescr=>describe_by_data( lv_option ).
         APPEND VALUE #( name = 'OPTION'
                         type = lo_datadescr ) TO lt_components.
         APPEND VALUE #( name = 'LOW'

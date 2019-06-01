@@ -29,9 +29,11 @@ CLASS lcl_appl IMPLEMENTATION.
     lo_popup->set_text( 'Selection Screen Generation Test' ).
 
     TRY.
-        lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr1 = NEW #( io_parent = lo_popup
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_value( 'DEFAULT' ).
-        lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr2 = NEW #( io_parent = lo_popup
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
         lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
       CATCH zcx_dynscreen_type_error
@@ -42,18 +44,17 @@ CLASS lcl_appl IMPLEMENTATION.
     ENDTRY.
 
     TRY.
-        lo_popup->add( lo_pa_matnr1 ).
-        lo_popup->add( lo_pa_matnr2 ).
-        lo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
+        lo_btn = NEW #( io_parent = lo_popup
+                        iv_text   = 'Testbutton'
+                        iv_length = 20           ).
         SET HANDLER handle_button_click FOR lo_btn.
 
-        lo_popup->add( lo_btn ).
 
-        lo_so_vbeln = NEW #( iv_type = 'VBAK-VBELN' ).
-        lo_popup->add( lo_so_vbeln ).
+        lo_so_vbeln = NEW #( io_parent = lo_popup
+                             iv_type   = 'VBAK-VBELN' ).
 
-        lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
-        lo_popup->add( lo_pa_ebeln ).
+        lo_pa_ebeln = NEW #( io_parent = lo_popup
+                             iv_type   = 'EKKO-EBELN' ).
 
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
@@ -112,10 +113,12 @@ CLASS lcl_appl IMPLEMENTATION.
 * ---------------------------------------------------------------------
   ENDMETHOD.
 
+
   METHOD handle_button_click.
 * ---------------------------------------------------------------------
     MESSAGE 'Button pressed!' TYPE 'I'.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

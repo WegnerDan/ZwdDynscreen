@@ -41,14 +41,14 @@ CLASS lcl IMPLEMENTATION.
     lo_screen->set_pretty_print( ).
     lo_screen->set_text( 'Selection Screen Tab Test' ).
 
-    lo_tab_block = NEW #( iv_lines = 6 ).
-    lo_tab1 = NEW #( iv_text = 'Tab1' ).
-    lo_tab2 = NEW #( iv_text = 'Tab2' ).
-
     TRY.
-        lo_tab_block->add( lo_tab1 ).
-        lo_tab_block->add( lo_tab2 ).
-        lo_screen->add( lo_tab_block ).
+        lo_tab_block = NEW #( io_parent = lo_screen
+                              iv_lines  = 6         ).
+        lo_tab1 = NEW #( io_parent = lo_tab_block
+                         iv_text   = 'Tab1'       ).
+        lo_tab2 = NEW #( io_parent = lo_tab_block
+                         iv_text   = 'Tab2'       ).
+
       CATCH zcx_dynscreen_incompatible
             zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
@@ -57,13 +57,13 @@ CLASS lcl IMPLEMENTATION.
 
 
     TRY.
-        lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr1 = NEW #( io_parent = lo_tab1
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_value( 'DEFAULT' ).
-        lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr2 = NEW #( io_parent = lo_tab2
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
         lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
-        lo_tab1->add( lo_pa_matnr1 ).
-        lo_tab2->add( lo_pa_matnr2 ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
             zcx_dynscreen_incompatible
@@ -72,9 +72,10 @@ CLASS lcl IMPLEMENTATION.
     ENDTRY.
 
     TRY.
-        lo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
+        lo_btn = NEW #( io_parent = lo_tab1
+                        iv_text   = 'Testbutton'
+                        iv_length = 20           ).
         SET HANDLER handle_button_click FOR lo_btn.
-        lo_tab1->add( lo_btn ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
             zcx_dynscreen_too_many_elems INTO lx.
@@ -83,12 +84,12 @@ CLASS lcl IMPLEMENTATION.
 
 
     TRY.
-        lo_so_vbeln = NEW #( iv_type = 'VBAK-VBELN' ).
-        lo_tab1->add( lo_so_vbeln ).
-        lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
-        lo_tab2->add( lo_pa_ebeln ).
-        lo_pa_program = NEW #( iv_type = 'RS38M-PROGRAMM' ).
-        lo_screen->add( lo_pa_program ).
+        lo_so_vbeln = NEW #( io_parent = lo_tab1
+                             iv_type   = 'VBAK-VBELN' ).
+        lo_pa_ebeln = NEW #( io_parent = lo_tab2
+                             iv_type   = 'EKKO-EBELN' ).
+        lo_pa_program = NEW #( io_parent = lo_screen
+                               iv_type   = 'RS38M-PROGRAMM' ).
         SET HANDLER handle_program_value_request FOR lo_pa_program.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
@@ -98,11 +99,11 @@ CLASS lcl IMPLEMENTATION.
     ENDTRY.
 
     TRY.
-        lo_rb_option1 = NEW #( iv_text = 'Option 1' ).
-        lo_rb_option2 = NEW #( iv_text = 'Option 2' ).
-        lo_rb_grp1    = NEW #( it_radiobuttons = VALUE #( ( lo_rb_option1 )
-                                                          ( lo_rb_option2 ) ) ).
-        lo_tab2->add( lo_rb_grp1 ).
+        lo_rb_grp1    = NEW #( io_parent = lo_tab2 ).
+        lo_rb_option1 = NEW #( io_parent = lo_rb_grp1
+                               iv_text   = 'Option 1' ).
+        lo_rb_option2 = NEW #( io_parent = lo_rb_grp1
+                               iv_text   = 'Option 2' ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
             zcx_dynscreen_too_many_elems INTO lx.

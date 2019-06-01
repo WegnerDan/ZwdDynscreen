@@ -2,16 +2,17 @@ CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_
 GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
   PUBLIC SECTION.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_radiobutton_grp
+                            iv_text   TYPE textpooltx OPTIONAL
                   RAISING   zcx_dynscreen_type_error
                             zcx_dynscreen_incompatible
                             zcx_dynscreen_too_many_elems,
-      add REDEFINITION,
       set_generic_type REDEFINITION,
       set_type REDEFINITION,
       set_value REDEFINITION.
   PROTECTED SECTION.
     METHODS:
+      add REDEFINITION,
       generate_open REDEFINITION,
       generate_close REDEFINITION.
   PRIVATE SECTION.
@@ -23,6 +24,7 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
+    " radiobuttons have no children
     RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
       EXPORTING
         parent_class       = me
@@ -34,8 +36,16 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type = 'ABAP_BOOL'
-                        iv_text = iv_text    ).
+    " io_parent of super class has type zcl_dynscreen_screen_base
+    " which is incompatible zcl_dynscreen_radiobutton_grp
+    " -> pass initial variable to io_parent of super class
+    " -> and add me afterwards
+    super->constructor( io_parent = VALUE #( )
+                        iv_type   = 'ABAP_BOOL'
+                        iv_text   = iv_text    ).
+
+* ---------------------------------------------------------------------
+    io_parent->add( me ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

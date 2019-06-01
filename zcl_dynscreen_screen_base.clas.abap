@@ -111,8 +111,7 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
     lv_formname = 'DISPLAY_' && mv_id.
 
 * ---------------------------------------------------------------------
-    DATA(lo_callback) = NEW zcl_dynscreen_callback( ).
-    lo_callback->set_caller( me ).
+    DATA(lo_callback) = NEW zcl_dynscreen_callback( io_caller = me ).
 
 * ---------------------------------------------------------------------
     mv_gentarget = get_buffered_generation_target( ).
@@ -222,7 +221,9 @@ CLASS zcl_dynscreen_screen_base IMPLEMENTATION.
       APPEND '* THIS IS A GENERATED PROGRAM!' TO mt_gen_notice.
       APPEND '*     changes are futile' TO mt_gen_notice.
       GET TIME.
-      APPEND `*     last generation: ` && sy-datum && ` ` && sy-uzeit TO mt_gen_notice.
+      APPEND `*     last generation: ` && sy-datum(4) && '-' && sy-datum+4(2) && '-' && sy-datum+6(2)
+                                && ` ` && sy-uzeit(2) && ':' && sy-uzeit+2(2) && ':' && sy-uzeit+4(2)
+      TO mt_gen_notice.
       APPEND mc_syn-cline TO mt_gen_notice.
     ENDIF.
 

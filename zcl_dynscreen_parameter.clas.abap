@@ -3,10 +3,13 @@ CLASS zcl_dynscreen_parameter DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io
     INTERFACES:
       zif_dynscreen_request_event.
     METHODS:
-      constructor IMPORTING iv_type         TYPE typename OPTIONAL
+      constructor IMPORTING io_parent       TYPE REF TO zcl_dynscreen_screen_base
+                            iv_type         TYPE typename OPTIONAL
                             is_generic_type TYPE mty_s_generic_type_info OPTIONAL
                             iv_text         TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error.
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems.
   PROTECTED SECTION.
     METHODS:
       generate_open REDEFINITION,
@@ -18,12 +21,12 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_parameter IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type         = iv_type
-                        is_generic_type = is_generic_type
-                        iv_text         = iv_text         ).
+    super->constructor( io_parent       = io_parent
+                        iv_text         = iv_text
+                        iv_type         = iv_type
+                        is_generic_type = is_generic_type ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

@@ -6,15 +6,15 @@ GLOBAL FRIENDS zcl_dynscreen_radiobutton.
     TYPES:
       mty_t_radiobutton TYPE STANDARD TABLE OF REF TO zcl_dynscreen_radiobutton WITH DEFAULT KEY.
     METHODS:
-      constructor IMPORTING it_radiobuttons TYPE mty_t_radiobutton OPTIONAL
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_screen_base
                   RAISING   zcx_dynscreen_incompatible
                             zcx_dynscreen_too_many_elems,
-      add REDEFINITION,
       get_selected_radiobutton RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton.
     EVENTS:
       radiobutton_click.
   PROTECTED SECTION.
     METHODS:
+      add REDEFINITION,
       generate_close REDEFINITION,
       generate_open REDEFINITION,
       generate_callback_set_value REDEFINITION,
@@ -22,14 +22,11 @@ GLOBAL FRIENDS zcl_dynscreen_radiobutton.
       get_first_radiobutton FINAL RETURNING VALUE(ro_radiobutton) TYPE REF TO zcl_dynscreen_radiobutton
                                   RAISING   cx_sy_itab_line_not_found.
   PRIVATE SECTION.
-    DATA:
-      mt_radiobuttons TYPE mty_t_radiobutton.
 ENDCLASS.
 
 
 
-CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
-
+CLASS zcl_dynscreen_radiobutton_grp IMPLEMENTATION.
 
   METHOD add.
 * ---------------------------------------------------------------------
@@ -41,10 +38,15 @@ CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
     ENDIF.
 
 * ---------------------------------------------------------------------
+    " set initial value of radio button group
+    IF mt_elements IS INITIAL.
+      set_value( iv_value = io_screen_element->get_id( ) ).
+    ENDIF.
+
+* ---------------------------------------------------------------------
     io_screen_element->mo_parent = me.
     INSERT VALUE #( id  = io_screen_element->get_id( )
-                    ref = io_screen_element
-                    var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
+                    ref = io_screen_element            ) INTO TABLE mt_elements.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -52,18 +54,11 @@ CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
-    DATA:
-      lo_radiobutton TYPE REF TO zcl_dynscreen_radiobutton.
-
-* ---------------------------------------------------------------------
-    super->constructor( is_generic_type = VALUE #( datatype = mc_type-n
+    " internal type is the same as mty_id
+    " value of radio button group corresponds to id of chosen radio button
+    super->constructor( io_parent       = io_parent
+                        is_generic_type = VALUE #( datatype = mc_type-n
                                                    length   = 4         ) ).
-
-* ---------------------------------------------------------------------
-    LOOP AT it_radiobuttons ASSIGNING FIELD-SYMBOL(<lo_rb>).
-      add( <lo_rb> ).
-    ENDLOOP.
-    mt_radiobuttons = it_radiobuttons.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -80,16 +75,18 @@ CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
 
   METHOD generate_callback_set_value.
 * ---------------------------------------------------------------------
-    IF mt_radiobuttons IS NOT INITIAL.
+    " make sure that value of radio button group is updated to id of chosen radio button
+    IF mt_elements IS NOT INITIAL.
       APPEND
       'CASE abap_true.' ##NO_TEXT
       TO rt.
-      LOOP AT mt_radiobuttons ASSIGNING FIELD-SYMBOL(<lo_rb>).
+      LOOP AT mt_elements ASSIGNING FIELD-SYMBOL(<ls_element>).
+        DATA(lo_radiobutton) = CAST zcl_dynscreen_radiobutton( <ls_element>-ref ).
         APPEND
-        `  WHEN ` && <lo_rb>->get_var_name( ) && '.'
+        `  WHEN ` && lo_radiobutton->get_var_name( ) && '.'
         TO rt.
         APPEND
-        `    ` && mc_syn-var_prefix && mv_id && ` = ` && <lo_rb>->get_id( ) && '.'
+        `    ` && mc_syn-var_prefix && mv_id && ` = ` && lo_radiobutton->get_id( ) && '.'
         TO rt.
       ENDLOOP.
       APPEND
@@ -126,7 +123,7 @@ CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
 
   METHOD get_first_radiobutton.
 * ---------------------------------------------------------------------
-    ro_radiobutton = mt_radiobuttons[ 1 ].
+    ro_radiobutton = CAST #( mt_elements[ 1 ]-ref ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -141,7 +138,7 @@ CLASS ZCL_DYNSCREEN_RADIOBUTTON_GRP IMPLEMENTATION.
     ASSIGN md_value->* TO <lv_value>.
 
 * ---------------------------------------------------------------------
-    ro_radiobutton = mt_radiobuttons[ table_line->mv_id = <lv_value> ].
+    ro_radiobutton = CAST #( mt_elements[ id = <lv_value> ]-ref ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.

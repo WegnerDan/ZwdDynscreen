@@ -1,15 +1,19 @@
 CLASS zcl_dynscreen_callback DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS:
+      constructor IMPORTING io_caller TYPE REF TO zcl_dynscreen_base,
       process_pbo,
-      set_caller IMPORTING io_caller TYPE REF TO zcl_dynscreen_base,
+      "! set value of screen element object in pai event
       set_value IMPORTING iv_id    TYPE zcl_dynscreen_base=>mty_id
                           iv_value TYPE any,
+      "! get value of screen element object in pbo event
       get_value IMPORTING iv_id    TYPE zcl_dynscreen_base=>mty_id
                 EXPORTING ev_value TYPE any,
+      "! raise user command event
       raise_uc_event IMPORTING iv_id    TYPE zcl_dynscreen_base=>mty_id
                                iv_value TYPE any OPTIONAL
                      CHANGING  cv_ucomm TYPE sscrfields-ucomm,
+      "! raise help/value request event
       raise_request_event IMPORTING iv_id    TYPE zcl_dynscreen_base=>mty_id
                                     iv_vname TYPE zcl_dynscreen_base=>mty_varname
                                     iv_kind  TYPE i
@@ -19,11 +23,14 @@ CLASS zcl_dynscreen_callback DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PROTECTED SECTION.
   PRIVATE SECTION.
     DATA:
-      mv_subrc  TYPE sy-subrc,
-      mo_caller TYPE REF TO zcl_dynscreen_base.
+      "! flat table with all the screen elements
+      mt_elements TYPE zcl_dynscreen_base=>mty_t_screen_elements,
+      mv_subrc    TYPE sy-subrc,
+      mo_caller   TYPE REF TO zcl_dynscreen_base.
     METHODS:
-      read_elements IMPORTING io_ref            TYPE REF TO zcl_dynscreen_base
-                              iv_id             TYPE zcl_dynscreen_base=>mty_id
+      fill_elements IMPORTING io TYPE REF TO zcl_dynscreen_base,
+      "! read table mt_elements with binary search
+      read_elements IMPORTING iv_id             TYPE zcl_dynscreen_base=>mty_id
                     RETURNING VALUE(rs_element) TYPE zcl_dynscreen_base=>mty_s_screen_element
                     RAISING   cx_sy_itab_line_not_found.
 ENDCLASS.
@@ -31,6 +38,16 @@ ENDCLASS.
 
 
 CLASS zcl_dynscreen_callback IMPLEMENTATION.
+
+  METHOD constructor.
+* ---------------------------------------------------------------------
+    mo_caller = io_caller.
+
+* ---------------------------------------------------------------------
+    fill_elements( io_caller ).
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
 
 
   METHOD get_subrc.
@@ -44,8 +61,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
   METHOD get_value.
 * ---------------------------------------------------------------------
     TRY.
-        DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( io_ref = mo_caller
-                                                                    iv_id  = iv_id     )-ref ).
+        DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( iv_id )-ref ).
         lo_io->get_value( IMPORTING ev_value = ev_value ).
       CATCH cx_sy_itab_line_not_found.
         "TODO
@@ -62,9 +78,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
         CONTINUE.
       ENDIF.
       TRY.
-          DATA(lo_io) = CAST zcl_dynscreen_io_element(
-                          read_elements( io_ref = mo_caller
-                                         iv_id  = mo_caller->base22_to_10( ls_screen-group1 ) && '' )-ref ).
+          DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( iv_id = mo_caller->base22_to_10( ls_screen-group1 ) && '' )-ref ).
           CASE lo_io->get_visible( ).
             WHEN abap_true.
               ls_screen-invisible = 0.
@@ -108,8 +122,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
     TRY.
-        DATA(ls_elem) = read_elements( io_ref = mo_caller
-                                       iv_id  = iv_id     ).
+        DATA(ls_elem) = read_elements( iv_id ).
         TRY.
             DATA(lo_io) = CAST zcl_dynscreen_io_element( ls_elem-ref ).
             DATA(lo_req_eve) = CAST zif_dynscreen_request_event( ls_elem-ref ).
@@ -166,8 +179,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
   METHOD raise_uc_event.
 * ---------------------------------------------------------------------
     TRY.
-        DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( io_ref = mo_caller
-                                                                    iv_id  = iv_id     )-ref ).
+        DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( iv_id )-ref ).
         lo_io->set_value( iv_value ).
         lo_io->set_ucomm( cv_ucomm ).
         DATA(lo_uc_event) = CAST zif_dynscreen_uc_event( lo_io ).
@@ -189,30 +201,12 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
 
   METHOD read_elements.
 * ---------------------------------------------------------------------
-    READ TABLE io_ref->mt_elements INTO rs_element
+    READ TABLE mt_elements INTO rs_element
     WITH KEY id = iv_id BINARY SEARCH.
-    IF sy-subrc = 0.
-      RETURN.
-    ELSE.
-      LOOP AT io_ref->mt_elements ASSIGNING FIELD-SYMBOL(<ls_elem>).
-        TRY.
-            rs_element = read_elements( io_ref = <ls_elem>-ref
-                                        iv_id  = iv_id         ).
-            RETURN.
-          CATCH cx_sy_itab_line_not_found.
-            CONTINUE.
-        ENDTRY.
-      ENDLOOP.
+
+    IF sy-subrc <> 0.
       RAISE EXCEPTION TYPE cx_sy_itab_line_not_found.
     ENDIF.
-
-* ---------------------------------------------------------------------
-  ENDMETHOD.
-
-
-  METHOD set_caller.
-* ---------------------------------------------------------------------
-    mo_caller = io_caller.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -229,8 +223,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
   METHOD set_value.
 * ---------------------------------------------------------------------
     TRY.
-        DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( io_ref = mo_caller
-                                                                    iv_id  = iv_id     )-ref ).
+        DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( iv_id )-ref ).
         lo_io->set_value( iv_value ).
       CATCH cx_sy_itab_line_not_found.
         "TODO
@@ -240,4 +233,16 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD fill_elements.
+* ---------------------------------------------------------------------
+    LOOP AT io->mt_elements INTO DATA(ls_element).
+      INSERT ls_element INTO TABLE mt_elements.
+      fill_elements( ls_element-ref ).
+    ENDLOOP.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

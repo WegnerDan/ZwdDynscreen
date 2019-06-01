@@ -23,14 +23,11 @@ go_tab_screen = NEW #( iv_text = 'Dynscreen Data Browser Demo' ).
 go_tab_screen->set_pretty_print( ).
 
 * ---------------------------------------------------------------------
-go_pa_table = NEW #( iv_type = 'DATABROWSE-TABLENAME' ).
-go_tab_screen->add( go_pa_table ).
-go_checkbox_key = NEW #( iv_text = 'Gen. SelOpts for keys only' ).
-TRY.
-    go_checkbox_key->set_value( abap_true ).
-  CATCH zcx_dynscreen_value_error.
-ENDTRY.
-go_tab_screen->add( go_checkbox_key ).
+go_pa_table = NEW #( io_parent = go_tab_screen
+                     iv_type   = 'DATABROWSE-TABLENAME' ).
+go_checkbox_key = NEW #( io_parent = go_tab_screen
+                         iv_text   = 'Gen. SelOpts for keys only' ).
+go_checkbox_key->set_value( abap_true ).
 
 * ---------------------------------------------------------------------
 DO.
@@ -73,8 +70,9 @@ go_sel_screen = NEW #( ).
 LOOP AT gt_key_fields ASSIGNING FIELD-SYMBOL(<gs_key_fld>) TO 200.
   TRY.
       INSERT VALUE #( fieldname = <gs_key_fld>-fieldname
-                      so_ref    = NEW #( iv_type = gv_tabname && '-' && <gs_key_fld>-fieldname ) ) INTO TABLE gt_selfields ASSIGNING FIELD-SYMBOL(<gs_selfield>).
-      go_sel_screen->add( <gs_selfield>-so_ref ).
+                      so_ref    = NEW #( io_parent = go_sel_screen
+                                         iv_type   = gv_tabname && '-' && <gs_key_fld>-fieldname )
+                    ) INTO TABLE gt_selfields ASSIGNING FIELD-SYMBOL(<gs_selfield>).
     CATCH zcx_dynscreen_type_error.
       CONTINUE.
     CATCH zcx_dynscreen_too_many_elems.

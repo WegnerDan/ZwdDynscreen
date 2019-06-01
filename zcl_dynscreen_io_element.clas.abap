@@ -14,28 +14,31 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mc_conv_write TYPE c LENGTH 1 VALUE 'W' ##NO_TEXT,
       mc_conv_xml   TYPE c LENGTH 1 VALUE 'X' ##NO_TEXT,
       mc_conv_cast  TYPE c LENGTH 1 VALUE 'C' ##NO_TEXT,
+      "! generic types
       BEGIN OF mc_type,
         c          TYPE dd01l-datatype VALUE 'CHAR' ##NO_TEXT,
         string     TYPE dd01l-datatype VALUE 'STRG' ##NO_TEXT,
-        x          TYPE dd01l-datatype VALUE 'RAW' ##NO_TEXT,
+        x          TYPE dd01l-datatype VALUE 'RAW'  ##NO_TEXT,
         n          TYPE dd01l-datatype VALUE 'NUMC' ##NO_TEXT,
         i          TYPE dd01l-datatype VALUE 'INT4' ##NO_TEXT,
         d          TYPE dd01l-datatype VALUE 'DATS' ##NO_TEXT,
         t          TYPE dd01l-datatype VALUE 'TIMS' ##NO_TEXT,
-        p          TYPE dd01l-datatype VALUE 'DEC' ##NO_TEXT,
+        p          TYPE dd01l-datatype VALUE 'DEC'  ##NO_TEXT,
         decfloat16 TYPE dd01l-datatype VALUE 'D16S' ##NO_TEXT,
         decfloat34 TYPE dd01l-datatype VALUE 'D34S' ##NO_TEXT,
       END OF mc_type.
     METHODS:
-      add REDEFINITION,
+      constructor IMPORTING io_parent       TYPE REF TO zcl_dynscreen_screen_base
+                            iv_type         TYPE typename OPTIONAL
+                            is_generic_type TYPE mty_s_generic_type_info OPTIONAL
+                            iv_text         TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx,
       set_ddic_text IMPORTING iv_ddic_text TYPE textpooltx,
       set_generic_type IMPORTING is_type_info TYPE mty_s_generic_type_info
                        RAISING   zcx_dynscreen_type_error,
-      constructor IMPORTING iv_type         TYPE typename OPTIONAL
-                            is_generic_type TYPE mty_s_generic_type_info OPTIONAL
-                            iv_text         TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
       get_type RETURNING VALUE(rv_type) TYPE typename,
       get_value IMPORTING iv_conversion   TYPE c DEFAULT mc_conv_cast
                 EXPORTING ev_value        TYPE any
@@ -66,6 +69,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mv_ddic_text           TYPE c LENGTH 40,
       mv_type                TYPE typename,
       ms_generic_type_info   TYPE mty_s_generic_type_info,
+      "! string that is used to declare variable with generic type
       mv_generic_type_string TYPE string,
       mv_visible             TYPE abap_bool,
       mv_obligatory          TYPE abap_bool,
@@ -73,6 +77,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mv_value               TYPE string,
       md_value               TYPE REF TO data.
     METHODS:
+      add REDEFINITION,
       get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
       get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
       get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx,
@@ -123,6 +128,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
+    DATA:
+      lo_parent TYPE REF TO zcl_dynscreen_base.
+
+* ---------------------------------------------------------------------
     super->constructor( ).
 
 * ---------------------------------------------------------------------
@@ -154,6 +163,13 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 * ---------------------------------------------------------------------
     mv_visible = abap_true.
     mv_input   = abap_true.
+
+* ---------------------------------------------------------------------
+    " radiobutton is added later (type conflict)
+    IF cl_abap_classdescr=>get_class_name( me ) <> '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON'.
+      lo_parent = io_parent.
+      lo_parent->add( me ).
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
