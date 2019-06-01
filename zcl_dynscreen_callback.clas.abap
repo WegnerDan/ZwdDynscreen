@@ -73,13 +73,17 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
 
   METHOD process_pbo.
 * ---------------------------------------------------------------------
+    DATA:
+      lo_io_element TYPE REF TO zcl_dynscreen_io_element.
+
+* ---------------------------------------------------------------------
     LOOP AT SCREEN INTO DATA(ls_screen).
       IF ls_screen-group1 IS INITIAL.
         CONTINUE.
       ENDIF.
       TRY.
-          DATA(lo_io) = CAST zcl_dynscreen_io_element( read_elements( iv_id = mo_caller->base22_to_10( ls_screen-group1 ) && '' )-ref ).
-          CASE lo_io->get_visible( ).
+          lo_io_element ?= read_elements( iv_id = mo_caller->base22_to_10( ls_screen-group1 ) && '' )-ref.
+          CASE lo_io_element->get_visible( ).
             WHEN abap_true.
               ls_screen-invisible = 0.
               ls_screen-active    = 1.
@@ -87,7 +91,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
               ls_screen-invisible = 1.
               ls_screen-active    = 0.
           ENDCASE.
-          CASE lo_io->get_obligatory( ).
+          CASE lo_io_element->get_obligatory( ).
             WHEN abap_true.
               ls_screen-required = 1.
             WHEN abap_false.
@@ -97,7 +101,7 @@ CLASS zcl_dynscreen_callback IMPLEMENTATION.
           OR ls_screen-group3 = 'PBU'  " button
           OR ls_screen-group3 = 'LOW'  " low field of select option
           OR ls_screen-group3 = 'HGH'. " high field of select option
-            CASE lo_io->get_input( ).
+            CASE lo_io_element->get_input( ).
               WHEN abap_true.
                 ls_screen-input = 1.
               WHEN abap_false.
