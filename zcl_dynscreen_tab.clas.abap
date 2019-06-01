@@ -1,12 +1,15 @@
 CLASS zcl_dynscreen_tab DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_subscreen CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL,
-      add REDEFINITION.
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_tabbed_block
+                            iv_text   TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems.
   PROTECTED SECTION.
     DATA:
       mo_screen TYPE REF TO zcl_dynscreen_subscreen.
     METHODS:
+      add REDEFINITION,
       generate REDEFINITION,
       generate_close REDEFINITION,
       generate_open REDEFINITION.
@@ -16,7 +19,6 @@ ENDCLASS.
 
 
 CLASS zcl_dynscreen_tab IMPLEMENTATION.
-
 
   METHOD add.
 * ---------------------------------------------------------------------
@@ -45,6 +47,9 @@ CLASS zcl_dynscreen_tab IMPLEMENTATION.
     IF get_text( ) IS INITIAL.
       set_text( `Tab ` && mv_id  ).
     ENDIF.
+
+* ---------------------------------------------------------------------
+    io_parent->add( me ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -83,4 +88,5 @@ CLASS zcl_dynscreen_tab IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

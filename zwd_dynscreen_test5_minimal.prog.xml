@@ -3,7 +3,7 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <PROGDIR>
-    <NAME>ZWD_DYNSCREEN_TEST3_SE16</NAME>
+    <NAME>ZWD_DYNSCREEN_TEST5_MINIMAL</NAME>
     <DBAPL>S</DBAPL>
     <SUBC>1</SUBC>
     <FIXPT>X</FIXPT>
@@ -13,8 +13,8 @@
    <TPOOL>
     <item>
      <ID>R</ID>
-     <ENTRY>se16 demo</ENTRY>
-     <LENGTH>9</LENGTH>
+     <ENTRY>Minimal Test</ENTRY>
+     <LENGTH>12</LENGTH>
     </item>
    </TPOOL>
   </asx:values>

@@ -1,9 +1,13 @@
-CLASS zcl_dynscreen_tabbed_block DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base CREATE PUBLIC.
+CLASS zcl_dynscreen_tabbed_block DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base CREATE PUBLIC
+GLOBAL FRIENDS zcl_dynscreen_tab.
   PUBLIC SECTION.
     TYPES:
       mty_lines TYPE n LENGTH 3 .
     METHODS:
-      constructor IMPORTING iv_lines TYPE mty_lines OPTIONAL,
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_screen_base
+                            iv_lines  TYPE mty_lines OPTIONAL
+                  RAISING   zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       set_lines IMPORTING iv_lines TYPE mty_lines,
       get_lines RETURNING VALUE(rv_lines) TYPE mty_lines.
   PROTECTED SECTION.
@@ -19,19 +23,27 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_tabbed_block IMPLEMENTATION.
 
-
   METHOD constructor.
+* ---------------------------------------------------------------------
+    DATA:
+      lo_parent TYPE REF TO zcl_dynscreen_base.
+
 * ---------------------------------------------------------------------
     super->constructor( ).
 
 * ---------------------------------------------------------------------
-    set_lines( iv_lines ).
+    IF iv_lines > 0.
+      set_lines( iv_lines ).
+    ELSE.
+      set_lines( 36 ).
+    ENDIF.
+
+* ---------------------------------------------------------------------
     mv_is_variable = abap_false.
 
 * ---------------------------------------------------------------------
-    IF get_lines( ) IS INITIAL.
-      set_lines( 36 ).
-    ENDIF.
+    lo_parent = io_parent.
+    lo_parent->add( me ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -71,4 +83,5 @@ CLASS zcl_dynscreen_tabbed_block IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

@@ -9,6 +9,8 @@ CLASS lcl DEFINITION CREATE PUBLIC.
       handle_button_click  FOR EVENT button_click OF zcl_dynscreen_button
         IMPORTING sender,
       handle_program_value_request FOR EVENT zif_dynscreen_request_event~value_request OF zcl_dynscreen_parameter
+        IMPORTING sender,
+      handle_radiobutton_selected FOR EVENT radiobutton_click OF zcl_dynscreen_radiobutton_grp
         IMPORTING sender.
 
 ENDCLASS.
@@ -30,32 +32,35 @@ CLASS lcl IMPLEMENTATION.
       lo_rb_grp1    TYPE REF TO zcl_dynscreen_radiobutton_grp,
       lo_rb_option1 TYPE REF TO zcl_dynscreen_radiobutton,
       lo_rb_option2 TYPE REF TO zcl_dynscreen_radiobutton,
-      lo_pa_program TYPE REF TO zcl_dynscreen_parameter.
+      lo_pa_program TYPE REF TO zcl_dynscreen_parameter,
+      lx            TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     lo_screen = NEW #( ).
     lo_screen->set_pretty_print( ).
+    lo_screen->disable_screen_buffer( ).
     lo_screen->set_text( 'Selection Screen Generation Test' ).
 
     TRY.
-        lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr1 = NEW #( io_parent = lo_screen
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_value( 'DEFAULT' ).
-        lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
         lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
+        lo_pa_matnr2 = NEW #( io_parent = lo_screen
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
-        lo_screen->add( lo_pa_matnr1 ).
-        lo_screen->add( lo_pa_matnr2 ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
             zcx_dynscreen_incompatible
-            zcx_dynscreen_too_many_elems INTO DATA(lx).
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
     TRY.
-        lo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
+        lo_btn = NEW #( io_parent = lo_screen
+                        iv_text   = 'Testbutton'
+                        iv_length = 20          ).
         SET HANDLER handle_button_click FOR lo_btn.
-        lo_screen->add( lo_btn ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
             zcx_dynscreen_too_many_elems INTO lx.
@@ -64,12 +69,12 @@ CLASS lcl IMPLEMENTATION.
 
 
     TRY.
-        lo_so_vbeln = NEW #( iv_type = 'VBAK-VBELN' ).
-        lo_screen->add( lo_so_vbeln ).
-        lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
-        lo_screen->add( lo_pa_ebeln ).
-        lo_pa_program = NEW #( iv_type = 'RS38M-PROGRAMM' ).
-        lo_screen->add( lo_pa_program ).
+        lo_so_vbeln = NEW #( io_parent = lo_screen
+                             iv_type   = 'VBAK-VBELN' ).
+        lo_pa_ebeln = NEW #( io_parent = lo_screen
+                             iv_type   = 'EKKO-EBELN' ).
+        lo_pa_program = NEW #( io_parent = lo_screen
+                               iv_type   = 'RS38M-PROGRAMM' ).
         SET HANDLER handle_program_value_request FOR lo_pa_program.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
@@ -79,11 +84,12 @@ CLASS lcl IMPLEMENTATION.
     ENDTRY.
 
     TRY.
-        lo_rb_option1 = NEW #( iv_text = 'Option 1' ).
-        lo_rb_option2 = NEW #( iv_text = 'Option 2' ).
-        lo_rb_grp1    = NEW #( it_radiobuttons = VALUE #( ( lo_rb_option1 )
-                                                          ( lo_rb_option2 ) ) ).
-        lo_screen->add( lo_rb_grp1 ).
+        lo_rb_grp1    = NEW #( io_parent = lo_screen ).
+        lo_rb_option1 = NEW #( io_parent = lo_rb_grp1
+                               iv_text   = 'Option 1' ).
+        lo_rb_option2 = NEW #( io_parent = lo_rb_grp1
+                               iv_text   = 'Option 2' ).
+        SET HANDLER handle_radiobutton_selected FOR lo_rb_grp1.
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
             zcx_dynscreen_too_many_elems INTO lx.
@@ -143,21 +149,43 @@ CLASS lcl IMPLEMENTATION.
 * ---------------------------------------------------------------------
         MESSAGE 'Selection successful!' TYPE 'S'.
 
-      CATCH zcx_dynscreen_canceled.
-        MESSAGE 'Selection canceled' TYPE 'S' DISPLAY LIKE 'E'.
-      CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
-        MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_canceled INTO DATA(lx_canceled).
+        MESSAGE lx_canceled TYPE 'S' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_value_error
+            zcx_dynscreen_syntax_error INTO lx.
+        MESSAGE lx TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
+
 
   METHOD handle_button_click.
+* ---------------------------------------------------------------------
     MESSAGE 'Button pressed!' TYPE 'I'.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
+
   METHOD handle_program_value_request.
-    FIELD-SYMBOLS <lv_program> TYPE rs38m-programm.
+* ---------------------------------------------------------------------
+    FIELD-SYMBOLS:
+      <lv_program> TYPE rs38m-programm.
+
     ASSIGN sender->zif_dynscreen_request_event~md_request_value->* TO <lv_program>.
+
     PERFORM program_directory IN PROGRAM saplwbabap USING <lv_program> abap_true.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD handle_radiobutton_selected.
+* ---------------------------------------------------------------------
+    MESSAGE sender->get_selected_radiobutton( )->get_text( ) && ` selected!` TYPE 'S'.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
 ENDCLASS.

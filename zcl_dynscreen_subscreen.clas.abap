@@ -10,7 +10,6 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_subscreen IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
     super->constructor( iv_text ).
@@ -20,4 +19,5 @@ CLASS zcl_dynscreen_subscreen IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

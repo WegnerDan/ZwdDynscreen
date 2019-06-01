@@ -1,3 +1,5 @@
+"! input/output element base class <br/>
+"! parameters, select-options etc.
 CLASS zcl_dynscreen_io_element DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_base ABSTRACT CREATE PUBLIC
 GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
   PUBLIC SECTION.
@@ -12,32 +14,36 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mc_conv_write TYPE c LENGTH 1 VALUE 'W' ##NO_TEXT,
       mc_conv_xml   TYPE c LENGTH 1 VALUE 'X' ##NO_TEXT,
       mc_conv_cast  TYPE c LENGTH 1 VALUE 'C' ##NO_TEXT,
+      "! generic types
       BEGIN OF mc_type,
         c          TYPE dd01l-datatype VALUE 'CHAR' ##NO_TEXT,
         string     TYPE dd01l-datatype VALUE 'STRG' ##NO_TEXT,
-        x          TYPE dd01l-datatype VALUE 'RAW' ##NO_TEXT,
+        x          TYPE dd01l-datatype VALUE 'RAW'  ##NO_TEXT,
         n          TYPE dd01l-datatype VALUE 'NUMC' ##NO_TEXT,
         i          TYPE dd01l-datatype VALUE 'INT4' ##NO_TEXT,
         d          TYPE dd01l-datatype VALUE 'DATS' ##NO_TEXT,
         t          TYPE dd01l-datatype VALUE 'TIMS' ##NO_TEXT,
-        p          TYPE dd01l-datatype VALUE 'DEC' ##NO_TEXT,
+        p          TYPE dd01l-datatype VALUE 'DEC'  ##NO_TEXT,
         decfloat16 TYPE dd01l-datatype VALUE 'D16S' ##NO_TEXT,
         decfloat34 TYPE dd01l-datatype VALUE 'D34S' ##NO_TEXT,
       END OF mc_type.
     METHODS:
-      add REDEFINITION,
+      constructor IMPORTING io_parent       TYPE REF TO zcl_dynscreen_screen_base
+                            iv_type         TYPE typename OPTIONAL
+                            is_generic_type TYPE mty_s_generic_type_info OPTIONAL
+                            iv_text         TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       get_ddic_text RETURNING VALUE(rv_ddic_text) TYPE textpooltx,
       set_ddic_text IMPORTING iv_ddic_text TYPE textpooltx,
       set_generic_type IMPORTING is_type_info TYPE mty_s_generic_type_info
                        RAISING   zcx_dynscreen_type_error,
-      constructor IMPORTING iv_type         TYPE typename OPTIONAL
-                            is_generic_type TYPE mty_s_generic_type_info OPTIONAL
-                            iv_text         TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
       get_type RETURNING VALUE(rv_type) TYPE typename,
       get_value IMPORTING iv_conversion   TYPE c DEFAULT mc_conv_cast
                 EXPORTING ev_value        TYPE any
-                RETURNING VALUE(rv_value) TYPE string,
+                RETURNING VALUE(rv_value) TYPE string
+                RAISING   zcx_dynscreen_value_error,
       set_type IMPORTING iv_type TYPE typename
                RAISING   zcx_dynscreen_type_error,
       set_value IMPORTING iv_conversion TYPE c DEFAULT mc_conv_cast
@@ -63,6 +69,7 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mv_ddic_text           TYPE c LENGTH 40,
       mv_type                TYPE typename,
       ms_generic_type_info   TYPE mty_s_generic_type_info,
+      "! string that is used to declare variable with generic type
       mv_generic_type_string TYPE string,
       mv_visible             TYPE abap_bool,
       mv_obligatory          TYPE abap_bool,
@@ -70,10 +77,13 @@ GLOBAL FRIENDS zcl_dynscreen_base zcl_dynscreen_callback.
       mv_value               TYPE string,
       md_value               TYPE REF TO data.
     METHODS:
+      add REDEFINITION,
       get_var_name RETURNING VALUE(rv_var_name) TYPE mty_varname,
       get_text_from_ddic RETURNING VALUE(rv_text) TYPE textpooltx,
       get_text_generic RETURNING VALUE(rv_text) TYPE textpooltx,
-      append_uc_event_src.
+      append_uc_event_src,
+      generate_callback_set_value RETURNING VALUE(rt) TYPE mty_t_source,
+      generate_callback_get_value RETURNING VALUE(rt) TYPE mty_t_source.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -85,7 +95,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
   METHOD add.
 * ---------------------------------------------------------------------
     " io elements usually have no children
-    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
+      EXPORTING
+        parent_class       = me
+        incompatible_class = io_screen_element.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -115,6 +128,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
+    DATA:
+      lo_parent TYPE REF TO zcl_dynscreen_base.
+
+* ---------------------------------------------------------------------
     super->constructor( ).
 
 * ---------------------------------------------------------------------
@@ -124,7 +141,9 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
     ELSEIF is_generic_type IS NOT INITIAL.
       set_generic_type( is_generic_type ).
     ELSE.
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+        EXPORTING
+          textid = zcx_dynscreen_type_error=>no_type_provided.
     ENDIF.
     set_text( iv_text ).
     mv_is_variable = abap_true.
@@ -144,6 +163,13 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 * ---------------------------------------------------------------------
     mv_visible = abap_true.
     mv_input   = abap_true.
+
+* ---------------------------------------------------------------------
+    " radiobutton is added later (type conflict)
+    IF cl_abap_classdescr=>get_class_name( me ) <> '\CLASS=ZCL_DYNSCREEN_RADIOBUTTON'.
+      lo_parent = io_parent.
+      lo_parent->add( me ).
+    ENDIF.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -222,22 +248,29 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
   METHOD get_value.
 * ---------------------------------------------------------------------
     DATA:
-      lv_value TYPE c LENGTH 1000.
+      lv_value                TYPE c LENGTH 1000,
+      lx_transformation_error TYPE REF TO cx_transformation_error.
     FIELD-SYMBOLS:
       <lv_value> TYPE any.
 
 * ---------------------------------------------------------------------
+    FREE ev_value.
+
+* ---------------------------------------------------------------------
     ASSIGN md_value->* TO <lv_value>.
     IF <lv_value> IS NOT ASSIGNED.
-      RETURN.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
     ENDIF.
 
 * ---------------------------------------------------------------------
     IF mv_value IS NOT INITIAL.
       TRY.
           CALL TRANSFORMATION id SOURCE XML mv_value RESULT value = <lv_value>.
-        CATCH cx_root.
-          FREE <lv_value>.
+        CATCH cx_transformation_error INTO lx_transformation_error.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+            EXPORTING
+              textid   = zcx_dynscreen_value_error=>value_error_with_prev
+              previous = lx_transformation_error.
       ENDTRY.
     ENDIF.
 
@@ -264,11 +297,17 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
         IF ev_value IS SUPPLIED.
           ev_value = <lv_value>.
         ENDIF.
-        rv_value = <lv_value>.
+        " don't fill rv_value, if <lv_value> points to table
+        IF cl_abap_datadescr=>get_data_type_kind( <lv_value> ) <> cl_abap_datadescr=>typekind_table.
+          rv_value = <lv_value>.
+        ENDIF.
 
 * ---------------------------------------------------------------------
       WHEN OTHERS.
-        RETURN.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid     = zcx_dynscreen_value_error=>invalid_conversion
+            conversion = iv_conversion.
     ENDCASE.
 
 * ---------------------------------------------------------------------
@@ -310,8 +349,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
   METHOD set_generic_type.
 * ---------------------------------------------------------------------
     DATA:
-      lv_length   TYPE i,
-      lv_decimals TYPE i.
+      lv_length     TYPE i,
+      lv_decimals   TYPE i,
+      lx_type_error TYPE REF TO zcx_dynscreen_type_error,
+      lx_root       TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     TRY.
@@ -377,7 +418,10 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
           WHEN OTHERS.
-            RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+            RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+              EXPORTING
+                textid            = zcx_dynscreen_type_error=>generic_type_not_supported
+                generic_data_type = ms_generic_type_info-datatype.
 
 * ---------------------------------------------------------------------
         ENDCASE.
@@ -385,8 +429,18 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 * ---------------------------------------------------------------------
         CREATE DATA md_value TYPE HANDLE mo_elemdescr.
 
-      CATCH cx_root.
-        RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+* ---------------------------------------------------------------------
+      CATCH zcx_dynscreen_type_error INTO lx_type_error.
+        RAISE EXCEPTION lx_type_error.
+
+* ---------------------------------------------------------------------
+      CATCH cx_root INTO lx_root.
+        RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+          EXPORTING
+            textid   = zcx_dynscreen_type_error=>type_error_with_prev
+            previous = lx_root.
+
+* ---------------------------------------------------------------------
     ENDTRY.
 
 * ---------------------------------------------------------------------
@@ -412,7 +466,9 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
   METHOD set_type.
 * ---------------------------------------------------------------------
     DATA:
-      lo_typedescr TYPE REF TO cl_abap_typedescr.
+      lo_typedescr  TYPE REF TO cl_abap_typedescr,
+      lx_type_error TYPE REF TO zcx_dynscreen_type_error,
+      lx_root       TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     TRY.
@@ -421,13 +477,21 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
                                              EXCEPTIONS OTHERS      = 1            ).
         IF sy-subrc <> 0.
           " goddamn old school exceptions...
-          RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+          RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+            EXPORTING
+              textid    = zcx_dynscreen_type_error=>type_not_found
+              type_name = iv_type.
         ENDIF.
         mo_elemdescr ?= lo_typedescr.
         mv_type = iv_type.
         CREATE DATA md_value TYPE HANDLE mo_elemdescr.
-      CATCH cx_root.
-        RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      CATCH zcx_dynscreen_type_error INTO lx_type_error.
+        RAISE EXCEPTION lx_type_error.
+      CATCH cx_root INTO lx_root.
+        RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+          EXPORTING
+            textid   = zcx_dynscreen_type_error=>type_error_with_prev
+            previous = lx_root.
     ENDTRY.
 
 * ---------------------------------------------------------------------
@@ -444,13 +508,17 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
   METHOD set_value.
 * ---------------------------------------------------------------------
+    DATA:
+      lx_transformation_error TYPE REF TO cx_transformation_error.
     FIELD-SYMBOLS:
       <lv_value> TYPE any.
 
 * ---------------------------------------------------------------------
     IF  iv_value     IS NOT SUPPLIED
     AND iv_value_str IS NOT SUPPLIED.
-      RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+        EXPORTING
+          textid = zcx_dynscreen_value_error=>no_value_provided.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -472,8 +540,11 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
         ELSE.
           TRY.
               CALL TRANSFORMATION id SOURCE value = <lv_value> RESULT XML mv_value.
-            CATCH cx_transformation_error INTO DATA(lx_tr).
-              RAISE EXCEPTION TYPE zcx_dynscreen_value_error EXPORTING previous = lx_tr.
+            CATCH cx_transformation_error INTO lx_transformation_error.
+              RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+                EXPORTING
+                  textid   = zcx_dynscreen_value_error=>value_error_with_prev
+                  previous = lx_transformation_error.
           ENDTRY.
         ENDIF.
       WHEN mc_conv_xml.
@@ -484,13 +555,21 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
         ENDIF.
         TRY.
             CALL TRANSFORMATION id SOURCE XML mv_value RESULT value = <lv_value>.
-          CATCH cx_transformation_error INTO lx_tr.
-            RAISE EXCEPTION TYPE zcx_dynscreen_value_error EXPORTING previous = lx_tr.
+          CATCH cx_transformation_error INTO lx_transformation_error.
+            RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+              EXPORTING
+                textid   = zcx_dynscreen_value_error=>value_error_with_prev
+                previous = lx_transformation_error.
         ENDTRY.
       WHEN mc_conv_write.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid = zcx_dynscreen_value_error=>set_value_write_conv.
       WHEN OTHERS.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid     = zcx_dynscreen_value_error=>invalid_conversion
+            conversion = iv_conversion.
     ENDCASE.
 
 * ---------------------------------------------------------------------
@@ -503,4 +582,26 @@ CLASS zcl_dynscreen_io_element IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
+
+  METHOD generate_callback_get_value.
+* ---------------------------------------------------------------------
+    APPEND
+    `go_cb->get_value( exporting iv_id = '` && mv_id &&    ##NO_TEXT
+    `' importing ev_value = ` && get_var_name( ) && ` ).`  ##NO_TEXT
+    TO rt.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
+
+  METHOD generate_callback_set_value.
+* ---------------------------------------------------------------------
+    APPEND
+    `go_cb->set_value( iv_id = '` && mv_id && `' iv_value = ` && get_var_name( ) && ` ).` ##NO_TEXT
+    TO rt.
+
+* ---------------------------------------------------------------------
+  ENDMETHOD.
+
 ENDCLASS.

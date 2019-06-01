@@ -7,13 +7,12 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mty_varname TYPE c LENGTH 30,
       mty_srcname TYPE c LENGTH 40,
       BEGIN OF mty_s_variable,
-        id   TYPE mty_id,
-        name TYPE mty_varname,
-        ref  TYPE REF TO zcl_dynscreen_io_element,
+        id  TYPE mty_id,
+        ref TYPE REF TO zcl_dynscreen_io_element,
       END OF mty_s_variable,
       mty_t_variables TYPE SORTED TABLE OF mty_s_variable WITH UNIQUE KEY id.
     CONSTANTS:
-      mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_%%%' ##NO_TEXT,
+      mc_gentarget_incname TYPE mty_srcname VALUE 'Z_DYNSCREEN_GEN_TARGET_000' ##NO_TEXT,
       BEGIN OF mc_com,
         exit  TYPE sscrfields-ucomm VALUE '_%_%_EXIT_%_%_',
         dummy TYPE sscrfields-ucomm VALUE '_%_%_%_%_DUMMY_%_%_%_%_',
@@ -25,9 +24,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       get_variables RETURNING VALUE(rt_variables) TYPE mty_t_variables,
       get_text RETURNING VALUE(rv_text) TYPE textpooltx,
       set_text IMPORTING iv_text TYPE textpooltx,
-      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
-          RAISING   zcx_dynscreen_incompatible
-                    zcx_dynscreen_too_many_elems,
       get_id RETURNING VALUE(rv_id) TYPE mty_id,
       get_parent RETURNING VALUE(ro_parent) TYPE REF TO zcl_dynscreen_base.
   PROTECTED SECTION.
@@ -35,7 +31,6 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       BEGIN OF mty_s_screen_element,
         id  TYPE mty_id,
         ref TYPE REF TO zcl_dynscreen_base,
-        var TYPE abap_bool,
       END OF mty_s_screen_element,
       mty_t_screen_elements TYPE SORTED TABLE OF mty_s_screen_element WITH UNIQUE KEY id,
       mty_source            TYPE string,
@@ -48,8 +43,10 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mc_base22          TYPE i VALUE 22,
       mc_base22_alphabet TYPE string VALUE '0123456789ABCDEFGHIJKLMNOPQRSTUV',
       BEGIN OF mc_syn,
-        sq                TYPE c LENGTH 1  VALUE '''', " single quote
-        dq                TYPE c LENGTH 1  VALUE '"',  " double quote
+        "! single quote
+        sq                TYPE c LENGTH 1  VALUE '''',
+        "! double quote
+        dq                TYPE c LENGTH 1  VALUE '"',
         dat_prefix        TYPE c LENGTH 1  VALUE 'D',
         var_prefix        TYPE c LENGTH 2  VALUE 'V_',
         tit_prefix        TYPE c LENGTH 2  VALUE 'T_',
@@ -57,6 +54,7 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
         tab_prefix        TYPE c LENGTH 4  VALUE 'TAB_',
         btn_prefix        TYPE c LENGTH 3  VALUE 'BT_',
         ucm_prefix        TYPE c LENGTH 3  VALUE 'UC_',
+        itab_body         TYPE c LENGTH 2  VALUE '[]',
         data              TYPE c LENGTH 4  VALUE 'DATA',
         param             TYPE c LENGTH 10 VALUE 'PARAMETERS',
         selopt            TYPE c LENGTH 14 VALUE 'SELECT-OPTIONS',
@@ -108,17 +106,28 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       mv_text        TYPE textpooltx,
       mt_elements    TYPE mty_t_screen_elements,
       mt_source      TYPE mty_t_source,
-      mt_source_ac   TYPE mty_t_source, " after screen call
-      mt_source_as   TYPE mty_t_source, " after standard screen definitions
+      "! after screen call
+      mt_source_ac   TYPE mty_t_source,
+      "! after standard screen definitions
+      mt_source_as   TYPE mty_t_source,
+      "! sources of events
       BEGIN OF ms_source_eve,
-        t_init          TYPE mty_t_source, " initialization
-        t_selscreen     TYPE mty_t_source, " at selection-screen
-        t_selscreen_out TYPE mty_t_source, " at selection-screen output
-        t_selscreen_on  TYPE mty_t_source, " at selection-screen on
-        t_selscreen_obl TYPE mty_t_source, " at selection-screen on block
-        t_selscreen_org TYPE mty_t_source, " at selection-screen on radiobutton group
-        t_selscreen_ovr TYPE mty_t_source, " at selection-screen on value-request for
-        t_selscreen_ohr TYPE mty_t_source, " at selection-screen on help-request for
+        "! initialization
+        t_init          TYPE mty_t_source,
+        "! at selection-screen
+        t_selscreen     TYPE mty_t_source,
+        "! at selection-screen output
+        t_selscreen_out TYPE mty_t_source,
+        "! at selection-screen on
+        t_selscreen_on  TYPE mty_t_source,
+        "! at selection-screen on block
+        t_selscreen_obl TYPE mty_t_source,
+        "! at selection-screen on radiobutton group
+        t_selscreen_org TYPE mty_t_source,
+        "! at selection-screen on value-request for
+        t_selscreen_ovr TYPE mty_t_source,
+        "! at selection-screen on help-request for
+        t_selscreen_ohr TYPE mty_t_source,
       END OF ms_source_eve,
       mt_variables TYPE mty_t_variables,
       mt_textpool  TYPE SORTED TABLE OF textpool WITH UNIQUE KEY id key.
@@ -126,16 +135,26 @@ GLOBAL FRIENDS zcl_dynscreen_io_element zcl_dynscreen_callback.
       set_last_id IMPORTING !iv_last_id TYPE i,
       get_last_id RETURNING VALUE(rv_id) TYPE i.
     METHODS:
+      add IMPORTING io_screen_element TYPE REF TO zcl_dynscreen_base
+          RAISING   zcx_dynscreen_incompatible
+                    zcx_dynscreen_too_many_elems,
       set_id IMPORTING iv_id TYPE i,
       generate_events RETURNING VALUE(rt_events_source) TYPE mty_t_source,
       generate_texts,
       is_var FINAL RETURNING VALUE(rv_is_var) TYPE abap_bool,
+      "! generate screen element source
       generate,
+      "! generate screen element opening clause (called before generate method of children) <br/><br/>
+      "! example: SELECTION-SCREEN BEGIN OF SCREEN 0001.
       generate_open ABSTRACT,
+      "! generate screen element closing clause (called before generate method of children) <br/><br/>
+      "! example: SELECTION-SCREEN END OF SCREEN 0001.
       generate_close ABSTRACT,
       pretty_print FINAL CHANGING ct_source TYPE mty_t_source,
+      "! convert base10 number to base22
       base10_to_22 FINAL IMPORTING iv_decimal       TYPE any
                          RETURNING VALUE(rv_base22) TYPE string,
+      "! convert base22 number to base10
       base22_to_10 FINAL IMPORTING iv_base22         TYPE any
                          RETURNING VALUE(rv_decimal) TYPE i.
   PRIVATE SECTION.
@@ -145,18 +164,19 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_base IMPLEMENTATION.
 
-
   METHOD add.
 * ---------------------------------------------------------------------
-    IF lines( mt_elements ) < 199.
-      IF '\CLASS=ZCL_DYNSCREEN_POPUP' = cl_abap_classdescr=>get_class_name( io_screen_element )
-      OR '\CLASS=ZCL_DYNSCREEN_SCREEN' = cl_abap_classdescr=>get_class_name( io_screen_element ).
-        RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+    IF lines( mt_elements ) < 199 ##NUMBER_OK.
+      IF cl_abap_classdescr=>get_class_name( io_screen_element ) = '\CLASS=ZCL_DYNSCREEN_POPUP'
+      OR cl_abap_classdescr=>get_class_name( io_screen_element ) = '\CLASS=ZCL_DYNSCREEN_SCREEN'.
+        RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
+          EXPORTING
+            parent_class       = me
+            incompatible_class = io_screen_element.
       ENDIF.
       io_screen_element->mo_parent = me.
       INSERT VALUE #( id  = io_screen_element->get_id( )
-                      ref = io_screen_element
-                      var = io_screen_element->is_var( ) ) INTO TABLE mt_elements.
+                      ref = io_screen_element            ) INTO TABLE mt_elements.
     ELSE.
       " after about 200 elements selection screen activation fails
       RAISE EXCEPTION TYPE zcx_dynscreen_too_many_elems.
@@ -254,11 +274,10 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       APPEND LINES OF <ls_element>-ref->mt_source TO mt_source.
       INSERT LINES OF <ls_element>-ref->mt_variables INTO TABLE mt_variables.
       " if element is a variable (parameters or select options)
-      IF <ls_element>-var = abap_true.
+      IF <ls_element>-ref->mv_is_variable = abap_true.
         lo_io ?= <ls_element>-ref.
         INSERT VALUE #( id   = <ls_element>-id
-                        name = lo_io->get_var_name( )
-                        ref  = lo_io                 ) INTO TABLE mt_variables.
+                        ref  = lo_io           ) INTO TABLE mt_variables.
       ENDIF.
       APPEND LINES OF <ls_element>-ref->mt_source_ac                  TO mt_source_ac.
       APPEND LINES OF <ls_element>-ref->mt_source_as                  TO mt_source_as.
@@ -292,9 +311,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
 * ---------------------------------------------------------------------
     APPEND mc_syn-eve_selscreen && '.' TO rt_events_source.
     LOOP AT mt_variables ASSIGNING FIELD-SYMBOL(<ls_var>).
-      APPEND
-      `go_cb->set_value( iv_id = '` && <ls_var>-id && `' iv_value = ` && <ls_var>-name && ` ).` ##NO_TEXT
-      TO rt_events_source.
+      APPEND LINES OF <ls_var>-ref->generate_callback_set_value( ) TO rt_events_source.
     ENDLOOP.
     APPEND LINES OF ms_source_eve-t_selscreen TO rt_events_source.
     APPEND `IF sscrfields-ucomm = '` && mc_com-exit && `'.` TO rt_events_source ##NO_TEXT.
@@ -305,10 +322,7 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     APPEND mc_syn-eve_selscreen_out && '.' TO rt_events_source.
     APPEND LINES OF ms_source_eve-t_selscreen_out TO rt_events_source.
     LOOP AT mt_variables ASSIGNING <ls_var>.
-      APPEND
-      `go_cb->get_value( exporting iv_id = '` && <ls_var>-id &&  ##NO_TEXT
-      `' importing ev_value = ` && <ls_var>-name && ` ).`        ##NO_TEXT
-      TO rt_events_source.
+      APPEND LINES OF <ls_var>-ref->generate_callback_get_value( ) TO rt_events_source.
     ENDLOOP.
     APPEND 'go_cb->process_pbo( ).' TO rt_events_source  ##NO_TEXT.
 
@@ -321,10 +335,12 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
     CONSTANTS:
       lc_id_title     TYPE c LENGTH  1 VALUE 'R',
       lc_id_seltx     TYPE c LENGTH  1 VALUE 'S',
-      lc_seltx_prefln TYPE i           VALUE 8,           " selection text needs to be offset by this amount
-      lc_seltx_ddic   TYPE c LENGTH 11 VALUE 'D       .', " selection text needs to contain this to use available ddic texts
-      lc_seltx_ddicln TYPE i           VALUE 9,           " text length seems to bet set to 9 for ddic entries (but it also works if 0 is provided)
-      lc_tab_body     TYPE c LENGTH  2 VALUE '[]'.
+      "! selection text needs to be offset by this amount
+      lc_seltx_prefln TYPE i           VALUE 8,
+      "! selection text needs to contain this to use available ddic texts
+      lc_seltx_ddic   TYPE c LENGTH 11 VALUE 'D       .',
+      "! text length seems to bet set to 9 for ddic entries (but it also works if 0 is provided)
+      lc_seltx_ddicln TYPE i           VALUE 9.
     DATA:
       lv_text  TYPE textpooltx,
       lv_txlen TYPE textpoolln.
@@ -362,9 +378,12 @@ CLASS zcl_dynscreen_base IMPLEMENTATION.
       ENDIF.
 
       APPEND VALUE #( id     = lc_id_seltx
-                      key    = replace( val = <ls_var>-name sub = lc_tab_body with = '' )
+                      key    = replace( val  = <ls_var>-ref->get_var_name( )
+                                        sub  = mc_syn-itab_body
+                                        with = ''                            )
                       entry  = lv_text
-                      length = lv_txlen      ) TO mt_textpool.
+                      length = lv_txlen
+                     ) TO mt_textpool.
     ENDLOOP.
 
 * ---------------------------------------------------------------------

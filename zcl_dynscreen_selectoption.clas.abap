@@ -3,9 +3,12 @@ CLASS zcl_dynscreen_selectoption DEFINITION PUBLIC INHERITING FROM zcl_dynscreen
     INTERFACES:
       zif_dynscreen_request_event.
     METHODS:
-      constructor IMPORTING iv_type TYPE typename
-                            iv_text TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_screen_base
+                            iv_type   TYPE typename
+                            iv_text   TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       get_value REDEFINITION,
       set_type REDEFINITION.
   PROTECTED SECTION.
@@ -23,16 +26,14 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type = iv_type
-                        iv_text = iv_text ).
+    super->constructor( io_parent = io_parent
+                        iv_type   = iv_type
+                        iv_text   = iv_text   ).
 
 * ---------------------------------------------------------------------
     set_type( iv_type ).
-*mo_elemdescr
-*md_value
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -106,55 +107,15 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD get_value.
 * ---------------------------------------------------------------------
-    DATA:
-      lv_value TYPE c LENGTH 1000.
-    FIELD-SYMBOLS:
-      <lv_value> TYPE any.
-
-* ---------------------------------------------------------------------
-    ASSIGN md_value->* TO <lv_value>.
-    IF <lv_value> IS NOT ASSIGNED.
-      RETURN.
+    IF iv_conversion = mc_conv_write.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+        EXPORTING
+          textid = zcx_dynscreen_value_error=>get_value_write_conv_selopt.
     ENDIF.
 
 * ---------------------------------------------------------------------
-    IF mv_value IS NOT INITIAL.
-      TRY.
-          CALL TRANSFORMATION id SOURCE XML mv_value RESULT value = <lv_value>.
-        CATCH cx_root.
-          FREE: <lv_value>, mv_value.
-      ENDTRY.
-    ENDIF.
-
-* ---------------------------------------------------------------------
-    CASE iv_conversion.
-
-* ---------------------------------------------------------------------
-      WHEN mc_conv_xml.
-        IF ev_value IS SUPPLIED.
-          ev_value = mv_value.
-        ENDIF.
-        rv_value = mv_value.
-
-* ---------------------------------------------------------------------
-      WHEN mc_conv_write.
-*        WRITE <lv_value> TO lv_value.
-*        IF ev_value IS SUPPLIED.
-*          ev_value = lv_value.
-*        ENDIF.
-*        rv_value = lv_value.
-
-* ---------------------------------------------------------------------
-      WHEN mc_conv_cast.
-        IF ev_value IS SUPPLIED.
-          ev_value = <lv_value>.
-        ENDIF.
-        FREE rv_value.
-
-* ---------------------------------------------------------------------
-      WHEN OTHERS.
-        RETURN.
-    ENDCASE.
+    super->get_value( EXPORTING iv_conversion = iv_conversion
+                      IMPORTING ev_value      = ev_value      ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -162,7 +123,7 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 
   METHOD get_var_name.
 * ---------------------------------------------------------------------
-    rv_var_name = super->get_var_name( ) && '[]'.
+    rv_var_name = super->get_var_name( ) && mc_syn-itab_body.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -171,8 +132,11 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
   METHOD set_type.
 * ---------------------------------------------------------------------
     DATA:
+      lv_sign       TYPE c LENGTH 1,
+      lv_option     TYPE c LENGTH 2,
       lo_datadescr  TYPE REF TO cl_abap_datadescr,
-      lt_components TYPE cl_abap_structdescr=>component_table.
+      lt_components TYPE cl_abap_structdescr=>component_table,
+      lx_root       TYPE REF TO cx_root.
     FIELD-SYMBOLS:
       <lv> TYPE any.
 
@@ -182,15 +146,17 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
 * ---------------------------------------------------------------------
     ASSIGN md_value->* TO <lv>.
     IF cl_abap_elemdescr=>get_data_type_kind( <lv> ) = 'F'.
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+        EXPORTING
+          textid = zcx_dynscreen_type_error=>float_selopt.
     ENDIF.
 
 * ---------------------------------------------------------------------
     TRY.
-        lo_datadescr ?= cl_abap_typedescr=>describe_by_name( 'CHAR1' ).
+        lo_datadescr ?= cl_abap_typedescr=>describe_by_data( lv_sign ).
         APPEND VALUE #( name = 'SIGN'
                         type = lo_datadescr ) TO lt_components.
-        lo_datadescr ?= cl_abap_typedescr=>describe_by_name( 'CHAR2' ).
+        lo_datadescr ?= cl_abap_typedescr=>describe_by_data( lv_option ).
         APPEND VALUE #( name = 'OPTION'
                         type = lo_datadescr ) TO lt_components.
         APPEND VALUE #( name = 'LOW'
@@ -199,8 +165,11 @@ CLASS zcl_dynscreen_selectoption IMPLEMENTATION.
                         type = mo_elemdescr ) TO lt_components.
         mo_tabledescr = cl_abap_tabledescr=>create( cl_abap_structdescr=>create( lt_components ) ).
         CREATE DATA md_value TYPE HANDLE mo_tabledescr.
-      CATCH cx_root.
-        RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+      CATCH cx_root INTO lx_root.
+        RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+          EXPORTING
+            textid   = zcx_dynscreen_type_error=>type_error_with_prev
+            previous = lx_root.
     ENDTRY.
 
 * ---------------------------------------------------------------------

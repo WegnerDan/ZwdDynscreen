@@ -20,7 +20,8 @@ CLASS lcl_appl IMPLEMENTATION.
       lo_pa_matnr1 TYPE REF TO zcl_dynscreen_parameter,
       lo_pa_matnr2 TYPE REF TO zcl_dynscreen_parameter,
       lo_so_vbeln  TYPE REF TO zcl_dynscreen_selectoption,
-      lo_pa_ebeln  TYPE REF TO zcl_dynscreen_parameter.
+      lo_pa_ebeln  TYPE REF TO zcl_dynscreen_parameter,
+      lx           TYPE REF TO cx_root.
 
 * ---------------------------------------------------------------------
     lo_popup = NEW #( ).
@@ -28,31 +29,32 @@ CLASS lcl_appl IMPLEMENTATION.
     lo_popup->set_text( 'Selection Screen Generation Test' ).
 
     TRY.
-        lo_pa_matnr1 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr1 = NEW #( io_parent = lo_popup
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_value( 'DEFAULT' ).
-        lo_pa_matnr2 = NEW #( iv_type = 'MARA-MATNR' ).
+        lo_pa_matnr2 = NEW #( io_parent = lo_popup
+                              iv_type   = 'MARA-MATNR' ).
         lo_pa_matnr1->set_text( lo_pa_matnr1->get_text( ) && ` ` && '1' ).
         lo_pa_matnr2->set_text( lo_pa_matnr2->get_text( ) && ` ` && '2' ).
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_value_error
             zcx_dynscreen_incompatible
-            zcx_dynscreen_too_many_elems INTO DATA(lx).
+            zcx_dynscreen_too_many_elems INTO lx.
         MESSAGE lx TYPE 'E'.
     ENDTRY.
 
     TRY.
-        lo_popup->add( lo_pa_matnr1 ).
-        lo_popup->add( lo_pa_matnr2 ).
-        lo_btn = NEW #( iv_text = 'Testbutton' iv_length = 20 ).
+        lo_btn = NEW #( io_parent = lo_popup
+                        iv_text   = 'Testbutton'
+                        iv_length = 20           ).
         SET HANDLER handle_button_click FOR lo_btn.
 
-        lo_popup->add( lo_btn ).
 
-        lo_so_vbeln = NEW #( iv_type = 'VBAK-VBELN' ).
-        lo_popup->add( lo_so_vbeln ).
+        lo_so_vbeln = NEW #( io_parent = lo_popup
+                             iv_type   = 'VBAK-VBELN' ).
 
-        lo_pa_ebeln = NEW #( iv_type = 'EKKO-EBELN' ).
-        lo_popup->add( lo_pa_ebeln ).
+        lo_pa_ebeln = NEW #( io_parent = lo_popup
+                             iv_type   = 'EKKO-EBELN' ).
 
       CATCH zcx_dynscreen_type_error
             zcx_dynscreen_incompatible
@@ -101,14 +103,22 @@ CLASS lcl_appl IMPLEMENTATION.
 
         WRITE: `lo_pa_ebeln: `, lv_ebeln, /.
 
-      CATCH zcx_dynscreen_canceled.
-        MESSAGE 'Selection canceled' TYPE 'I'.
-      CATCH zcx_dynscreen_syntax_error INTO DATA(lx_syntax_error).
-        MESSAGE lx_syntax_error->get_text( ) TYPE 'I' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_canceled INTO lx.
+        MESSAGE lx TYPE 'S' DISPLAY LIKE 'E'.
+      CATCH zcx_dynscreen_syntax_error
+            zcx_dynscreen_value_error INTO lx.
+        MESSAGE lx TYPE 'I' DISPLAY LIKE 'E'.
     ENDTRY.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
 
+
   METHOD handle_button_click.
+* ---------------------------------------------------------------------
     MESSAGE 'Button pressed!' TYPE 'I'.
+
+* ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

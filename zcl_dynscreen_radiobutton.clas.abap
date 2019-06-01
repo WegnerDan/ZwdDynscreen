@@ -1,17 +1,18 @@
-CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_radiobutton_grp FINAL CREATE PUBLIC
+CLASS zcl_dynscreen_radiobutton DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_io_element FINAL CREATE PUBLIC
 GLOBAL FRIENDS zcl_dynscreen_radiobutton_grp.
   PUBLIC SECTION.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
-      add REDEFINITION,
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_radiobutton_grp
+                            iv_text   TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_type_error
+                            zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       set_generic_type REDEFINITION,
       set_type REDEFINITION,
       set_value REDEFINITION.
   PROTECTED SECTION.
-    DATA:
-      mv_from_constructor TYPE abap_bool.
     METHODS:
+      add REDEFINITION,
       generate_open REDEFINITION,
       generate_close REDEFINITION.
   PRIVATE SECTION.
@@ -21,10 +22,13 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
-
   METHOD add.
 * ---------------------------------------------------------------------
-    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible.
+    " radiobuttons have no children
+    RAISE EXCEPTION TYPE zcx_dynscreen_incompatible
+      EXPORTING
+        parent_class       = me
+        incompatible_class = io_screen_element.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -32,11 +36,16 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( ).
-    mv_from_constructor = abap_true.
-    set_type( 'ABAP_BOOL' ).
-    set_text( iv_text ).
-    mv_from_constructor = abap_false.
+    " io_parent of super class has type zcl_dynscreen_screen_base
+    " which is incompatible zcl_dynscreen_radiobutton_grp
+    " -> pass initial variable to io_parent of super class
+    " -> and add me afterwards
+    super->constructor( io_parent = VALUE #( )
+                        iv_type   = 'ABAP_BOOL'
+                        iv_text   = iv_text    ).
+
+* ---------------------------------------------------------------------
+    io_parent->add( me ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -80,12 +89,11 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD set_generic_type.
 * ---------------------------------------------------------------------
-    IF mv_from_constructor = abap_true.
-      super->set_generic_type( is_type_info ).
-    ELSE.
-      " not supported for radiobuttons
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
-    ENDIF.
+    " not supported for radiobuttons
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+      EXPORTING
+        textid       = zcx_dynscreen_type_error=>type_change_not_supported
+        parent_class = me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -93,12 +101,11 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
   METHOD set_type.
 * ---------------------------------------------------------------------
-    IF mv_from_constructor = abap_true.
-      super->set_type( iv_type ).
-    ELSE.
-      " not supported for radiobuttons
-      RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
-    ENDIF.
+    " not supported for radiobuttons
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+      EXPORTING
+        textid       = zcx_dynscreen_type_error=>type_change_not_supported
+        parent_class = me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -112,16 +119,26 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
     AND iv_value_str IS NOT SUPPLIED.
       IF  iv_value <> abap_true
       AND iv_value <> abap_false.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid       = zcx_dynscreen_value_error=>invalid_value
+            value        = iv_value
+            parent_class = me.
       ENDIF.
     ELSEIF iv_value     IS NOT SUPPLIED
     AND    iv_value_str IS SUPPLIED.
       IF iv_value_str <> abap_true
       OR iv_value_str <> abap_false.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid       = zcx_dynscreen_value_error=>invalid_value
+            value        = iv_value_str
+            parent_class = me.
       ENDIF.
     ELSE.
-      RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+      RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+        EXPORTING
+          textid = zcx_dynscreen_value_error=>no_value_provided.
     ENDIF.
 
 * ---------------------------------------------------------------------
@@ -131,4 +148,5 @@ CLASS zcl_dynscreen_radiobutton IMPLEMENTATION.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
+
 ENDCLASS.

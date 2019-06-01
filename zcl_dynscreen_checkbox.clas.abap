@@ -3,8 +3,10 @@ CLASS zcl_dynscreen_checkbox DEFINITION PUBLIC INHERITING FROM zcl_dynscreen_par
     INTERFACES:
       zif_dynscreen_uc_event.
     METHODS:
-      constructor IMPORTING iv_text TYPE textpooltx OPTIONAL
-                  RAISING   zcx_dynscreen_type_error,
+      constructor IMPORTING io_parent TYPE REF TO zcl_dynscreen_screen_base
+                            iv_text   TYPE textpooltx OPTIONAL
+                  RAISING   zcx_dynscreen_incompatible
+                            zcx_dynscreen_too_many_elems,
       set_type REDEFINITION,
       set_value REDEFINITION.
     EVENTS:
@@ -19,11 +21,11 @@ ENDCLASS.
 
 CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
-
   METHOD constructor.
 * ---------------------------------------------------------------------
-    super->constructor( iv_type = 'ABAP_BOOL'
-                        iv_text = iv_text     ).
+    super->constructor( io_parent = io_parent
+                        iv_type   = 'ABAP_BOOL'
+                        iv_text   = iv_text     ).
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -55,8 +57,10 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
   METHOD set_type.
 * ---------------------------------------------------------------------
-    " not supported for checkboxes
-    RAISE EXCEPTION TYPE zcx_dynscreen_type_error.
+    RAISE EXCEPTION TYPE zcx_dynscreen_type_error
+      EXPORTING
+        textid       = zcx_dynscreen_type_error=>type_change_not_supported
+        parent_class = me.
 
 * ---------------------------------------------------------------------
   ENDMETHOD.
@@ -64,23 +68,33 @@ CLASS zcl_dynscreen_checkbox IMPLEMENTATION.
 
   METHOD set_value.
 * ---------------------------------------------------------------------
-    IF iv_conversion = zwd_dynscreen_io_element=>mc_conv_cast.
+    IF iv_conversion = zcl_dynscreen_io_element=>mc_conv_cast.
       " only either iv_value or iv_value_str are allowed to be supplied
       " only abap_true and abap_false are allowed values
       IF  iv_value     IS SUPPLIED
       AND iv_value_str IS NOT SUPPLIED.
         IF  iv_value <> abap_true
         AND iv_value <> abap_false.
-          RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+            EXPORTING
+              textid       = zcx_dynscreen_value_error=>invalid_value
+              value        = iv_value
+              parent_class = me.
         ENDIF.
       ELSEIF iv_value     IS NOT SUPPLIED
       AND    iv_value_str IS SUPPLIED.
         IF iv_value_str <> abap_true
         OR iv_value_str <> abap_false.
-          RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+          RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+            EXPORTING
+              textid       = zcx_dynscreen_value_error=>invalid_value
+              value        = iv_value_str
+              parent_class = me.
         ENDIF.
       ELSE.
-        RAISE EXCEPTION TYPE zcx_dynscreen_value_error.
+        RAISE EXCEPTION TYPE zcx_dynscreen_value_error
+          EXPORTING
+            textid = zcx_dynscreen_value_error=>no_value_provided.
       ENDIF.
     ENDIF.
 
